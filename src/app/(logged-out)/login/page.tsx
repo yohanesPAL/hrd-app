@@ -4,6 +4,7 @@ import { Button, Container, FloatingLabel, Form, Stack } from 'react-bootstrap'
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
+import useLoading from '@/stores/loading/LoadingStore';
 
 interface LoginForm {
   username: string,
@@ -17,16 +18,19 @@ const loginFormDefault: LoginForm = {
 
 function Login() {
   const router = useRouter();
+  const setLoading = useLoading((state) => state.setLoading)
   const [loginForm, setLoginForm] = useState<LoginForm>(loginFormDefault);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loginForm.username == 'akbar' && loginForm.password == "akbar123") {
-      document.cookie = 'login=true; path=/'
-      router.push("/media/dashboard")
+      setLoading(true);
+      document.cookie = 'login=true; path=/';
+      router.push("/media/dashboard");
     } else {
-      toast.error("username / password salah!")
+      toast.error("username / password salah!");
     }
   }
 
