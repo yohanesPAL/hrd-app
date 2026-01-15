@@ -1,6 +1,7 @@
 "use client";
 import ExportToExcel from '@/components/buttons/ExportToExcel';
-import DefaultTable from '@/components/defaultTable/DefaulteTable'
+import PageTitle from '@/components/PageTitle';
+import DefaultTable from '@/components/table/DefaulteTable'
 import mockKaryawan from '@/mock/KaryawanMock'
 import { KaryawanInt } from '@/type/KaryawanType'
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
@@ -46,7 +47,7 @@ const Karyawan = () => {
 
   return (
     <div>
-      <h2>Karyawan</h2>
+      <PageTitle>Karyawan</PageTitle>
       <ExportToExcel onExport={onExport} />
       <DefaultTable<KaryawanInt>
         data={mockKaryawan}

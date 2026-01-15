@@ -11,7 +11,7 @@ export async function exportTableToExcel<T>(table: Table<T>, filename: string) {
   const columns = table
     .getVisibleLeafColumns()
     .filter((col) => !excludedColumnIds.includes(col.id));
-  const rows = table.getPrePaginationRowModel().rows;
+  const rows = table.getCoreRowModel().rows;
 
   const titleRow = sheet.getRow(1);
   titleRow.getCell(1).value = filename;
