@@ -26,7 +26,7 @@ const TopBar = () => {
             <DropdownToggle className='d-flex flex-row align-items-center justify-content-center gap-2 h-100 px-3 py-0 bg-transparent border-0 on-hover'>
               <Image alt='profile-picture' width={40} height={40} src={'/pp.webp'} className="rounded-circle" style={{ objectFit: 'cover' }} />
             </DropdownToggle>
-            <DropdownMenu style={{ right: 0, transform: "translateX(-10px)", width: "250px" }} className='p-2 text-end'>
+            <DropdownMenu style={{ right: 0, transform: "translateX(-10px)", width: "250px" }} className='p-2 text-end bg-white'>
               <div className='d-flex flex-column justify-content-center align-items-end'>
                 <span>Akbar Maulana | HRD</span>
                 <span>PT Perdana Adhi Lestari</span>

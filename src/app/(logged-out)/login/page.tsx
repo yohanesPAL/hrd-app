@@ -31,6 +31,7 @@ function Login() {
       router.push("/media/dashboard");
     } else {
       toast.error("username / password salah!");
+      setLoginForm({...loginForm, password: ""})
     }
   }
 
