@@ -1,9 +1,12 @@
+import DivisiChart from '@/components/dashboard/DivisiChart'
+import PageTitle from '@/components/PageTitle'
 import React from 'react'
 
 function Dashboard() {
   return (
     <div>
-      <h2>Dashboard</h2>
+      <PageTitle>Dashboard</PageTitle>
+      <DivisiChart/>
     </div>
   )
 }
