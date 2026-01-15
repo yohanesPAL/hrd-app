@@ -9,8 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "motion": "^12.26.2",
     "next": "16.1.1",
     "react": "19.2.3",
@@ -21,6 +24,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
