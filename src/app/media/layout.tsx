@@ -15,7 +15,7 @@ const Media = ({ children }: { children: React.ReactNode }) => {
       <div className='d-flex flex-column w-100'>
         <TopBar />
         <div className='flex-grow-1 d-flex justify-content-center align-items-start w-full'>
-          <div className='bg-white my-2 border rounded p-2' style={{ width: "90%" }}>
+          <div className='my-2 p-2' style={{ width: "90%"}}>
             <motion.div
               key={pathname}
               initial={{ opacity: 0 }}

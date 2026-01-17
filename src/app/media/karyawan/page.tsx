@@ -14,10 +14,12 @@ const columns: ColumnDef<KaryawanInt>[] = [
   { accessorKey: "nama", header: "Nama" },
   { accessorKey: "jk", header: "Jenis Kelaim" },
   { accessorKey: "alamat", header: "Alamat" },
-  { accessorKey: "hp", header: "HP",
+  {
+    accessorKey: "hp", header: "HP",
     meta: {
       print: (value: any) => value ? value : "-",
-    } },
+    }
+  },
   { accessorKey: "jabatan", header: "Jabatan" },
   { accessorKey: "divisi", header: "Divisi" },
   {
@@ -46,18 +48,20 @@ const Karyawan = () => {
   }
 
   return (
-    <div>
+    <>
       <PageTitle>Karyawan</PageTitle>
-      <ExportToExcel onExport={onExport} />
-      <DefaultTable<KaryawanInt>
-        data={mockKaryawan}
-        columns={columns}
-        defaultSort={defaultSort}
-        loading={tableLoading}
-        tableWidth='105%'
-        SetTableComponent={setTable}
-      />
-    </div>
+      <div className='page-container-border bg-white rounded p-2 pt-4'>
+        <ExportToExcel onExport={onExport} />
+        <DefaultTable<KaryawanInt>
+          data={mockKaryawan}
+          columns={columns}
+          defaultSort={defaultSort}
+          loading={tableLoading}
+          tableWidth='105%'
+          SetTableComponent={setTable}
+        />
+      </div>
+    </>
   )
 }
 
