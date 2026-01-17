@@ -42,7 +42,7 @@ function Login() {
         <Stack gap={4} className="p-4 bg-white border rounded">
           <div>
             <h2 className="mb-0">Perdana Adhi Lestari</h2>
-            <small>HRD Sistem</small>
+            <small>HR System</small>
           </div>
           <h2>Login</h2>
           <FloatingLabel controlId="username" label="username">
