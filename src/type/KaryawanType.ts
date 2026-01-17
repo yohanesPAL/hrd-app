@@ -10,4 +10,24 @@ interface KaryawanInt {
   statusKontrak: "Kontrak" | "Tetap";
 }
 
+interface KaryawanInterface {
+  id: string;
+  nik: string;
+  nama: string;
+  jk: "Pria" | "Wanita";
+  alamat: string;
+  hp: string | null;
+  jabatan: string;
+  divisi: string;
+  sp: 1 | 2 | 3 | null;
+  cutiTerakhir: number;
+  cutiSekarang: number;
+  statusAktif: boolean;
+  statusKaryawan: "Kontrak" | "Tetap" | "Resign" | "Cutoff";
+  tglMasuk: string;
+  tglKeluar: string | null;
+  durasiKontrak: number | null;
+  kodeAbsensi: string | null;
+}
+
 export type { KaryawanInt };
