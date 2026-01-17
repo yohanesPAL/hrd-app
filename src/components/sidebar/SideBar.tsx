@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { Nav, Navbar, Stack } from 'react-bootstrap'
+import { Accordion, Collapse, Nav, Navbar, Stack } from 'react-bootstrap'
 import Menu from './SideBarMenu'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -9,9 +9,9 @@ import useNavbar from '@/stores/navbar/NavbarStore'
 import styles from './sidebar.module.css'
 
 const NavLink = React.memo(
-  ({ nama, icon, isActive }: { nama: string, icon: string, isActive: boolean }) => {
+  ({ nama, icon, href, isActive }: { nama: string, icon: string, href: string, isActive: boolean }) => {
     return (
-      <Nav.Link as={Link} href={`/media/${nama.toLowerCase()}`} className={`d-flex w-100 flex-row gap-2 justify-content-start align-items-center ${styles.navlink} ${isActive ? styles.active : ''}`}>
+      <Nav.Link as={Link} href={`${href}`} className={`d-flex w-100 flex-row gap-2 justify-content-start align-items-center ${styles.navlink} ${isActive ? styles.active : ''}`}>
         <i className={`bi ${icon}`}></i>
         <span>{nama}</span>
       </Nav.Link>
@@ -42,12 +42,43 @@ const SideBar = () => {
           </div>
           <Stack>
             {Menu.map((item) => {
+              if (item.children) {
+                return (
+                  <Accordion key={item.nama} flush style={{ background: 'var(--secondary)' }}>
+                    <Accordion.Item eventKey="0" style={{background: 'var(--secondary)'}}>
+                      <Accordion.Header className={`${styles.dropdownNavlink}`}>
+                        <Stack direction='horizontal' gap={2}>
+                        <i className={`bi ${item.icon}`}></i>
+                        <span>{item.nama}</span>
+                        </Stack>
+                      </Accordion.Header>
+                      <Accordion.Body className="p-0">
+                        <Nav className="flex-column" style={{paddingLeft: "22px"}}>
+                          {item.children.map((subMenu) => {
+                            return (
+                              <NavLink
+                                key={subMenu.nama}
+                                nama={subMenu.nama}
+                                icon={subMenu.icon}
+                                href={`/media/${item.href}/${subMenu.href}`}
+                                isActive={isActive(`/media/${item.href}/${subMenu.href}`)}
+                              />
+                            )
+                          })}
+                        </Nav>
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  </Accordion>
+                )
+              }
+
               return (
                 <NavLink
                   key={item.nama}
                   nama={item.nama}
                   icon={item.icon}
-                  isActive={isActive(`/media/${item.nama.toLowerCase()}`)}
+                  href={`/media/${item.href}`}
+                  isActive={isActive(`/media/${item.href}`)}
                 />
               )
             })}

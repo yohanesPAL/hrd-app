@@ -67,3 +67,45 @@ a {
   border: 1px solid #BECBD6;
   border-top: 4px solid #BECBD6;
 }
+
+.accordion-button {
+  background-color: var(--secondary);
+  border: 0;
+  padding: 16px;
+  color: silver;
+}
+
+.accordion-button:hover {
+  background-color: black;
+  border: 0;
+  color: #fff;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: black;
+  border: 0;
+  color: #fff;
+}
+
+.accordion-button:not(.collapsed)::after {
+  filter: brightness(0) invert(1);
+  border: 0;
+}
+
+.accordion-button::after {
+  filter: brightness(0) invert(0.7);
+  border: 0;
+}
+
+.accordion-button:hover::after {
+  filter: brightness(0) invert(1);
+  border: 0;
+}
+
+.navbar-nav .nav-link.active {
+  color: silver
+}
+
+.navbar-nav .nav-link.active:hover {
+  color: #fff;
+}
