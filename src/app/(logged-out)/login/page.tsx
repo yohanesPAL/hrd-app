@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
 import useLoading from '@/stores/loading/LoadingStore';
+import { signIn } from 'next-auth/react';
+import { MoonLoader } from "react-spinners"
 
 interface LoginForm {
   username: string,
@@ -18,27 +20,35 @@ const loginFormDefault: LoginForm = {
 
 function Login() {
   const router = useRouter();
-  const setLoading = useLoading((state) => state.setLoading)
   const [loginForm, setLoginForm] = useState<LoginForm>(loginFormDefault);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [processLogin, setProcessLogin] = useState<boolean>(false);
 
-
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const onLogin = async (username: string, password: string, e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (loginForm.username == 'akbar' && loginForm.password == "akbar123") {
-      setLoading(true);
-      document.cookie = 'login=true; path=/';
-      router.push("/media/dashboard");
-    } else {
-      toast.error("username / password salah!");
-      setLoginForm({...loginForm, password: ""})
-    }
-  }
+    if (!loginForm) return toast.error("harap isi username & password!");
+    setProcessLogin(true);
 
+    const res = await signIn("credentials", {
+      username,
+      password,
+      redirect: false,
+    })
+
+    if(res?.error) {
+      toast.error(res.error);
+      setProcessLogin(false);
+      return;
+    }
+
+    const session = await fetch("/api/auth/session").then(res => res.json());
+    router.replace(`/media/${session.user.role}/dashboard`)
+    setProcessLogin(false);
+  }
 
   return (
     <Container className="d-flex align-items-center justify-content-center min-vh-100">
-      <Form className="w-50" style={{ maxWidth: '500px' }} onSubmit={onSubmit}>
+      <Form className="w-50" style={{ maxWidth: '500px' }} onSubmit={(event) => onLogin(loginForm.username, loginForm.password, event)}>
         <Stack gap={4} className="p-4 bg-white border rounded">
           <div>
             <h2 className="mb-0">Perdana Adhi Lestari</h2>
@@ -72,7 +82,7 @@ function Login() {
               </span>
             </FloatingLabel>
           </Form.Group>
-          <Button type="submit" variant="primary" className="w-auto align-self-start">Login</Button>
+          <Button type="submit" variant="primary" className={`w-auto align-self-start ${processLogin ?? 'disabled'}`}>Login</Button>
         </Stack>
       </Form>
     </Container>

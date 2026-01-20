@@ -1,7 +1,7 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import Image from 'next/image'
-import { Accordion, Collapse, Nav, Navbar, Stack } from 'react-bootstrap'
+import { Accordion, Nav, Navbar, Stack } from 'react-bootstrap'
 import Menu from './SideBarMenu'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -19,9 +19,9 @@ const NavLink = React.memo(
   }
 )
 
-const SideBar = () => {
+const SideBar = ({ role }: { role: string }) => {
   const route = usePathname();
-  const isActive = (path: string) => route.startsWith(path)
+  const isActive = (path: string) => route.startsWith(path);
   const showNavbar = useNavbar((state) => state.isShow);
 
   return (
@@ -29,10 +29,10 @@ const SideBar = () => {
       {showNavbar &&
         <Stack gap={4}>
           <div>
-            <Link href='/dashboard' style={{ height: "4rem", background: 'var(--primary)' }} className='d-flex align-items-center justify-content-center'>
+            <Link href={`/media/${role}/dashboard`} style={{ height: "4rem", background: 'var(--primary)' }} className='d-flex align-items-center justify-content-center'>
               <h1>HR System</h1>
             </Link>
-            <Link href='/dashboard' className='d-flex flex-row gap-3 align-items-center justify-content-center p-2 white-shade overflow-hidden' style={{ minWidth: "15rem", height: "5rem" }}>
+            <Link href={`/media/${role}/dashboard`} className='d-flex flex-row gap-3 align-items-center justify-content-center p-2 white-shade overflow-hidden' style={{ minWidth: "15rem", height: "5rem" }}>
               <Image alt='profile-picture' width={50} height={50} src={'/pp.webp'} className="rounded-circle" style={{ objectFit: 'cover' }} />
               <div className='d-flex flex-column align-items-start w-100 justify-content-center'>
                 <span>Akbar Maulana</span>
@@ -45,23 +45,23 @@ const SideBar = () => {
               if (item.children) {
                 return (
                   <Accordion key={item.nama} flush style={{ background: 'var(--secondary)' }}>
-                    <Accordion.Item eventKey="0" style={{background: 'var(--secondary)'}}>
+                    <Accordion.Item eventKey="0" style={{ background: 'var(--secondary)' }}>
                       <Accordion.Header className={`${styles.dropdownNavlink}`}>
                         <Stack direction='horizontal' gap={2}>
-                        <i className={`bi ${item.icon}`}></i>
-                        <span>{item.nama}</span>
+                          <i className={`bi ${item.icon}`}></i>
+                          <span>{item.nama}</span>
                         </Stack>
                       </Accordion.Header>
                       <Accordion.Body className="p-0">
-                        <Nav className="flex-column" style={{paddingLeft: "22px"}}>
+                        <Nav className="flex-column" style={{ paddingLeft: "22px" }}>
                           {item.children.map((subMenu) => {
                             return (
                               <NavLink
                                 key={subMenu.nama}
                                 nama={subMenu.nama}
                                 icon={subMenu.icon}
-                                href={`/${item.href}/${subMenu.href}`}
-                                isActive={isActive(`/${item.href}/${subMenu.href}`)}
+                                href={`/media/${role}/${item.href}/${subMenu.href}`}
+                                isActive={isActive(`/media/${role}/${item.href}/${subMenu.href}`)}
                               />
                             )
                           })}
@@ -77,8 +77,8 @@ const SideBar = () => {
                   key={item.nama}
                   nama={item.nama}
                   icon={item.icon}
-                  href={`/${item.href}`}
-                  isActive={isActive(`/${item.href}`)}
+                  href={`/media/${role}/${item.href}`}
+                  isActive={isActive(`/media/${role}/${item.href}`)}
                 />
               )
             })}

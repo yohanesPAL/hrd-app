@@ -1,4 +1,4 @@
-import { ChartDataInt } from "@/type/ChartDataType";
+import { ChartDataInt } from "@/types/ChartDataType";
 
 const divisiChart: ChartDataInt[] = [
   { nama: "IT", value: 5, fill: "#0088FE" },

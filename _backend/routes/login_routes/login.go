@@ -7,6 +7,5 @@ import (
 )
 
 func Login(r *gin.Engine) {
-	r.GET("/login", logincontroller.GetAkun)
 	r.POST("/login", logincontroller.LoginHandler)
 }

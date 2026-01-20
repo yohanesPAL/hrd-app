@@ -1,4 +1,4 @@
-import { ChartDataInt } from "@/type/ChartDataType";
+import { ChartDataInt } from "@/types/ChartDataType";
 
 const jabatanChart: ChartDataInt[] = [
   { nama: "Software Engineer", value: 1, fill: "#0088FE" },

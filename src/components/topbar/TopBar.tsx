@@ -1,7 +1,6 @@
 "use client";
 import Image from 'next/image'
-import React from 'react'
-import { Button, Dropdown, DropdownDivider, DropdownMenu, DropdownToggle, Nav, Navbar, Stack } from 'react-bootstrap'
+import { Button, Dropdown, DropdownDivider, DropdownMenu, DropdownToggle, Navbar } from 'react-bootstrap'
 import useNavbar from '@/stores/navbar/NavbarStore'
 import { useRouter } from 'next/navigation';
 
@@ -31,7 +30,7 @@ const TopBar = () => {
                 <span>Akbar Maulana | HRD</span>
                 <span>PT Perdana Adhi Lestari</span>
               </div>
-              <DropdownDivider/>
+              <DropdownDivider />
               <div className='d-flex flex-row justify-content-between align-items-center'>
                 <Button type='button' variant='primary'>Profile</Button>
                 <Button type='button' variant='danger' onClick={onLogout}>Logout</Button>

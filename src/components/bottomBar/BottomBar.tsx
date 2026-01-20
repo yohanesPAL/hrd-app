@@ -1,4 +1,3 @@
-"use client";
 import { Navbar } from 'react-bootstrap'
 
 const BottomBar = () => {

@@ -1,4 +1,4 @@
-import { KaryawanInt } from "@/type/KaryawanType";
+import { KaryawanInt } from "@/types/KaryawanType";
 
 const mockKaryawan: KaryawanInt[] = [
   {

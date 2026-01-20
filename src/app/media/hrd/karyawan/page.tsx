@@ -3,7 +3,7 @@ import ExportToExcel from '@/components/buttons/ExportToExcel';
 import PageTitle from '@/components/PageTitle';
 import DefaultTable from '@/components/table/DefaulteTable'
 import mockKaryawan from '@/mock/KaryawanMock'
-import { KaryawanInt } from '@/type/KaryawanType'
+import { KaryawanInt } from '@/types/KaryawanType'
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
 import { ColumnDef, SortingState, Table } from '@tanstack/react-table'
 import { useState } from 'react';
