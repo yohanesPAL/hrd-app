@@ -35,15 +35,19 @@ function Login() {
       redirect: false,
     })
 
-    if(res?.error) {
-      toast.error(res.error);
+    if (res?.error) {
+      if (res.error === "Configuration") {
+        toast.error("internal server error");
+      } else if (res.error === "CredentialsSignin") {
+        toast.error("username/password salah!");
+        setLoginForm({...loginForm, password: ""});
+      }
       setProcessLogin(false);
       return;
     }
 
     const session = await fetch("/api/auth/session").then(res => res.json());
-    router.replace(`/media/${session.user.role}/dashboard`)
-    setProcessLogin(false);
+    router.replace(`/media/${session.user.role}/dashboard`);
   }
 
   return (
@@ -82,7 +86,7 @@ function Login() {
               </span>
             </FloatingLabel>
           </Form.Group>
-          <Button type="submit" variant="primary" className={`w-auto align-self-start ${processLogin ?? 'disabled'}`}>Login</Button>
+          <Button type="submit" variant="primary" className={`w-auto align-self-start ${processLogin && 'disabled'}`}>Login</Button>
         </Stack>
       </Form>
     </Container>

@@ -2,16 +2,22 @@
 import Image from 'next/image'
 import { Button, Dropdown, DropdownDivider, DropdownMenu, DropdownToggle, Navbar } from 'react-bootstrap'
 import useNavbar from '@/stores/navbar/NavbarStore'
-import { useRouter } from 'next/navigation';
+import { signOut } from "next-auth/react";
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const TopBar = () => {
-  const router = useRouter()
-  const showNavbar = useNavbar((state) => state.setShow)
-  const navbarState = useNavbar((state) => state.isShow)
+  const showNavbar = useNavbar((state) => state.setShow);
+  const navbarState = useNavbar((state) => state.isShow);
+  const [processLogout, setProcessLogout] = useState<boolean>(false);
 
-  const onLogout = () => {
-    document.cookie = 'login=false; path=/'
-    router.push("/login")
+  const onLogout = async () => {
+    setProcessLogout(true);
+    try {
+      await signOut({ callbackUrl: "/login" });
+    } catch (error: any) {
+      toast.error(error)
+    }
   }
 
   return (
@@ -33,7 +39,7 @@ const TopBar = () => {
               <DropdownDivider />
               <div className='d-flex flex-row justify-content-between align-items-center'>
                 <Button type='button' variant='primary'>Profile</Button>
-                <Button type='button' variant='danger' onClick={onLogout}>Logout</Button>
+                <Button type='button' variant='danger' className={`${processLogout && "disabled"}`} onClick={onLogout}>Logout</Button>
               </div>
             </DropdownMenu>
           </Dropdown>

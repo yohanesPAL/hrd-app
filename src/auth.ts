@@ -25,7 +25,13 @@ export const { handlers, signOut, auth } = NextAuth({
             }),
           });
 
-          if (!res.ok) return null;
+          if (res.status === 422) {
+            return null
+          }
+
+          if (!res.ok) {
+            throw new Error("INTERNAL_SERVER_ERROR");
+          }
 
           const user = await res.json();
 
@@ -36,7 +42,7 @@ export const { handlers, signOut, auth } = NextAuth({
             karyawanId: user.karyawan_id,
           };
         } catch (error) {
-          return null;
+          throw new Error("SERVICE_UNAVAILABLE");
         }
       },
     }),
