@@ -19,7 +19,7 @@ interface KaryawanInterface {
   hp: string | null;
   jabatan: string;
   divisi: string;
-  sp: 1 | 2 | 3 | null;
+  sp: 0 | 1 | 2 | 3;
   cutiTerakhir: number;
   cutiSekarang: number;
   statusAktif: boolean;

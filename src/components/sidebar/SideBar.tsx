@@ -29,10 +29,10 @@ const SideBar = () => {
       {showNavbar &&
         <Stack gap={4}>
           <div>
-            <Link href='/media/dashboard' style={{ height: "4rem", background: 'var(--primary)' }} className='d-flex align-items-center justify-content-center'>
+            <Link href='/dashboard' style={{ height: "4rem", background: 'var(--primary)' }} className='d-flex align-items-center justify-content-center'>
               <h1>HR System</h1>
             </Link>
-            <Link href='/media/dashboard' className='d-flex flex-row gap-3 align-items-center justify-content-center p-2 white-shade overflow-hidden' style={{ minWidth: "15rem", height: "5rem" }}>
+            <Link href='/dashboard' className='d-flex flex-row gap-3 align-items-center justify-content-center p-2 white-shade overflow-hidden' style={{ minWidth: "15rem", height: "5rem" }}>
               <Image alt='profile-picture' width={50} height={50} src={'/pp.webp'} className="rounded-circle" style={{ objectFit: 'cover' }} />
               <div className='d-flex flex-column align-items-start w-100 justify-content-center'>
                 <span>Akbar Maulana</span>
@@ -60,8 +60,8 @@ const SideBar = () => {
                                 key={subMenu.nama}
                                 nama={subMenu.nama}
                                 icon={subMenu.icon}
-                                href={`/media/${item.href}/${subMenu.href}`}
-                                isActive={isActive(`/media/${item.href}/${subMenu.href}`)}
+                                href={`/${item.href}/${subMenu.href}`}
+                                isActive={isActive(`/${item.href}/${subMenu.href}`)}
                               />
                             )
                           })}
@@ -77,8 +77,8 @@ const SideBar = () => {
                   key={item.nama}
                   nama={item.nama}
                   icon={item.icon}
-                  href={`/media/${item.href}`}
-                  isActive={isActive(`/media/${item.href}`)}
+                  href={`/${item.href}`}
+                  isActive={isActive(`/${item.href}`)}
                 />
               )
             })}

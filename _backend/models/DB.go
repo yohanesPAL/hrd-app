@@ -11,7 +11,7 @@ import (
 var DB *sql.DB
 
 func ConnectDB() {
-	dsn := "-"
+	dsn := "root:@tcp(127.0.0.1:3306)/hrsys?charset=utf8mb4&parseTime=True&loc=Local"
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"hrsys/models"
+	loginroutes "hrsys/routes/login_routes"
 	"log"
 	"os"
 	"os/signal"
@@ -39,6 +40,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to set trusted proxies: %v", err)
 	}
+
+	loginroutes.Login(route)
 
 	go func() {
 		if err := route.Run("127.0.0.1:8080"); err != nil {
