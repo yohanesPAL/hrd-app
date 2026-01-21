@@ -1,6 +1,6 @@
-import { ChartDataInt } from "@/types/ChartDataType";
+import { ChartDataInterface } from "@/types/ChartDataType";
 
-const karyawanTetap:  ChartDataInt[] = [
+const karyawanTetap:  ChartDataInterface[] = [
   { nama: "Tetap", value: 12, fill: '#0088FE' },
   { nama: "Kontrak", value: 3, fill: '#FFBB28' },
 ];

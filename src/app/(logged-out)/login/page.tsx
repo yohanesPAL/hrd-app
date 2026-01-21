@@ -4,9 +4,8 @@ import { Button, Container, FloatingLabel, Form, Stack } from 'react-bootstrap'
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
-import useLoading from '@/stores/loading/LoadingStore';
 import { signIn } from 'next-auth/react';
-import { MoonLoader } from "react-spinners"
+import  useProfile from '@/stores/profile/ProfileStore'
 
 interface LoginForm {
   username: string,
@@ -19,6 +18,7 @@ const loginFormDefault: LoginForm = {
 }
 
 function Login() {
+  const setProfile = useProfile((state) => state.setProfile)
   const router = useRouter();
   const [loginForm, setLoginForm] = useState<LoginForm>(loginFormDefault);
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -40,13 +40,14 @@ function Login() {
         toast.error("internal server error");
       } else if (res.error === "CredentialsSignin") {
         toast.error("username/password salah!");
-        setLoginForm({...loginForm, password: ""});
+        setLoginForm({ ...loginForm, password: "" });
       }
       setProcessLogin(false);
       return;
     }
 
     const session = await fetch("/api/auth/session").then(res => res.json());
+    setProfile(session.user.role)
     router.replace(`/media/${session.user.role}/dashboard`);
   }
 

@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"hrsys/models"
+	karyawanroutes "hrsys/routes/karyawan_routes"
 	loginroutes "hrsys/routes/login_routes"
+	profileroutes "hrsys/routes/profile_routes"
 	"log"
 	"os"
 	"os/signal"
@@ -42,6 +44,8 @@ func main() {
 	}
 
 	loginroutes.Login(route)
+	profileroutes.Profile(route)
+	karyawanroutes.Karyawan(route)
 
 	go func() {
 		if err := route.Run("127.0.0.1:8080"); err != nil {

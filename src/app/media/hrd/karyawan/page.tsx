@@ -1,65 +1,26 @@
-"use client";
-import ExportToExcel from '@/components/buttons/ExportToExcel';
 import PageTitle from '@/components/PageTitle';
-import DefaultTable from '@/components/table/DefaulteTable'
-import mockKaryawan from '@/mock/KaryawanMock'
-import { KaryawanInt } from '@/types/KaryawanType'
-import { exportTableToExcel } from '@/utils/exportTableToExcel';
-import { ColumnDef, SortingState, Table } from '@tanstack/react-table'
-import { useState } from 'react';
-import { toast } from 'react-toastify';
+import ClientPage from './clientPage';
+import { KaryawanInterface } from '@/types/KaryawanType';
+import { ServerFetch } from '@/utils/ServerFetch';
 
-const columns: ColumnDef<KaryawanInt>[] = [
-  { accessorKey: "id", header: "Kode" },
-  { accessorKey: "nama", header: "Nama" },
-  { accessorKey: "jk", header: "Jenis Kelaim" },
-  { accessorKey: "alamat", header: "Alamat" },
-  {
-    accessorKey: "hp", header: "HP",
-    meta: {
-      print: (value: any) => value ? value : "-",
-    }
-  },
-  { accessorKey: "jabatan", header: "Jabatan" },
-  { accessorKey: "divisi", header: "Divisi" },
-  {
-    accessorKey: "statusAktif", header: "Status", cell: ({ getValue }) => {
-      return getValue() as boolean ? "Aktif" : "Non Aktif"
-    },
-    meta: {
-      print: (value: any) => value ? "Aktif" : "Non Aktif",
-    }
-  },
-  { accessorKey: "statusKontrak", header: "Status Kontrak" },
-]
+const Karyawan = async() => {
 
-const defaultSort: SortingState = [{ id: 'id', desc: false }]
+  let data: KaryawanInterface[] | null = null;
+  let err: string | null = null
+  const res = await ServerFetch({ uri: `/karyawan` })
 
-const Karyawan = () => {
-  const [tableLoading, setTableLoading] = useState<boolean>(false);
-  const [table, setTable] = useState<Table<KaryawanInt> | null>(null)
-
-  const onExport = () => {
-    if (!table) {
-      toast.error("Table tidak ditemukan");
-      return;
-    }
-    exportTableToExcel<KaryawanInt>(table, "Karyawan")
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    err = body?.error ?? "Request failed";
+  } else {
+    data = await res.json();
   }
 
   return (
     <>
       <PageTitle>Karyawan</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <ExportToExcel onExport={onExport} />
-        <DefaultTable<KaryawanInt>
-          data={mockKaryawan}
-          columns={columns}
-          defaultSort={defaultSort}
-          loading={tableLoading}
-          tableWidth='105%'
-          SetTableComponent={setTable}
-        />
+        <ClientPage data={data} err={err}/>
       </div>
     </>
   )

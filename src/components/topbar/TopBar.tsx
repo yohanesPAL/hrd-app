@@ -5,8 +5,9 @@ import useNavbar from '@/stores/navbar/NavbarStore'
 import { signOut } from "next-auth/react";
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import Link from 'next/link';
 
-const TopBar = () => {
+const TopBar = ({ role, karyawanId }: { role: string, karyawanId: string }) => {
   const showNavbar = useNavbar((state) => state.setShow);
   const navbarState = useNavbar((state) => state.isShow);
   const [processLogout, setProcessLogout] = useState<boolean>(false);
@@ -38,7 +39,9 @@ const TopBar = () => {
               </div>
               <DropdownDivider />
               <div className='d-flex flex-row justify-content-between align-items-center'>
-                <Button type='button' variant='primary'>Profile</Button>
+                <Link href={`/media/${role}/profile/${karyawanId}`}>
+                  <Button type='button' variant='primary'>Profile</Button>
+                </Link>
                 <Button type='button' variant='danger' className={`${processLogout && "disabled"}`} onClick={onLogout}>Logout</Button>
               </div>
             </DropdownMenu>

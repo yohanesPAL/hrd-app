@@ -1,6 +1,6 @@
-import { ChartDataInt } from "@/types/ChartDataType";
+import { ChartDataInterface } from "@/types/ChartDataType";
 
-const divisiChart: ChartDataInt[] = [
+const divisiChart: ChartDataInterface[] = [
   { nama: "IT", value: 5, fill: "#0088FE" },
   { nama: "Design", value: 1, fill: "#00C49F" },
   { nama: "HR", value: 1, fill: "#FFBB28" },
