@@ -9,7 +9,7 @@ import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation';
 import { Button } from 'react-bootstrap';
 import Link from 'next/link';
-import useProfile from '@/stores/profile/profileStore';
+import useProfile from '@/stores/profile/ProfileStore';
 
 const defaultSort: SortingState = [{ id: 'id', desc: false }]
 
@@ -24,7 +24,7 @@ const ClientPage = ({ data, err }: { data: KaryawanInterface[] | null, err: stri
       {
         accessorKey: "id", header: "Kode", cell: ({ getValue }) => {
           const kode = getValue() as string;
-          return <Link href={`media/${role}/profile/${kode}`} style={{ width: '100px' }}><Button type='button' variant='success'>{kode}</Button></Link>
+          return <Link href={`/media/${role}/profile/${kode}`} target='_blank' style={{ width: '100px' }}><Button type='button' variant='success'>{kode}</Button></Link>
         }
       },
       { accessorKey: "nama", header: "Nama" },

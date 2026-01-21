@@ -47,7 +47,7 @@ function Login() {
     }
 
     const session = await fetch("/api/auth/session").then(res => res.json());
-    setProfile(session.user.role)
+    setProfile({role: session.user.role})
     router.replace(`/media/${session.user.role}/dashboard`);
   }
 
