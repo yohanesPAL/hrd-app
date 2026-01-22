@@ -7,7 +7,7 @@ import { ColumnDef, SortingState, Table } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation';
-import { Button } from 'react-bootstrap';
+import { Button, Stack } from 'react-bootstrap';
 import Link from 'next/link';
 import useProfile from '@/stores/profile/ProfileStore';
 
@@ -24,7 +24,11 @@ const ClientPage = ({ data, err }: { data: KaryawanInterface[] | null, err: stri
       {
         accessorKey: "id", header: "Kode", cell: ({ getValue }) => {
           const kode = getValue() as string;
-          return <Link href={`/media/${role}/profile/${kode}`} target='_blank' style={{ width: '100px' }}><Button type='button' variant='success'>{kode}</Button></Link>
+          return (
+            <Link href={`/media/${role}/profile/${kode}`} target='_blank' className='d-flex w-100 justify-content-center align-items-center'>
+              <Button type='button' variant='success' style={{ width: '75%' }}>{kode}</Button>
+            </Link>
+          )
         }
       },
       { accessorKey: "nama", header: "Nama" },
@@ -65,7 +69,14 @@ const ClientPage = ({ data, err }: { data: KaryawanInterface[] | null, err: stri
 
   return (
     <>
+
+    <Stack direction='horizontal' gap={2}>
+      <Button type='button' variant='primary' onClick={() => route.push(`/media/${role}/karyawan/tambah`)}>
+        <i className='bi bi-person'></i>
+        <span>Tambah</span>
+        </Button>
       <ExportToExcel onExport={onExport} />
+      </Stack>
       <DefaultTable<KaryawanInterface>
         data={data}
         columns={columns}
