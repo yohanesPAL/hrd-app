@@ -6,12 +6,12 @@ import { Table as TableType, ColumnDef, flexRender, getCoreRowModel, getFiltered
 import { Button, Form } from 'react-bootstrap';
 import { Spinner } from 'react-bootstrap';
 
-function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", loading, SetTableComponent }: {
+function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", loading = false, SetTableComponent }: {
   data: T[],
   columns: ColumnDef<T, any>[],
   defaultSort: SortingState,
   tableWidth?: string,
-  loading: boolean,
+  loading?: boolean,
   SetTableComponent: Dispatch<SetStateAction<TableType<T> | null>>,
 }) {
   const [sorting, setSorting] = useState<SortingState>(defaultSort);

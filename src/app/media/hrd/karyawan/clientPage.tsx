@@ -62,23 +62,18 @@ const ClientPage = ({ data, err }: { data: KaryawanInterface[] | null, err: stri
     exportTableToExcel<KaryawanInterface>(table, "Karyawan")
   }
 
-  if (!data) {
-    route.replace("/not-found")
-    return
-  }
-
   return (
     <>
 
-    <Stack direction='horizontal' gap={2}>
-      <Button type='button' variant='primary' onClick={() => route.push(`/media/${role}/karyawan/tambah`)}>
-        <i className='bi bi-person'></i>
-        <span>Tambah</span>
+      <Stack direction='horizontal' gap={2}>
+        <Button type='button' variant='primary' onClick={() => route.push(`/media/${role}/karyawan/tambah`)}>
+          <i className='bi bi-person'></i>
+          <span>Tambah</span>
         </Button>
-      <ExportToExcel onExport={onExport} />
+        <ExportToExcel onExport={onExport} />
       </Stack>
       <DefaultTable<KaryawanInterface>
-        data={data}
+        data={data ?? []}
         columns={columns}
         defaultSort={defaultSort}
         loading={tableLoading}

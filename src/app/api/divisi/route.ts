@@ -1,0 +1,21 @@
+import { NextRequest, NextResponse } from "next/server";
+import { ServerFetch } from "@/utils/ServerFetch";
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+
+  const res = await ServerFetch({
+    uri: "/divisi",
+    options: {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body),
+    }
+  });
+
+  const data = await res.json()
+
+  return NextResponse.json(data, {status: res.status})
+}

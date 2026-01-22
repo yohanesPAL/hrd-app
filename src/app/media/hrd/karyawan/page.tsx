@@ -2,9 +2,9 @@ import PageTitle from '@/components/PageTitle';
 import ClientPage from './clientPage';
 import { KaryawanInterface } from '@/types/KaryawanType';
 import { ServerFetch } from '@/utils/ServerFetch';
+import { redirect } from 'next/navigation';
 
 const Karyawan = async() => {
-
   let data: KaryawanInterface[] | null = null;
   let err: string | null = null
   const res = await ServerFetch({ uri: `/karyawan` })
@@ -15,6 +15,8 @@ const Karyawan = async() => {
   } else {
     data = await res.json();
   }
+
+  if(!data) redirect("/not-found");
 
   return (
     <>
