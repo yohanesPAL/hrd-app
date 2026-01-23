@@ -11,10 +11,15 @@ import styles from './sidebar.module.css'
 const NavLink = React.memo(
   ({ nama, icon, href, isActive }: { nama: string, icon: string, href: string, isActive: boolean }) => {
     return (
-      <Nav.Link as={Link} href={`${href}`} className={`d-flex w-100 flex-row gap-2 justify-content-start align-items-center ${styles.navlink} ${isActive ? styles.active : ''}`}>
-        <i className={`bi ${icon}`}></i>
-        <span>{nama}</span>
-      </Nav.Link>
+      <Link href={href} className="text-decoration-none">
+        <Nav.Link
+          as="span"
+          className={`d-flex w-100 flex-row gap-2 justify-content-start align-items-center ${styles.navlink} ${isActive ? styles.active : ''}`}
+        >
+          <i className={`bi ${icon}`}></i>
+          <span>{nama}</span>
+        </Nav.Link>
+      </Link>
     )
   }
 )

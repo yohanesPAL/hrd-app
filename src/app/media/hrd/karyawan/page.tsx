@@ -16,8 +16,6 @@ const Karyawan = async() => {
     data = await res.json();
   }
 
-  if(!data) redirect("/not-found");
-
   return (
     <>
       <PageTitle>Karyawan</PageTitle>

@@ -22,7 +22,6 @@ export async function ServerFetch({
   });
 
   if (res.status === 401) redirect("/unauthorized");
-  if (res.status === 404) redirect("/not-found");
 
   return res;
 }

@@ -12,7 +12,8 @@ import (
 func GetJabatan(c *gin.Context) {
 	db := models.DB
 
-	rows, err := db.Query(`SELECT id, id_divisi, nama, is_active FROM jabatan`)
+	rows, err := db.Query(`SELECT j.id, divisi.id, divisi.nama, j.nama, j.is_active
+		FROM jabatan AS j JOIN divisi ON (divisi.id = j.id_divisi)`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal ambil data jabatan: %s", err)})
 		return
@@ -22,7 +23,7 @@ func GetJabatan(c *gin.Context) {
 	data := []jabatantypes.JabatanRes{}
 	for rows.Next() {
 		var item jabatantypes.JabatanRes
-		if err := rows.Scan(&item.Id, &item.IdDivisi, &item.Nama, &item.IsActive); err != nil {
+		if err := rows.Scan(&item.Id, &item.IdDivisi, &item.NamaDiv, &item.Nama, &item.IsActive); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal baca data jabatan: %s", err)})
 			return
 		}

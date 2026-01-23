@@ -12,7 +12,7 @@ import (
 func PostDivisi(c *gin.Context) {
 	var req divisitypes.PostDivisiReq
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid request body: %s", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("invalid request body: %s", err)})
 		return
 	}
 

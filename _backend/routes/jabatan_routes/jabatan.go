@@ -8,6 +8,8 @@ import (
 
 func Jabatan(r *gin.Engine) {
 	r.GET("/jabatan", jabatancontroller.GetJabatan)
+	r.GET("/jabatan/divisi", jabatancontroller.GetDivisi)
 	r.POST("/jabatan", jabatancontroller.PostJabatan)
-	r.PATCH("/jabatan", jabatancontroller.PatchJabatan)
+	r.PATCH("/jabatan/:id", jabatancontroller.PatchJabatan)
+	r.DELETE("/jabatan/:id", jabatancontroller.DeleteJabatan)
 }

@@ -29,7 +29,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${robotoMono.variable}`}>
-        <ToastContainer />
+        <ToastContainer closeOnClick />
         {children}
       </body>
     </html>

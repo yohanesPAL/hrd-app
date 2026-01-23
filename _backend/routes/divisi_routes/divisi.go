@@ -9,5 +9,6 @@ import (
 func Divisi(r *gin.Engine) {
 	r.GET("/divisi", divisicontroller.GetDivisi)
 	r.POST("/divisi", divisicontroller.PostDivisi)
-	r.PATCH("/divisi", divisicontroller.PatchDivisi)
+	r.PATCH("/divisi/:id", divisicontroller.PatchDivisi)
+	r.DELETE("/divisi/:id", divisicontroller.DeleteDivisi)
 }

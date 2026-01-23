@@ -8,11 +8,11 @@ type DivisiRes struct {
 
 type PostDivisiReq struct {
 	Nama     string `json:"nama" binding:"required"`
-	IsActive bool   `json:"is_active" binding:"required"`
+	IsActive bool   `json:"is_active"`
 }
 
 type PatchDivisiReq struct {
 	Id       string `json:"id" binding:"required"`
 	Nama     string `json:"nama" binding:"required"`
-	IsActive bool   `json:"is_active" binding:"required"`
+	IsActive bool   `json:"is_active"`
 }
