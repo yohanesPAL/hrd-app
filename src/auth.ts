@@ -26,7 +26,7 @@ export const { handlers, signOut, auth } = NextAuth({
           });
 
           if (res.status === 422) {
-            return null
+            return null;
           }
 
           if (!res.ok) {
@@ -66,5 +66,12 @@ export const { handlers, signOut, auth } = NextAuth({
 
       return session;
     },
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 12 * 60 * 60,
+  },
+  jwt: {
+    maxAge: 12 * 60 * 60,
   },
 });

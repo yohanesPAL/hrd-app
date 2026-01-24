@@ -7,7 +7,7 @@ import PageTransition from "./PageTransition";
 
 export default async function HrdGuard({ children }: { children: React.ReactNode }) {
   const session = await auth();
-
+  
   if (!session) redirect("/login");
   if (session.user.role !== "hrd") redirect("/unauthorized");
 
