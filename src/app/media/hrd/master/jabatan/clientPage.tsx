@@ -5,17 +5,19 @@ import { FormEvent, useEffect, useMemo, useState, useTransition } from 'react'
 import { Button, Form, Modal, Stack } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import ExportToExcel from '@/components/buttons/ExportToExcel';
+import { exportTableToExcel } from '@/utils/exportTableToExcel';
 
 
 
-const defaultSort: SortingState = [{ id: "id", desc: false }];
+const defaultSort: SortingState = [{ id: "urutan", desc: false }];
 const defaultJabatanForm: JabatanForm = { id_divisi: "", nama: "", is_active: true };
 
-const ClientPage = ({ data, err }: { data: JabatanInterface[] | null, err: any }) => {
+const ClientPage = ({ data, err }: { data: JabatanTable[] | null, err: any }) => {
   useEffect(() => { if (err) toast.error(err) }, [err]);
   const router = useRouter();
 
-  const [table, setTable] = useState<Table<JabatanInterface> | null>(null);
+  const [table, setTable] = useState<Table<JabatanTable> | null>(null);
   const [jabatanForm, setJabatanForm] = useState<JabatanForm>(defaultJabatanForm)
   const [editingId, setEditingId] = useState<string>("")
   const [show, setShow] = useState<boolean>(false);
@@ -173,14 +175,17 @@ const ClientPage = ({ data, err }: { data: JabatanInterface[] | null, err: any }
     })
   }
 
-  const columns = useMemo<ColumnDef<JabatanInterface>[]>(() => {
+  const columns = useMemo<ColumnDef<JabatanTable>[]>(() => {
     return [
-      { accessorKey: "id", header: "Kode" },
+      { accessorKey: "urutan", header: "No", sortingFn: 'alphanumeric' },
       { accessorKey: "nama", header: "Jabatan" },
       { accessorKey: "nama_divisi", header: "Divisi" },
       {
         accessorKey: "is_active", header: "Status", cell: ({ getValue }) => {
           return getValue() as boolean ? "Aktif" : "Non Aktif"
+        },
+        meta: {
+          print: (value: boolean) => value ? "Aktif" : "Non Aktif"
         }
       },
       {
@@ -196,8 +201,8 @@ const ClientPage = ({ data, err }: { data: JabatanInterface[] | null, err: any }
                 });
                 setShow(true);
                 setEditingId(row.original.id);
-              }}><i className="bi bi-pencil"></i></Button>
-              <Button type="button" variant='danger' onClick={() => onDelete(kode)}><i className="bi bi-trash"></i></Button>
+              }}><i className="bi bi-pencil-fill"></i></Button>
+              <Button type="button" variant='danger' onClick={() => onDelete(kode)}><i className="bi bi-trash-fill"></i></Button>
             </Stack>
           )
         }
@@ -205,16 +210,25 @@ const ClientPage = ({ data, err }: { data: JabatanInterface[] | null, err: any }
     ]
   }, [])
 
+  const onExport = () => {
+    if (!table) {
+      toast.error("Table tidak ditemukan");
+      return;
+    }
+    exportTableToExcel<JabatanTable>(table, "Jabatan")
+  }
+
   return (
     <>
-      <Stack direction='horizontal'>
-        <Button type='button' variant='primary' onClick={() => setShow(true)}>
+      <Stack direction='horizontal' gap={2}>
+        <Button type='button' variant='primary' onClick={() => setShow(true)} disabled={divisiList.length > 0 && false}>
           <i className='bi bi-briefcase'></i>
           <span>Tambah</span>
         </Button>
+        <ExportToExcel onExport={onExport} />
       </Stack>
 
-      <DefaultTable<JabatanInterface>
+      <DefaultTable<JabatanTable>
         loading={isPending}
         data={data ?? []}
         columns={columns}

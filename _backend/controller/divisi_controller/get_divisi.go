@@ -20,12 +20,15 @@ func GetDivisi(c *gin.Context) {
 	defer rows.Close()
 
 	data := []divisitypes.DivisiRes{}
+	urutan := 1
 	for rows.Next() {
 		var item divisitypes.DivisiRes
 		if err := rows.Scan(&item.Id, &item.Nama, &item.IsActive); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal baca data divisi: %s", err)})
 			return
 		}
+		item.Urutan = urutan
+		urutan++
 
 		data = append(data, item)
 	}

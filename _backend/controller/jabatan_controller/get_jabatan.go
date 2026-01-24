@@ -21,12 +21,15 @@ func GetJabatan(c *gin.Context) {
 	defer rows.Close()
 
 	data := []jabatantypes.JabatanRes{}
+	urutan := 1
 	for rows.Next() {
 		var item jabatantypes.JabatanRes
 		if err := rows.Scan(&item.Id, &item.IdDivisi, &item.NamaDiv, &item.Nama, &item.IsActive); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal baca data jabatan: %s", err)})
 			return
 		}
+		item.Urutan = urutan
+		urutan++
 
 		data = append(data, item)
 	}

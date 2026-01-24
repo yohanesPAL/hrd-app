@@ -5,7 +5,7 @@ import InternalServerError from '@/app/500/page';
 import DataNotFound from '@/app/not-found/page';
 
 const Jabatan = async () => {
-  let data: JabatanInterface[] | null = null;
+  let data: JabatanTable[] | null = null;
   let err: any = null;
   const res = await ServerFetch({ uri: `/jabatan` })
 

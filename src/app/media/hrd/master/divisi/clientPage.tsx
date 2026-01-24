@@ -5,15 +5,17 @@ import { FormEvent, useEffect, useMemo, useState, useTransition } from 'react'
 import { Button, Form, Modal, Stack } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import ExportToExcel from '@/components/buttons/ExportToExcel';
+import { exportTableToExcel } from '@/utils/exportTableToExcel';
 
-const defaultSort: SortingState = [{ id: "id", desc: false }]
+const defaultSort: SortingState = [{ id: "urutan", desc: false }]
 const defaultDivisiForm: Divisi = { nama: "", is_active: true }
 
-const ClientPage = ({ data, err }: { data: DivisiInterface[] | null, err: any }) => {
+const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => {
   useEffect(() => { toast.error(err) }, [err])
 
   const router = useRouter()
-  const [table, setTable] = useState<Table<DivisiInterface> | null>(null);
+  const [table, setTable] = useState<Table<DivisiTable> | null>(null);
   const [divisiForm, setDivisiForm] = useState<Divisi>(defaultDivisiForm)
   const [editingId, setEditingId] = useState<string>("");
   const [show, setShow] = useState<boolean>(false);
@@ -98,7 +100,7 @@ const ClientPage = ({ data, err }: { data: DivisiInterface[] | null, err: any })
       )
     } else {
       toast.promise(
-        updateDivisi({...payload, id: editingId}), {
+        updateDivisi({ ...payload, id: editingId }), {
         pending: "Update divisi...",
         success: "Berhasil update divisi!",
         error: {
@@ -155,13 +157,16 @@ const ClientPage = ({ data, err }: { data: DivisiInterface[] | null, err: any })
     })
   }
 
-  const columns = useMemo<ColumnDef<DivisiInterface>[]>(() => {
+  const columns = useMemo<ColumnDef<DivisiTable>[]>(() => {
     return [
-      { accessorKey: "id", header: "Kode", sortingFn: "alphanumeric" },
+      { accessorKey: "urutan", header: "No", sortingFn: "alphanumeric" },
       { accessorKey: "nama", header: "Nama Divisi" },
       {
         accessorKey: "is_active", header: "Status", cell: ({ getValue }) => {
           return getValue() as boolean ? "Aktif" : "Non Aktif"
+        },
+        meta: {
+          print: (value: boolean) => value ? "Aktif" : "Non Aktif"
         }
       },
       {
@@ -173,8 +178,8 @@ const ClientPage = ({ data, err }: { data: DivisiInterface[] | null, err: any })
                 setEditingId(kode);
                 setDivisiForm({ nama: row.original.nama, is_active: row.original.is_active });
                 setShow(true);
-              }}><i className="bi bi-pencil"></i></Button>
-              <Button type="button" variant='danger' onClick={() => onDelete(kode)}><i className="bi bi-trash"></i></Button>
+              }}><i className="bi bi-pencil-fill"></i></Button>
+              <Button type="button" variant='danger' onClick={() => onDelete(kode)}><i className="bi bi-trash-fill"></i></Button>
             </Stack>
           )
         }
@@ -182,15 +187,24 @@ const ClientPage = ({ data, err }: { data: DivisiInterface[] | null, err: any })
     ]
   }, [])
 
+  const onExport = () => {
+    if(!table) {
+      toast.error("Table tidak ditemukan");
+      return
+    }
+    exportTableToExcel<DivisiTable>(table, "Divisi")
+  }
+
   return (
     <>
-      <Stack direction='horizontal'>
+      <Stack direction='horizontal' gap={2}>
         <Button type='button' variant='primary' onClick={() => setShow(true)}>
           <i className='bi bi-stack'></i>
           <span>Tambah</span>
         </Button>
+        <ExportToExcel onExport={onExport}/>
       </Stack>
-      <DefaultTable<DivisiInterface>
+      <DefaultTable<DivisiTable>
         data={data ?? []}
         columns={columns}
         defaultSort={defaultSort}

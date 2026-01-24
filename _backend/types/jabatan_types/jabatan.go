@@ -1,6 +1,7 @@
 package jabatantypes
 
 type JabatanRes struct {
+	Urutan   int    `json:"urutan"`
 	Id       string `json:"id"`
 	IdDivisi string `json:"id_divisi"`
 	NamaDiv  string `json:"nama_divisi"`

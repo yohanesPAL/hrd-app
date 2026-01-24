@@ -5,7 +5,7 @@ import InternalServerError from '@/app/500/page';
 import DataNotFound from '@/app/not-found/page';
 
 const Divisi = async () => {
-  let data: DivisiInterface[] | null = null;
+  let data: DivisiTable[] | null = null;
   let err: any = null;
   const res = await ServerFetch({ uri: `/divisi` })
   await new Promise(resolve => setTimeout(resolve, 2000))
@@ -17,7 +17,7 @@ const Divisi = async () => {
   } else {
     data = await res.json()
   }
-
+console.log(data)
   return (
     <>
       <PageTitle>Divisi</PageTitle>

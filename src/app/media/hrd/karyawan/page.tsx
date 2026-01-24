@@ -2,7 +2,6 @@ import PageTitle from '@/components/PageTitle';
 import ClientPage from './clientPage';
 import { KaryawanInterface } from '@/types/KaryawanType';
 import { ServerFetch } from '@/utils/ServerFetch';
-import { redirect } from 'next/navigation';
 
 const Karyawan = async() => {
   let data: KaryawanInterface[] | null = null;

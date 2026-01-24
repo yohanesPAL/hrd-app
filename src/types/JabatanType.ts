@@ -13,3 +13,9 @@ interface JabatanForm {
 interface JabatanInterface extends JabatanForm {
   id: string;
 }
+
+interface JabatanTable extends Jabatan {
+  urutan: number;
+  id: string;
+  id_divisi: string;
+}

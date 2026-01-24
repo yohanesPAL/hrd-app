@@ -1,6 +1,7 @@
 package divisitypes
 
 type DivisiRes struct {
+	Urutan   int    `json:"urutan"`
 	Id       string `json:"id"`
 	Nama     string `json:"nama"`
 	IsActive bool   `json:"is_active"`
