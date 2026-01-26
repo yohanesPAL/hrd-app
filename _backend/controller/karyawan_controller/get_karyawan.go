@@ -13,7 +13,9 @@ import (
 func GetKaryawan(c *gin.Context) {
 	db := models.DB
 
-	rows, err := db.Query(`SELECT id, nama, jk, alamat, hp, divisi, jabatan, status_aktif, status_karyawan FROM karyawan`)
+	rows, err := db.Query(`SELECT k.id, k.nama, jk, alamat, hp, d.nama, j.nama, status_aktif, status_karyawan FROM karyawan AS k
+		JOIN divisi AS d ON (d.id = k.divisi)
+		JOIN jabatan AS j ON (j.id = k.jabatan)`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal ambil data karyawan: %s", err)})
 		return
@@ -21,6 +23,7 @@ func GetKaryawan(c *gin.Context) {
 	defer rows.Close()
 
 	data := []karyawantypes.KaryawanRes{}
+	urutan := 1
 	for rows.Next() {
 		var item karyawantypes.KaryawanRes
 		var hp sql.NullString
@@ -29,6 +32,8 @@ func GetKaryawan(c *gin.Context) {
 			return
 		}
 		item.HP = hp.String
+		item.Urutan = urutan
+		urutan++
 
 		data = append(data, item)
 	}

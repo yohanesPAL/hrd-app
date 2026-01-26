@@ -8,40 +8,18 @@ import { useRouter } from 'next/navigation';
 import ExportToExcel from '@/components/buttons/ExportToExcel';
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
 
-
-
 const defaultSort: SortingState = [{ id: "urutan", desc: false }];
 const defaultJabatanForm: JabatanForm = { id_divisi: "", nama: "", is_active: true };
 
-const ClientPage = ({ data, err }: { data: JabatanTable[] | null, err: any }) => {
-  useEffect(() => { if (err) toast.error(err) }, [err]);
+const ClientPage = ({ data, divisiList}: { data: JabatanTable[], divisiList: DivisiInterface[]}) => {
   const router = useRouter();
 
   const [table, setTable] = useState<Table<JabatanTable> | null>(null);
   const [jabatanForm, setJabatanForm] = useState<JabatanForm>(defaultJabatanForm)
   const [editingId, setEditingId] = useState<string>("")
   const [show, setShow] = useState<boolean>(false);
-  const [divisiList, setDivisiList] = useState<DivisiInterface[]>([])
   const [isPosting, setIsPosting] = useState<boolean>(false)
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    const getDivisiList = async () => {
-      const res = await fetch('/api/jabatan/divisi', {
-        method: "GET"
-      });
-
-      const body = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(body?.error ?? 'Request failed')
-      };
-
-      setDivisiList(body);
-    }
-
-    getDivisiList();
-  }, [])
 
   const onCloseModal = () => {
     setShow(false);
@@ -222,7 +200,7 @@ const ClientPage = ({ data, err }: { data: JabatanTable[] | null, err: any }) =>
     <>
       <Stack direction='horizontal' gap={2}>
         <Button type='button' variant='primary' onClick={() => setShow(true)} disabled={divisiList.length > 0 && false}>
-          <i className='bi bi-briefcase'></i>
+          <i className='bi bi-briefcase-fill'></i>
           <span>Tambah</span>
         </Button>
         <ExportToExcel onExport={onExport} />
@@ -265,6 +243,7 @@ const ClientPage = ({ data, err }: { data: JabatanTable[] | null, err: any }) =>
                 </Form.Select>
               </Form.Group>
               <Form.Group>
+                <Form.Label>Divisi</Form.Label>
                 <Form.Select
                   required
                   value={jabatanForm.id_divisi}

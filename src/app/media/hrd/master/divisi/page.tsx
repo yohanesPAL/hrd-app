@@ -17,7 +17,7 @@ const Divisi = async () => {
   } else {
     data = await res.json()
   }
-console.log(data)
+
   return (
     <>
       <PageTitle>Divisi</PageTitle>

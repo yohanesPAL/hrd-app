@@ -13,7 +13,7 @@ const DokumenChildren: MenuInterface[] = [
 
 const MasterChildren: MenuInterface[] = [
   { nama: "Divisi", href: "divisi", icon: "bi-stack" },
-  { nama: "Jabatan", href: "jabatan", icon: "bi-briefcase" },
+  { nama: "Jabatan", href: "jabatan", icon: "bi-briefcase-fill" },
 ]
 
 const Menu: MenuInterface[] = [

@@ -13,15 +13,22 @@ export async function ServerFetch({
 
   if (!session) redirect("/unauthorized");
 
-  const res = await fetch(`${process.env.NEXT_GO_API_URL}${uri}`, {
-    ...options,
-    headers: {
-      ...options.headers,
-    },
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(`${process.env.NEXT_GO_API_URL}${uri}`, {
+      ...options,
+      headers: {
+        ...options.headers,
+      },
+      cache: "no-store",
+    });
 
-  if (res.status === 401) redirect("/unauthorized");
+    if (res.status === 401) redirect("/unauthorized");
 
-  return res;
+    return res;
+  } catch (err) {
+    return new Response(JSON.stringify({ error: "Service unavailable" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }

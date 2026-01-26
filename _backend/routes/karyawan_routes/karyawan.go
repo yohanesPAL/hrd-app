@@ -8,4 +8,6 @@ import (
 
 func Karyawan(r *gin.Engine) {
 	r.GET("/karyawan", karyawancontroller.GetKaryawan)
+	r.POST("/karyawan", karyawancontroller.PostKaryawan)
+	r.GET("/karyawan/form-depedencies", karyawancontroller.GetFormDepedencies)
 }

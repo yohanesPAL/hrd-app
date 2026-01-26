@@ -79,7 +79,11 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
 
   const onSubmit = (payload: Divisi, e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!payload) return toast.error("data divisi tidak boleh kosong")
+    if (!payload) {
+      toast.error("data divisi tidak boleh kosong")
+      return
+    }
+
     setIsPosting(true);
 
     if (editingId === "") {
@@ -141,6 +145,11 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
   }
 
   const onDelete = (kode: string) => {
+    if (!kode) {
+      toast.error("kode tidak boleh kosong");
+      return;
+    }
+
     toast.promise(
       deleteDivisi(kode), {
       pending: "Menghapus divisi...",
@@ -188,7 +197,7 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
   }, [])
 
   const onExport = () => {
-    if(!table) {
+    if (!table) {
       toast.error("Table tidak ditemukan");
       return
     }
@@ -202,7 +211,7 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
           <i className='bi bi-stack'></i>
           <span>Tambah</span>
         </Button>
-        <ExportToExcel onExport={onExport}/>
+        <ExportToExcel onExport={onExport} />
       </Stack>
       <DefaultTable<DivisiTable>
         data={data ?? []}

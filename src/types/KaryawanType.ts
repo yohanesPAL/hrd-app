@@ -1,4 +1,5 @@
-interface KaryawanInterface {
+interface KaryawanTable {
+  urutan: number;
   id: string;
   nama: string;
   jk: "Pria" | "Wanita";
@@ -10,4 +11,24 @@ interface KaryawanInterface {
   statusKaryawan: "Kontrak" | "Tetap" | "Resign" | "Cutoff";
 }
 
-export type { KaryawanInterface };
+interface KaryawanForm {
+  nik: string;
+  nama: string;
+  jk: "Pria" | "Wanita";
+  alamat: string;
+  hp: string;
+  divisi: string;
+  jabatan: string;
+  cuti_terakhir: number;
+  cuti_sekarang: number;
+  status_aktif: boolean;
+  status_karyawan: string;
+  durasi_kontrak: number;
+  kode_absesnsi: string;
+  tgl_masuk: string;
+}
+
+interface KaryawanFormDepedencies {
+  divisi: DivisiInterface[];
+  jabatan: JabatanInterface[];
+}

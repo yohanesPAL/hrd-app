@@ -1,7 +1,6 @@
 "use client";
 import ExportToExcel from '@/components/buttons/ExportToExcel'
 import DefaultTable from '@/components/table/DefaulteTable'
-import { KaryawanInterface } from '@/types/KaryawanType'
 import { exportTableToExcel } from '@/utils/exportTableToExcel'
 import { ColumnDef, SortingState, Table } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
@@ -11,27 +10,26 @@ import { Button, Stack } from 'react-bootstrap';
 import Link from 'next/link';
 import useProfile from '@/stores/profile/ProfileStore';
 
-const defaultSort: SortingState = [{ id: 'id', desc: false }]
+const defaultSort: SortingState = [{ id: 'urutan', desc: false }]
 
-const ClientPage = ({ data, err }: { data: KaryawanInterface[] | null, err: string | null }) => {
+const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   const route = useRouter()
   const role = useProfile((state) => state.profile?.role)
   const [tableLoading, setTableLoading] = useState<boolean>(false);
-  const [table, setTable] = useState<Table<KaryawanInterface> | null>(null)
+  const [table, setTable] = useState<Table<KaryawanTable> | null>(null)
 
-  const columns = useMemo<ColumnDef<KaryawanInterface>[]>(() => {
+  const columns = useMemo<ColumnDef<KaryawanTable>[]>(() => {
     return [
+      { accessorKey: "urutan", header: "No", sortingFn: "alphanumeric" },
       {
-        accessorKey: "id", header: "Kode", cell: ({ getValue }) => {
-          const kode = getValue() as string;
+        accessorKey: "nama", header: "Nama", cell: ({ row }) => {
           return (
-            <Link href={`/media/${role}/profile/${kode}`} target='_blank' className='d-flex w-100 justify-content-center align-items-center'>
-              <Button type='button' variant='success' style={{ width: '75%' }}>{kode}</Button>
+            <Link href={`/media/${role}/profile/${row.original.id}`}>
+              <Button type='button' variant='success'>{row.original.nama}</Button>
             </Link>
           )
         }
       },
-      { accessorKey: "nama", header: "Nama" },
       { accessorKey: "jk", header: "Jenis Kelaim" },
       { accessorKey: "alamat", header: "Alamat" },
       {
@@ -59,25 +57,23 @@ const ClientPage = ({ data, err }: { data: KaryawanInterface[] | null, err: stri
       toast.error("Table tidak ditemukan");
       return;
     }
-    exportTableToExcel<KaryawanInterface>(table, "Karyawan")
+    exportTableToExcel<KaryawanTable>(table, "Karyawan")
   }
 
   return (
     <>
-
       <Stack direction='horizontal' gap={2}>
         <Button type='button' variant='primary' onClick={() => route.push(`/media/${role}/karyawan/tambah`)}>
-          <i className='bi bi-person'></i>
+          <i className='bi bi-person-fill'></i>
           <span>Tambah</span>
         </Button>
         <ExportToExcel onExport={onExport} />
       </Stack>
-      <DefaultTable<KaryawanInterface>
+      <DefaultTable<KaryawanTable>
         data={data ?? []}
         columns={columns}
         defaultSort={defaultSort}
         loading={tableLoading}
-        tableWidth='105%'
         SetTableComponent={setTable}
       />
     </>
