@@ -17,8 +17,11 @@ func GetProfileId(c *gin.Context) {
 
 	var data profiletypes.ProfileRes
 	var hp, tglMasuk, tglKeluar, durasiKontrak, kodeAbsensi sql.NullString
-	if err := db.QueryRow(`SELECT nik, nama, jk, alamat, hp, divisi, jabatan, sp, cuti_terakhir, cuti_sekarang, status_aktif, status_karyawan, tgl_masuk, tgl_keluar, durasi_kontrak, kode_absensi
-		FROM karyawan WHERE id = ?`, id).Scan(
+	if err := db.QueryRow(`SELECT nik, k.nama, jk, alamat, hp, d.nama, j.nama, sp, cuti_terakhir, cuti_sekarang, status_aktif, status_karyawan, tgl_masuk, tgl_keluar, durasi_kontrak, kode_absensi
+		FROM karyawan AS k
+		JOIN divisi AS d ON (d.id = k.divisi)
+		JOIN jabatan AS j ON (j.id = k.jabatan)
+		WHERE k.id = ?`, id).Scan(
 		&data.NIK,
 		&data.Nama,
 		&data.JK,

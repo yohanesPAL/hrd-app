@@ -13,7 +13,7 @@ import (
 func GetKaryawan(c *gin.Context) {
 	db := models.DB
 
-	rows, err := db.Query(`SELECT k.id, k.nama, jk, alamat, hp, d.nama, j.nama, status_aktif, status_karyawan FROM karyawan AS k
+	rows, err := db.Query(`SELECT k.id, k.nama, jk, alamat, hp, d.nama, j.nama, status_aktif, status_karyawan, kode_absensi FROM karyawan AS k
 		JOIN divisi AS d ON (d.id = k.divisi)
 		JOIN jabatan AS j ON (j.id = k.jabatan)`)
 	if err != nil {
@@ -27,7 +27,7 @@ func GetKaryawan(c *gin.Context) {
 	for rows.Next() {
 		var item karyawantypes.KaryawanRes
 		var hp sql.NullString
-		if err := rows.Scan(&item.Id, &item.Nama, &item.JK, &item.Alamat, &hp, &item.Divisi, &item.Jabatan, &item.StatusAktif, &item.StatusKaryawan); err != nil {
+		if err := rows.Scan(&item.Id, &item.Nama, &item.JK, &item.Alamat, &hp, &item.Divisi, &item.Jabatan, &item.StatusAktif, &item.StatusKaryawan, &item.KodeAbsensi); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal baca data karyawan: %s", err)})
 			return
 		}

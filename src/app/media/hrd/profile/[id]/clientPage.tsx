@@ -5,9 +5,7 @@ import { Table } from 'react-bootstrap';
 import { toast } from 'react-toastify'
 import styles from './profile.module.css'
 
-const ClientPage = ({ data, err }: { data: ProfileInterface | null, err: any }) => {
-  if (err) toast.error(err.error);
-
+const ClientPage = ({ data }: { data: ProfileInterface}) => {
   let statusAktif = '';
   if(data) {
     statusAktif = data?.status_aktif === "1" ? "Aktif" : "Non Aktif"
@@ -26,11 +24,11 @@ const ClientPage = ({ data, err }: { data: ProfileInterface | null, err: any }) 
 
               <td style={{width:"15%"}}>Cuti Terakhir</td>
               <td>:</td>
-              <td style={{width:"35%"}}>{data?.cuti_terakhir}</td>
+              <td style={{width:"35%"}}>{data?.cuti_terakhir} Hari</td>
             </tr>
             <tr>
               <td>Nama</td><td>:</td><td>{data?.nama}</td>
-              <td>Cuti Sekarang</td><td>:</td><td>{data?.cuti_sekarang}</td>
+              <td>Cuti Sekarang</td><td>:</td><td>{data?.cuti_sekarang} Hari</td>
             </tr>
             <tr>
               <td>Jenis Kelamin</td><td>:</td><td>{data?.jk}</td>
@@ -50,7 +48,7 @@ const ClientPage = ({ data, err }: { data: ProfileInterface | null, err: any }) 
             </tr>
             <tr>
               <td>Jabatan</td><td>:</td><td>{data?.jabatan}</td>
-              <td>Durasi Kontrak</td><td>:</td><td>{data?.durasi_kontrak || "-"}</td>
+              <td>Durasi Kontrak</td><td>:</td><td>{!data?.durasi_kontrak ? "-" : `${data?.durasi_kontrak} Hari`}</td>
             </tr>
             <tr>
               <td>SP</td><td>:</td><td>{data?.sp}</td>

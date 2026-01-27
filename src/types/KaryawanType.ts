@@ -7,8 +7,9 @@ interface KaryawanTable {
   hp: string | null;
   divisi: string;
   jabatan: string;
-  statusAktif: boolean;
-  statusKaryawan: "Kontrak" | "Tetap" | "Resign" | "Cutoff";
+  status_aktif: boolean;
+  status_karyawan: "Kontrak" | "Tetap" | "Resign" | "Cutoff";
+  kode_absensi: string;
 }
 
 interface KaryawanForm {
@@ -31,4 +32,9 @@ interface KaryawanForm {
 interface KaryawanFormDepedencies {
   divisi: DivisiInterface[];
   jabatan: JabatanInterface[];
+}
+
+interface PatchKodeAbsensi {
+  id: string;
+  kode_absensi: string
 }

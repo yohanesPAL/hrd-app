@@ -1,20 +1,23 @@
 import { ProfileInterface } from "@/types/ProfileType";
 import ClientPage from "./clientPage";
 import { ServerFetch } from "@/utils/ServerFetch";
+import DataNotFound from "@/app/not-found/page";
+import InternalServerError from "@/app/500/page";
 
 export default async function Profile({ params }: { params: { id: string } }) {
   const { id } = await params;
 
-  let data: ProfileInterface | null = null;
-  let err: string | null = null
   const res = await ServerFetch({ uri: `/profile/${id}` })
 
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    err = body?.error ?? "Request failed";
-  } else {
-    data = await res.json();
-  }
+    const err = body?.error ?? "Request failed";
 
-  return <ClientPage data={data} err={err} />;
+    if(res.status === 404) return <DataNotFound/>
+    return <InternalServerError msg={err}/>
+  } 
+
+  const data: ProfileInterface = await res.json();
+
+  return <ClientPage data={data} />;
 }

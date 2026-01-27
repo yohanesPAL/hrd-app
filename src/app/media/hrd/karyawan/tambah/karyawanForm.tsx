@@ -45,8 +45,6 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
       setIsPosting(false);
       throw new Error(body?.error ?? "request failed")
     }
-
-    setIsPosting(false);
     return body;
   }
 
