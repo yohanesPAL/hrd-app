@@ -1,25 +1,17 @@
-import { Dispatch, SetStateAction } from 'react'
+'use client';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
 import { Button, Modal } from 'react-bootstrap'
 
-interface Props {
-  nama: string;
-  id: string;
-  show: boolean;
-}
+const ConfirmDeleteModal = () => {
+  const {props, onConfirm, setClose, isPosting} = useConfirmDelete();
 
-const ConfirmModal = (
-  {
-    props,
-    setClose,
-    onConfirm,
-    isPosting,
-  }: {
-    props: Props,
-    setClose: () => void,
-    onConfirm: (id: string) => void,
-    isPosting: boolean
-  }) => {
+  const handleConfirm = () => {
+    if(!onConfirm) return;
 
+    onConfirm(props.id);
+    setClose();
+  }
+  
   return (
     <Modal show={props.show}>
       <Modal.Header>
@@ -30,10 +22,10 @@ const ConfirmModal = (
       </Modal.Body>
       <Modal.Footer>
         <Button type='button' variant='success' onClick={setClose}>Kembali</Button>
-        <Button type='button' variant='danger' onClick={() => onConfirm(props.id)} disabled={isPosting}>Hapus</Button>
+        <Button type='button' variant='danger' onClick={handleConfirm} disabled={isPosting}>Hapus</Button>
       </Modal.Footer>
     </Modal>
   )
 }
 
-export default ConfirmModal
+export default ConfirmDeleteModal

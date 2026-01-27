@@ -10,22 +10,23 @@ import { Button, Form, Modal, Stack, } from 'react-bootstrap';
 import Link from 'next/link';
 import useProfile from '@/stores/profile/ProfileStore';
 import ConfirmDeleteModal from '@/components/confirmModal/ConfirmDeleteModal';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
 
 const defaultSort: SortingState = [{ id: 'urutan', desc: false }]
 const kodeAbsenFormDefault = { id: "", kode_absensi: "" }
-const confirmDeleteDefault = { show: false, nama: "", id: "" }
 
 const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   const router = useRouter()
   const role = useProfile((state) => state.profile?.role)
+  const openConfirmDelete = useConfirmDelete((state) => state.setOpen)
+  const closeConfirmDelete = useConfirmDelete((state) => state.setClose)
+
   const [table, setTable] = useState<Table<KaryawanTable> | null>(null)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [kodeAbsenForm, setKodeAbsenForm] = useState<PatchKodeAbsensi>(kodeAbsenFormDefault)
   const [namaOnEdit, setNamaOnEdit] = useState<string>("");
   const [isPending, startTransition] = useTransition();
   const [isPosting, setIsPosting] = useState<boolean>(false);
-
-  const [confirmDelete, setConfirmDelete] = useState(confirmDeleteDefault)
 
   const onCloseModal = () => {
     setShowModal(false)
@@ -93,7 +94,7 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
       throw new Error(body?.error ?? "Request failed");
     }
 
-    setConfirmDelete(confirmDeleteDefault)
+    closeConfirmDelete()
     setIsPosting(false);
     startTransition(() => {
       router.refresh();
@@ -102,6 +103,8 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   }
 
   const onDelete = (kode: string) => {
+    if(!kode) return toast.error("id tidak boleh kosong!")
+
     setIsPosting(true);
 
     toast.promise(
@@ -156,15 +159,16 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
       {
         id: "aksi", header: "Aksi", cell: ({ row }) => {
           const kode = row.original.id
+          const nama = row.original.nama
           return (
             <Stack direction='horizontal' gap={2}>
               <Button type='button' onClick={() => {
-                setNamaOnEdit(row.original.nama)
+                setNamaOnEdit(nama)
                 setKodeAbsenForm({ id: kode, kode_absensi: row.original.kode_absensi })
                 setShowModal(true);
               }}><i className="bi bi-fingerprint"></i></Button>
-              <Button type='button' variant='success' onClick={() => router.push(`karyawan/${row.original.id}/edit`)}><i className="bi bi-pencil-fill"></i></Button>
-              <Button type="button" variant='danger' onClick={() => setConfirmDelete({show: true, nama: row.original.nama, id: row.original.id})}><i className="bi bi-trash-fill"></i></Button>
+              <Button type='button' variant='success' onClick={() => router.push(`karyawan/${kode}/edit`)}><i className="bi bi-pencil-fill"></i></Button>
+              <Button type="button" variant='danger' onClick={() => openConfirmDelete({ nama: nama, id: kode }, (id) => onDelete(id))}><i className="bi bi-trash-fill"></i></Button>
             </Stack>
           )
         }
@@ -228,13 +232,6 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
           </Modal.Footer>
         </Form>
       </Modal>
-
-      <ConfirmDeleteModal 
-      props={confirmDelete} 
-      setClose={() => setConfirmDelete(confirmDeleteDefault)} 
-      onConfirm={(kode: string) => onDelete(kode)}
-      isPosting={isPosting}
-      />
     </>
   )
 }

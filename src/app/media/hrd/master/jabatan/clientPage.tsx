@@ -7,13 +7,16 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import ExportToExcel from '@/components/buttons/ExportToExcel';
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
 
 const defaultSort: SortingState = [{ id: "urutan", desc: false }];
 const defaultJabatanForm: JabatanForm = { id_divisi: "", nama: "", is_active: true };
 
-const ClientPage = ({ data, divisiList}: { data: JabatanTable[], divisiList: DivisiInterface[]}) => {
+const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: DivisiInterface[] }) => {
   const router = useRouter();
 
+  const openConfirmDelete = useConfirmDelete((state) => state.setOpen)
+  const closeConfirmDelete = useConfirmDelete((state) => state.setClose)
   const [table, setTable] = useState<Table<JabatanTable> | null>(null);
   const [jabatanForm, setJabatanForm] = useState<JabatanForm>(defaultJabatanForm)
   const [editingId, setEditingId] = useState<string>("")
@@ -129,6 +132,7 @@ const ClientPage = ({ data, divisiList}: { data: JabatanTable[], divisiList: Div
       throw new Error(body?.error ?? 'Request failed')
     }
 
+    closeConfirmDelete();
     setIsPosting(false);
     startTransition(() => {
       router.refresh();
@@ -137,6 +141,8 @@ const ClientPage = ({ data, divisiList}: { data: JabatanTable[], divisiList: Div
   }
 
   const onDelete = (kode: string) => {
+    if (!kode) return toast.error("id tidak boleh kosong!");
+
     toast.promise(
       deleteJabatan(kode), {
       pending: "Menghapus jabatan...",
@@ -180,7 +186,7 @@ const ClientPage = ({ data, divisiList}: { data: JabatanTable[], divisiList: Div
                 setShow(true);
                 setEditingId(row.original.id);
               }}><i className="bi bi-pencil-fill"></i></Button>
-              <Button type="button" variant='danger' onClick={() => onDelete(kode)}><i className="bi bi-trash-fill"></i></Button>
+              <Button type="button" variant='danger' onClick={() => openConfirmDelete({ nama: row.original.nama, id: kode }, (id) => { onDelete(id) })}><i className="bi bi-trash-fill"></i></Button>
             </Stack>
           )
         }

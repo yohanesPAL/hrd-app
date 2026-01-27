@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import ExportToExcel from '@/components/buttons/ExportToExcel';
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
 
 const defaultSort: SortingState = [{ id: "urutan", desc: false }]
 const defaultDivisiForm: Divisi = { nama: "", is_active: true }
@@ -15,6 +16,8 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
   useEffect(() => { toast.error(err) }, [err])
 
   const router = useRouter()
+  const openConfirmDelete = useConfirmDelete((state) => state.setOpen)
+  const closeConfirmDelete = useConfirmDelete((state) => state.setClose)
   const [table, setTable] = useState<Table<DivisiTable> | null>(null);
   const [divisiForm, setDivisiForm] = useState<Divisi>(defaultDivisiForm)
   const [editingId, setEditingId] = useState<string>("");
@@ -137,6 +140,7 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
       throw new Error(body?.error ?? 'Request failed')
     }
 
+    closeConfirmDelete()
     setIsPosting(false);
     startTransition(() => {
       router.refresh();
@@ -188,7 +192,12 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
                 setDivisiForm({ nama: row.original.nama, is_active: row.original.is_active });
                 setShow(true);
               }}><i className="bi bi-pencil-fill"></i></Button>
-              <Button type="button" variant='danger' onClick={() => onDelete(kode)}><i className="bi bi-trash-fill"></i></Button>
+              <Button type="button" variant='danger' onClick={() => {
+                openConfirmDelete(
+                  { nama: row.original.nama, id: kode },
+                  (id) => { onDelete(id) }
+                )
+              }}><i className="bi bi-trash-fill"></i></Button>
             </Stack>
           )
         }
