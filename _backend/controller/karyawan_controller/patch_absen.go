@@ -18,6 +18,17 @@ func PatchKodeAbsesnsi(c *gin.Context) {
 
 	db := models.DB
 
+	var isKodeAbsenExists bool
+	if err := db.QueryRow(`SELECT EXISTS(SELECT 1 FROM karyawan WHERE kode_absensi = ?)`, req.KodeAbsensi).Scan(&isKodeAbsenExists); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal cek kode absen: %s", err)})
+		return
+	}
+
+	if isKodeAbsenExists {
+		c.JSON(http.StatusConflict, gin.H{"error": "Kode absen sudah digunakan"})
+		return
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal memulai transaksi: %s", err)})

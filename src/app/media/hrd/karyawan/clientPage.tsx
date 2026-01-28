@@ -9,11 +9,11 @@ import { useRouter } from 'next/navigation';
 import { Button, Form, Modal, Stack, } from 'react-bootstrap';
 import Link from 'next/link';
 import useProfile from '@/stores/profile/ProfileStore';
-import ConfirmDeleteModal from '@/components/confirmModal/ConfirmDeleteModal';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
 
 const defaultSort: SortingState = [{ id: 'urutan', desc: false }]
 const kodeAbsenFormDefault = { id: "", kode_absensi: "" }
+const spFormDefault = { id: "", sp: 0 }
 
 const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   const router = useRouter()
@@ -22,16 +22,24 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   const closeConfirmDelete = useConfirmDelete((state) => state.setClose)
 
   const [table, setTable] = useState<Table<KaryawanTable> | null>(null)
-  const [showModal, setShowModal] = useState<boolean>(false)
+  const [showModalAbsen, setShowModalAbsen] = useState<boolean>(false)
   const [kodeAbsenForm, setKodeAbsenForm] = useState<PatchKodeAbsensi>(kodeAbsenFormDefault)
+  const [showModalSp, setShowModalSp] = useState<boolean>(false)
+  const [spForm, setSpForm] = useState<PatchSp>(spFormDefault)
   const [namaOnEdit, setNamaOnEdit] = useState<string>("");
   const [isPending, startTransition] = useTransition();
   const [isPosting, setIsPosting] = useState<boolean>(false);
 
-  const onCloseModal = () => {
-    setShowModal(false)
+  const onCloseModalAbsen = () => {
+    setShowModalAbsen(false)
     setNamaOnEdit("")
     setKodeAbsenForm(kodeAbsenFormDefault)
+  }
+
+  const onCloseModalSp = () => {
+    setShowModalSp(false)
+    setNamaOnEdit("")
+    setSpForm(spFormDefault)
   }
 
   const updateKodeAbsen = async (payload: PatchKodeAbsensi) => {
@@ -53,7 +61,7 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
     startTransition(() => {
       router.refresh();
     })
-    onCloseModal();
+    onCloseModalAbsen();
     setIsPosting(false);
     return body;
   };
@@ -74,6 +82,53 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
           return 'Request failed'
         },
         autoClose: false,
+      }
+    }
+    )
+  }
+
+  const updateSp = async (payload: PatchSp) => {
+    const res = await fetch(`/api/karyawan/${payload.id}/sp`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    })
+
+    const body = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      setIsPosting(false)
+      throw new Error(body?.error ?? "Request failed");
+    }
+
+    startTransition(() => {
+      router.refresh();
+    })
+    setIsPosting(false);
+    onCloseModalSp();
+    return body
+  }
+
+  const onUpdateSp = (payload: PatchSp, e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!payload) return toast.error("data tidak boleh kosong");
+    if (payload.sp > 3) return toast.error("sp tidak boleh > 3");
+
+    setIsPosting(true)
+    
+    toast.promise(
+      updateSp(payload), {
+      pending: "Update SP...",
+      success: "Berhasil update SP",
+      error: {
+        render({ data }) {
+          if (data instanceof Error) {
+            return data.message
+          }
+          return "Request failed"
+        }
       }
     }
     )
@@ -103,7 +158,7 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   }
 
   const onDelete = (kode: string) => {
-    if(!kode) return toast.error("id tidak boleh kosong!")
+    if (!kode) return toast.error("id tidak boleh kosong!")
 
     setIsPosting(true);
 
@@ -165,9 +220,14 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
               <Button type='button' onClick={() => {
                 setNamaOnEdit(nama)
                 setKodeAbsenForm({ id: kode, kode_absensi: row.original.kode_absensi })
-                setShowModal(true);
+                setShowModalAbsen(true);
               }}><i className="bi bi-fingerprint"></i></Button>
               <Button type='button' variant='success' onClick={() => router.push(`karyawan/${kode}/edit`)}><i className="bi bi-pencil-fill"></i></Button>
+              <Button type='button' variant='warning' className='text-white' onClick={() => {
+                setNamaOnEdit(nama)
+                setSpForm({ id: kode, sp: row.original.sp })
+                setShowModalSp(true);
+              }}>SP</Button>
               <Button type="button" variant='danger' onClick={() => openConfirmDelete({ nama: nama, id: kode }, (id) => onDelete(id))}><i className="bi bi-trash-fill"></i></Button>
             </Stack>
           )
@@ -199,7 +259,7 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
         SetTableComponent={setTable}
       />
 
-      <Modal show={showModal} onHide={onCloseModal}>
+      <Modal show={showModalAbsen} onHide={onCloseModalAbsen}>
         <Modal.Header>
           <Modal.Title>Ubah Kode Absensi</Modal.Title>
         </Modal.Header>
@@ -228,7 +288,41 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
           </Modal.Body>
           <Modal.Footer>
             <Button type='submit' variant='primary' disabled={isPosting && true}>Update</Button>
-            <Button type='button' variant='danger' onClick={onCloseModal}>Batal</Button>
+            <Button type='button' variant='danger' onClick={onCloseModalAbsen}>Batal</Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      <Modal show={showModalSp} onHide={onCloseModalSp}>
+        <Modal.Header>
+          <Modal.Title>Ubah SP Karyawan</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={(e) => onUpdateSp(spForm, e)}>
+          <Modal.Body>
+            <Stack gap={2}>
+              <Form.Group>
+                <Form.Label>Nama</Form.Label>
+                <Form.Control
+                  type='text'
+                  required
+                  disabled
+                  value={namaOnEdit}
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>SP</Form.Label>
+                <Form.Control
+                  type='text'
+                  required
+                  value={spForm.sp}
+                  onChange={(e) => setSpForm({ ...spForm, sp: Number(e.currentTarget.value) })}
+                />
+              </Form.Group>
+            </Stack>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button type='submit' variant='primary' disabled={isPosting && true}>Update</Button>
+            <Button type='button' variant='danger' onClick={onCloseModalSp}>Batal</Button>
           </Modal.Footer>
         </Form>
       </Modal>

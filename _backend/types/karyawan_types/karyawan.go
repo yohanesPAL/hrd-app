@@ -1,4 +1,4 @@
-package karywantypes
+package karyawantypes
 
 type KaryawanRes struct {
 	Urutan         int    `json:"urutan"`
@@ -12,6 +12,7 @@ type KaryawanRes struct {
 	StatusAktif    string `json:"status_aktif"`
 	StatusKaryawan string `json:"status_karyawan"`
 	KodeAbsensi    string `json:"kode_absensi"`
+	Sp             int    `json:"sp"`
 }
 
 type PostKaryawanReq struct {
@@ -28,12 +29,34 @@ type PostKaryawanReq struct {
 	StatusKaryawan string `json:"status_karyawan" binding:"required"`
 	TglMasuk       string `json:"tgl_masuk" binding:"required"`
 	DurasiKontrak  int    `json:"durasi_kontrak"`
-	KodeAbsensi    string `json:"kode_absesnsi"`
+	KodeAbsensi    string `json:"kode_absensi"`
 }
 
 type PatchKodeAbsesnsiReq struct {
 	Id          string `json:"id" binding:"required"`
 	KodeAbsensi string `json:"kode_absensi" binding:"required"`
+}
+
+type PatchSpReq struct {
+	Id string `json:"id" binding:"required"`
+	Sp int    `json:"sp" binding:"required"`
+}
+
+type PatchKaryawanDataRes struct {
+	Nik            string `json:"nik"`
+	Nama           string `json:"nama"`
+	JK             string `json:"jk"`
+	Alamat         string `json:"alamat"`
+	HP             string `json:"hp"`
+	Divisi         string `json:"divisi"`
+	Jabatan        string `json:"jabatan"`
+	CutiTerakhir   string `json:"cuti_terakhir"`
+	CutiSekarang   string `json:"cuti_sekarang"`
+	StatusAktif    string `json:"status_aktif"`
+	StatusKaryawan string `json:"status_karyawan"`
+	TglMasuk       string `json:"tgl_masuk"`
+	TglKeluar      string `json:"tgl_keluar"`
+	DuraiKontrak   string `json:"durasi_kontrak"`
 }
 
 type PatchKaryawanReq struct {
@@ -45,7 +68,6 @@ type PatchKaryawanReq struct {
 	HP             string `json:"hp"`
 	Divisi         string `json:"divisi" binding:"required"`
 	Jabatan        string `json:"jabatan" binding:"required"`
-	SP             string `json:"sp"`
 	CutiTerakhir   string `json:"cuti_terakhir"`
 	CutiSekarang   string `json:"cuti_sekarang"`
 	StatusAktif    string `json:"status_aktif"`
@@ -53,5 +75,4 @@ type PatchKaryawanReq struct {
 	TglMasuk       string `json:"tgl_masuk" binding:"required"`
 	TglKeluar      string `json:"tgl_keluar"`
 	DuraiKontrak   string `json:"durasi_kontrak"`
-	KodeAbsensi    string `json:"kode_absensi"`
 }

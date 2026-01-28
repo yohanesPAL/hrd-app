@@ -20,7 +20,7 @@ const defaulKaryawanForm: KaryawanForm = {
   status_aktif: true,
   status_karyawan: "",
   durasi_kontrak: 0,
-  kode_absesnsi: "",
+  kode_absensi: "",
   tgl_masuk: getTodayYYYYMMDD(),
 }
 
@@ -214,8 +214,8 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
               <Form.Control
                 type='text'
                 placeholder='Ex: 541'
-                value={karyawanForm.kode_absesnsi}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, kode_absesnsi: e.currentTarget.value })}
+                value={karyawanForm.kode_absensi}
+                onChange={(e) => setKaryawanForm({ ...karyawanForm, kode_absensi: e.currentTarget.value })}
               />
             </Form.Group>
           </Row>

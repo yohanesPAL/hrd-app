@@ -10,7 +10,11 @@ func Karyawan(r *gin.Engine) {
 	r.GET("/karyawan", karyawancontroller.GetKaryawan)
 	r.POST("/karyawan", karyawancontroller.PostKaryawan)
 	r.DELETE("/karyawan/:id", karyawancontroller.DeleteKaryawan)
-	r.PATCH("/karyawan/:id", karyawancontroller.DeleteKaryawan)
+
+	r.GET("/karyawan/:id/info", karyawancontroller.GetKaryawanData)
+	r.PATCH("/karyawan/:id", karyawancontroller.PatchKaryawan)
+
 	r.GET("/karyawan/form-depedencies", karyawancontroller.GetFormDepedencies)
 	r.PATCH("/karyawan/:id/kode-absensi", karyawancontroller.PatchKodeAbsesnsi)
+	r.PATCH("/karyawan/:id/sp", karyawancontroller.PatchSP)
 }
