@@ -11,7 +11,7 @@ import (
 func DeleteDivisi(c *gin.Context) {
 	id := c.Param("id")
 
-	if id == "" {
+	if id == "" || id == "undefined" {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "id tidak boleh kosong"})
 		return
 	}

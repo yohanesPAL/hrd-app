@@ -2,10 +2,10 @@
 import { Modal } from "react-bootstrap";
 import LoadingComp from "./Loading";
 
-const LoadingScreen = () => {
+const LoadingScreen = ({ show = true }: { show?: boolean }) => {
   return (
     <Modal
-      show={true}
+      show={show}
       centered
       backdrop="static"
       keyboard={false}
