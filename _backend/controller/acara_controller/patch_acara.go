@@ -31,6 +31,17 @@ func PatchAcara(c *gin.Context) {
 
 	db := models.DB
 
+	var userAcara string
+	if err := db.QueryRow(`SELECT akun_id FROM acara WHERE id = ?`, req.Id).Scan(&userAcara); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal ambil user: %s", err)})
+		return
+	}
+
+	if userAcara != req.AkunId {
+		c.JSON(http.StatusForbidden, gin.H{"error": "acara milik user lain"})
+		return
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal memulai transaksi: %s", err)})

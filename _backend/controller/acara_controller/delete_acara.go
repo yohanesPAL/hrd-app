@@ -10,6 +10,7 @@ import (
 
 func DeleteAcara(c *gin.Context) {
 	id := c.Param("id")
+	akunId := c.Query("aid")
 
 	if id == "" || id == "undefined" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "id tidak boleh kosong"})
@@ -17,6 +18,17 @@ func DeleteAcara(c *gin.Context) {
 	}
 
 	db := models.DB
+
+	var userAcara string
+	if err := db.QueryRow(`SELECT akun_id FROM acara WHERE id = ?`, id).Scan(&userAcara); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal cek user: %s", err)})
+		return
+	}
+
+	if userAcara != akunId {
+		c.JSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("acara milik user lain useracara: %s akunId: %s", userAcara, akunId)})
+		return
+	}
 
 	tx, err := db.Begin()
 	if err != nil {

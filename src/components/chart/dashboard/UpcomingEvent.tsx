@@ -1,6 +1,5 @@
 'use client';
-import Link from 'next/link';
-import { ListGroup, ListGroupItem, Stack } from 'react-bootstrap'
+import { ListGroup, ListGroupItem, Stack } from 'react-bootstrap';
 
 const formatter = new Intl.DateTimeFormat('en-GB', {
   day: '2-digit',
@@ -22,9 +21,7 @@ const UpcomingEvent = ({ upcoming, ongoing }: { upcoming: EventForm[], ongoing: 
         {
           ongoing.length > 0 && (
             <div>
-              <Link href="">
-                <h5 className='border-bottom'>Sedang Berlangsung</h5>
-              </Link>
+              <h5 className='border-bottom'>Sedang Berlangsung</h5>
               <ListGroup variant="flush">
                 {
                   ongoing.map((item, index) => {

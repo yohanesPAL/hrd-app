@@ -7,7 +7,7 @@ import (
 )
 
 func Acara(r *gin.Engine) {
-	r.GET("/acara", acaracontroller.GetAcara)
+	r.GET("/acara/:userId", acaracontroller.GetAcara)
 	r.POST("/acara", acaracontroller.PostAcara)
 	r.PATCH("/acara/:id", acaracontroller.PatchAcara)
 	r.DELETE("/acara/:id", acaracontroller.DeleteAcara)

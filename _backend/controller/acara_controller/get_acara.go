@@ -13,6 +13,7 @@ import (
 func GetAcara(c *gin.Context) {
 	tglMulai := c.Query("tm")
 	tglAkhir := c.Query("ta")
+	userId := c.Param("userId")
 
 	start, err := time.Parse(time.RFC3339, tglMulai)
 	if err != nil {
@@ -28,7 +29,7 @@ func GetAcara(c *gin.Context) {
 
 	db := models.DB
 
-	rows, err := db.Query(`SELECT id, title, start, end FROM acara WHERE start < ? AND end > ?`, end, start)
+	rows, err := db.Query(`SELECT id, title, start, end FROM acara WHERE start < ? AND end > ? AND akun_id = ?`, end, start, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal ambil acara: %s", err)})
 		return

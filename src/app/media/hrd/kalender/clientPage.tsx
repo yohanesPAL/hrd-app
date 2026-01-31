@@ -8,6 +8,9 @@ import { Button, Form, Modal, Stack } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/loadingScreen/LoadingScreen";
+import useProfile from "@/stores/profile/ProfileStore";
+import DataNotFound from "@/app/not-found/page";
+import InternalServerError from "@/app/500/page";
 
 interface EventModal {
   show: boolean;
@@ -34,10 +37,12 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-const eventDefault: EventForm = { title: "", start: new Date(), end: new Date() }
+const eventDefault: EventForm = { akun_id: "", title: "", start: new Date(), end: new Date() }
 
 const ClientPage = ({ data }: { data: EventData[] }) => {
   const router = useRouter()
+  const today = new Date();
+  const userId: string = useProfile((state) => state.profile?.id)!
   const [showModal, setShowModal] = useState<EventModal>({ show: false, type: "add" });
   const [eventForm, setEventForm] = useState<EventForm>(eventDefault)
   const [editingId, setEditingId] = useState<string>("");
@@ -49,6 +54,40 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
     setShowModal({ show: false, type: "add" });
     setEventForm(eventDefault);
     setEditingId("");
+  }
+
+  const getAcara = async (date: Date) => {
+    const tglMulai = new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth() - 1,
+        1,
+        0, 0, 0
+      )
+    );
+
+    const tglAkhir = new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth() + 2,
+        1,
+        0, 0, 0
+      )
+    );
+
+    const res = await fetch(`/api/acara/${userId}?tm=${tglMulai.toISOString()}&ta=${tglAkhir.toISOString()}`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      const err = body?.error ?? "Request failed"
+
+      if (res.status === 404) return <DataNotFound />
+      return <InternalServerError msg={err} />
+    }
+
+    let data: EventData[] = await res.json();
+    data = data.map(item => ({ ...item, start: new Date(item.start), end: new Date(item.end) }));
+    console.log(data)
+    setEvents(data);
   }
 
   const postAcara = async (payload: EventForm) => {
@@ -141,7 +180,7 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
   }
 
   const deleteAcara = async (id: string) => {
-    const res = await fetch(`/api/acara/${id}`, {
+    const res = await fetch(`/api/acara/${id}?aid=${userId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json"
@@ -184,13 +223,13 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
   }
 
   const handleSelectSlot = (start: any, end: any) => {
-    setEventForm({ title: "", start: start, end: end });
+    setEventForm({ akun_id: userId, title: "", start: start, end: end });
     setShowModal({ show: true, type: "add" });
   };
 
   const handleSelectEvent = (event: EventData) => {
     setEditingId(event.id)
-    setEventForm({ title: event.title, start: event.start, end: event.end })
+    setEventForm({ akun_id: userId, title: event.title, start: event.start, end: event.end })
     setShowModal({ show: true, type: "edit" });
   }
 
@@ -211,8 +250,28 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
           endAccessor="end"
           views={["month", "week", "day", "agenda"]}
           defaultView="month"
+          onNavigate={(date) => { getAcara(date) }}
           onSelectSlot={(slotInfo) => { handleSelectSlot(slotInfo.start, slotInfo.end) }}
           onSelectEvent={(event) => handleSelectEvent(event)}
+          eventPropGetter={(event) => {
+            let backgroundColor = '#3174ad'
+            if (event.end < today) {
+              backgroundColor = 'gray'
+            } else if (event.start <= today && event.end >= today) {
+              backgroundColor = '#31ad46'
+            }
+
+            return {
+              style: {
+                backgroundColor,
+                borderRadius: '5px',
+                opacity: 0.9,
+                color: 'white',
+                border: '0px',
+                display: 'block',
+              },
+            };
+          }}
         />
       </div>
       <Modal show={showModal.show} onHide={onModalClose} className="p-0">

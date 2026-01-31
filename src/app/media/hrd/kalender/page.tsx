@@ -3,8 +3,10 @@ import ClientPage from './clientPage'
 import { ServerFetch } from '@/utils/ServerFetch'
 import DataNotFound from '@/app/not-found/page'
 import InternalServerError from '@/app/500/page'
+import { auth } from '@/auth'
 
 const Kalender = async () => {
+  const session = await auth();
   const now = new Date();
   const tglMulai = new Date(
     Date.UTC(
@@ -24,7 +26,7 @@ const Kalender = async () => {
     )
   );
 
-  const res = await ServerFetch({ uri: `/acara?tm=${tglMulai.toISOString()}&ta=${tglAkhir.toISOString()}` })
+  const res = await ServerFetch({ uri: `/acara/${session?.user.id}?tm=${tglMulai.toISOString()}&ta=${tglAkhir.toISOString()}` })
 
   if (!res.ok) {
     const body = await res.json().catch(() => null)

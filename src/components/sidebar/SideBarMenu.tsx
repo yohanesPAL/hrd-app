@@ -21,8 +21,8 @@ const Menu: MenuInterface[] = [
   { nama: "Kalender Acara", href: "kalender", icon: "bi-calendar-event"},
   { nama: "Master", href: "master", icon: "bi-database", children: MasterChildren },
   { nama: "Karyawan", href: "karyawan", icon: "bi-person" },
-  { nama: "Mobil", href: "mobil", icon: "bi-truck" },
   { nama: "Absensi", href: "absensi", icon: "bi-calendar-check" },
+  { nama: "Mobil", href: "mobil", icon: "bi-truck" },
   { nama: "Dokumen", href: "dokumen", icon: "bi-file-earmark-medical-fill", children: DokumenChildren },
 ]
 

@@ -16,14 +16,16 @@ type GetAcaraRes struct {
 }
 
 type PostAcaraReq struct {
-	Title string `json:"title" binding:"required"`
-	Start string `json:"start" binding:"required"`
-	End   string `json:"end" binding:"required"`
+	AkunId string `json:"akun_id" binding:"required"`
+	Title  string `json:"title" binding:"required"`
+	Start  string `json:"start" binding:"required"`
+	End    string `json:"end" binding:"required"`
 }
 
 type PatchAcaraReq struct {
-	Id    string `json:"id" binding:"required"`
-	Title string `json:"title" binding:"required"`
-	Start string `json:"start" binding:"required"`
-	End   string `json:"end" binding:"required"`
+	AkunId string `json:"akun_id" binding:"required"`
+	Id     string `json:"id" binding:"required"`
+	Title  string `json:"title" binding:"required"`
+	Start  string `json:"start" binding:"required"`
+	End    string `json:"end" binding:"required"`
 }

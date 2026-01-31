@@ -38,7 +38,7 @@ func PostAcara(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	if _, err := tx.Exec(`INSERT INTO acara (title, start, end) VALUES (?,?,?)`, req.Title, start, end); err != nil {
+	if _, err := tx.Exec(`INSERT INTO acara (akun_id, title, start, end) VALUES (?,?,?,?)`, req.AkunId, req.Title, start, end); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal menambah acara: %s", err)})
 		return
 	}

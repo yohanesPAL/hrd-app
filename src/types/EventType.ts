@@ -1,4 +1,5 @@
 interface EventForm {
+  akun_id: string;
   title: string;
   start: Date;
   end: Date;
