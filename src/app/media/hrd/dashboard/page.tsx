@@ -11,6 +11,9 @@ import { Stack } from 'react-bootstrap'
 
 const isActive = (start: Date, end: Date) => {
   const now = new Date();
+  if (now >= new Date(end) && now >= new Date(start)) {
+    return true;
+  };
   return now <= new Date(end) && now >= new Date(start);
 }
 
@@ -25,7 +28,6 @@ const Card = ({ children }: { children: React.ReactNode }) => {
 const DivisiChartMemo = React.memo(() => { return <DivisiChart /> })
 
 async function Dashboard() {
-
   const res = await ServerFetch({ uri: "/acara/upcoming" })
   if (!res.ok) {
     const body = await res.json().catch(() => null);
@@ -52,7 +54,7 @@ async function Dashboard() {
       <Stack gap={3} direction='vertical'>
         <Stack direction='horizontal' gap={3} className="align-items-stretch">
           <Card>
-            <UpcomingEvent upcoming={upcomingEvents} ongoing={onGoingEvents}/>
+            <UpcomingEvent upcoming={upcomingEvents} ongoing={onGoingEvents} />
           </Card>
           <Card>
             <DivisiChartMemo />

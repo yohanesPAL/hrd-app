@@ -1,6 +1,6 @@
 'use client'
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, set } from "date-fns";
+import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import { id } from "date-fns/locale/id";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { FormEvent, useEffect, useState, useTransition } from "react";
@@ -49,6 +49,8 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
   const [events, setEvents] = useState<EventData[]>(data);
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition();
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [currentView, setCurrentView] = useState<View>("month");
 
   const onModalClose = () => {
     setShowModal({ show: false, type: "add" });
@@ -242,6 +244,8 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
       <LoadingScreen show={isPending} />
       <div style={{ height: "80vh" }}>
         <Calendar
+          date={currentDate}
+          view={currentView}
           selectable
           localizer={localizer}
           culture="id-ID"
@@ -250,7 +254,11 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
           endAccessor="end"
           views={["month", "week", "day", "agenda"]}
           defaultView="month"
-          onNavigate={(date) => { getAcara(date) }}
+          onView={(view) => setCurrentView(view)}
+          onNavigate={(date, view) => {
+            setCurrentDate(date);
+            getAcara(date);
+          }}
           onSelectSlot={(slotInfo) => { handleSelectSlot(slotInfo.start, slotInfo.end) }}
           onSelectEvent={(event) => handleSelectEvent(event)}
           eventPropGetter={(event) => {
@@ -274,6 +282,16 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
           }}
         />
       </div>
+      <Stack className="my-4">
+        <span>status:</span>
+        <Stack direction='horizontal' gap={1}>
+          <span className="px-1 rounded" style={{ background: "gray", color: "white" }}>Sudah Lewat</span>
+          <span>|</span>
+          <span className="px-1 rounded" style={{ background: "#31ad46", color: "white" }}>Berlangsung</span>
+          <span>|</span>
+          <span className="px-1 rounded" style={{ background: "#3174ad", color: "white" }}>Mendatang</span>
+        </Stack>
+      </Stack>
       <Modal show={showModal.show} onHide={onModalClose} className="p-0">
         <Form onSubmit={(e) => onSubmit(eventForm, e)}>
           <Modal.Header>

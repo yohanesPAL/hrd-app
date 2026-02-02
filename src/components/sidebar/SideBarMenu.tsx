@@ -18,8 +18,8 @@ const MasterChildren: MenuInterface[] = [
 
 const Menu: MenuInterface[] = [
   { nama: "Dashboard", href: "dashboard", icon: "bi-speedometer2" },
-  { nama: "Kalender Acara", href: "kalender", icon: "bi-calendar-event"},
   { nama: "Master", href: "master", icon: "bi-database", children: MasterChildren },
+  { nama: "Kalender Acara", href: "kalender", icon: "bi-calendar-event"},
   { nama: "Karyawan", href: "karyawan", icon: "bi-person" },
   { nama: "Absensi", href: "absensi", icon: "bi-calendar-check" },
   { nama: "Mobil", href: "mobil", icon: "bi-truck" },
