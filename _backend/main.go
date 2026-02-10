@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"hrsys/models"
+	absendivisiroutes "hrsys/routes/absen_divisi_routes"
+	absenroutes "hrsys/routes/absen_routes"
 	acararoutes "hrsys/routes/acara_routes"
 	divisiroutes "hrsys/routes/divisi_routes"
 	jabatanroutes "hrsys/routes/jabatan_routes"
@@ -52,6 +54,8 @@ func main() {
 	divisiroutes.Divisi(route)
 	jabatanroutes.Jabatan(route)
 	acararoutes.Acara(route)
+	absendivisiroutes.AbsenDivisi(route)
+	absenroutes.Absen(route)
 
 	go func() {
 		if err := route.Run("127.0.0.1:8080"); err != nil {

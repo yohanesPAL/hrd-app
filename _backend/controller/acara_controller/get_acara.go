@@ -29,7 +29,7 @@ func GetAcara(c *gin.Context) {
 
 	db := models.DB
 
-	rows, err := db.Query(`SELECT id, title, start, end FROM acara WHERE start < ? AND end > ? AND akun_id = ?`, end, start, userId)
+	rows, err := db.Query(`SELECT id, title, start, end FROM acara WHERE akun_id = ? AND start < ? AND end > ?`, userId, end, start)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal ambil acara: %s", err)})
 		return

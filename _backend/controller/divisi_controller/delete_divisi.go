@@ -41,6 +41,11 @@ func DeleteDivisi(c *gin.Context) {
 		return
 	}
 
+	if _, err := tx.Exec(`DELETE FROM jam_absensi WHERE divisi = ?`, id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal hapus jam absen: %s", err)})
+		return
+	}
+
 	if err := tx.Commit(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal commit: %s", err)})
 		return

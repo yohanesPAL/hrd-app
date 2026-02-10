@@ -3,15 +3,13 @@ import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
 import { Button, Modal } from 'react-bootstrap'
 
 const ConfirmDeleteModal = () => {
-  const {props, onConfirm, setClose, isPosting} = useConfirmDelete();
+  const { props, onConfirm, setClose, isPosting } = useConfirmDelete();
 
   const handleConfirm = () => {
-    if(!onConfirm) return;
-
+    if (!onConfirm) return;
     onConfirm(props.id);
-    setClose();
   }
-  
+
   return (
     <Modal show={props.show}>
       <Modal.Header>
@@ -21,7 +19,7 @@ const ConfirmDeleteModal = () => {
         <span><strong>{props.nama}</strong> akan dihapus permanen!</span>
       </Modal.Body>
       <Modal.Footer>
-        <Button type='button' variant='success' onClick={setClose}>Kembali</Button>
+        <Button type='button' variant='success' onClick={setClose} disabled={isPosting}>Kembali</Button>
         <Button type='button' variant='danger' onClick={handleConfirm} disabled={isPosting}>Hapus</Button>
       </Modal.Footer>
     </Modal>

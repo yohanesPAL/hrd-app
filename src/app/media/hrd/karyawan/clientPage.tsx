@@ -10,6 +10,7 @@ import { Button, Form, Modal, Stack, } from 'react-bootstrap';
 import Link from 'next/link';
 import useProfile from '@/stores/profile/ProfileStore';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
+import { useShallow } from 'zustand/shallow';
 
 const defaultSort: SortingState = [{ id: 'urutan', desc: false }]
 const kodeAbsenFormDefault = { id: "", kode_absensi: "" }
@@ -18,8 +19,20 @@ const spFormDefault = { id: "", sp: 0 }
 const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   const router = useRouter()
   const role = useProfile((state) => state.profile?.role)
-  const openConfirmDelete = useConfirmDelete((state) => state.setOpen)
-  const closeConfirmDelete = useConfirmDelete((state) => state.setClose)
+
+  const {
+    setOpen: openConfirmDelete,
+    setClose: closeConfirmDelete,
+    isPosting,
+    setIsPosting,
+  } = useConfirmDelete(
+    useShallow((state) => ({
+      setOpen: state.setOpen,
+      setClose: state.setClose,
+      isPosting: state.isPosting,
+      setIsPosting: state.setIsPosting,
+    }))
+  )
 
   const [table, setTable] = useState<Table<KaryawanTable> | null>(null)
   const [showModalAbsen, setShowModalAbsen] = useState<boolean>(false)
@@ -28,7 +41,6 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
   const [spForm, setSpForm] = useState<PatchSp>(spFormDefault)
   const [namaOnEdit, setNamaOnEdit] = useState<string>("");
   const [isPending, startTransition] = useTransition();
-  const [isPosting, setIsPosting] = useState<boolean>(false);
 
   const onCloseModalAbsen = () => {
     setShowModalAbsen(false)
@@ -54,15 +66,9 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false);
       throw new Error(body?.error ?? "Request failed");
     }
 
-    startTransition(() => {
-      router.refresh();
-    })
-    onCloseModalAbsen();
-    setIsPosting(false);
     return body;
   };
 
@@ -71,7 +77,12 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
     setIsPosting(true);
 
     toast.promise(
-      updateKodeAbsen(payload), {
+      updateKodeAbsen(payload).then(() => {
+        startTransition(() => {
+          router.refresh();
+        })
+        onCloseModalAbsen();
+      }).finally(() => setIsPosting(false)), {
       pending: "Update kode absen...",
       success: "Berhasil update kode absen",
       error: {
@@ -99,15 +110,9 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false)
       throw new Error(body?.error ?? "Request failed");
     }
 
-    startTransition(() => {
-      router.refresh();
-    })
-    setIsPosting(false);
-    onCloseModalSp();
     return body
   }
 
@@ -117,9 +122,14 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
     if (payload.sp > 3) return toast.error("sp tidak boleh > 3");
 
     setIsPosting(true)
-    
+
     toast.promise(
-      updateSp(payload), {
+      updateSp(payload).then(() => {
+        startTransition(() => {
+          router.refresh();
+        })
+        onCloseModalSp();
+      }).finally(() => setIsPosting(false)), {
       pending: "Update SP...",
       success: "Berhasil update SP",
       error: {
@@ -128,7 +138,8 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
             return data.message
           }
           return "Request failed"
-        }
+        },
+        autoClose: false,
       }
     }
     )
@@ -149,11 +160,6 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
       throw new Error(body?.error ?? "Request failed");
     }
 
-    closeConfirmDelete()
-    setIsPosting(false);
-    startTransition(() => {
-      router.refresh();
-    })
     return body;
   }
 
@@ -163,7 +169,12 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
     setIsPosting(true);
 
     toast.promise(
-      deleteKaryawan(kode), {
+      deleteKaryawan(kode).then(() => {
+        closeConfirmDelete()
+        startTransition(() => {
+          router.refresh();
+        })
+      }).finally(() => setIsPosting(false)), {
       pending: "Menghapus karyawan...",
       success: "Berhasil hapus karyawan",
       error: {
@@ -287,8 +298,8 @@ const ClientPage = ({ data }: { data: KaryawanTable[] }) => {
             </Stack>
           </Modal.Body>
           <Modal.Footer>
-            <Button type='submit' variant='primary' disabled={isPosting && true}>Update</Button>
             <Button type='button' variant='danger' onClick={onCloseModalAbsen}>Batal</Button>
+            <Button type='submit' variant='primary' disabled={isPosting && true}>Update</Button>
           </Modal.Footer>
         </Form>
       </Modal>

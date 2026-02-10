@@ -1,5 +1,6 @@
 import InternalServerError from '@/app/500/page'
 import DataNotFound from '@/app/not-found/page'
+import { auth } from '@/auth'
 import PageTitle from '@/components/PageTitle'
 import DivisiChart from '@/components/chart/dashboard/DivisiChart'
 import KaryawanAktifChart from '@/components/chart/dashboard/KaryawanAktifChart'
@@ -28,7 +29,12 @@ const Card = ({ children }: { children: React.ReactNode }) => {
 const DivisiChartMemo = React.memo(() => { return <DivisiChart /> })
 
 async function Dashboard() {
-  const res = await ServerFetch({ uri: "/acara/upcoming" })
+  const session = await auth();
+  const id = session?.user.id;
+
+  console.log(id)
+
+  const res = await ServerFetch({ uri: `/acara/upcoming?user_id=${id}` })
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     const err = body?.error ?? "Request failed"

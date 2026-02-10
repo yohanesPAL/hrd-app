@@ -1,28 +1,39 @@
 'use client';
 import DefaultTable from '@/components/table/DefaulteTable';
 import { ColumnDef, SortingState, Table } from '@tanstack/react-table';
-import { FormEvent, useEffect, useMemo, useState, useTransition } from 'react'
+import { FormEvent, useMemo, useState, useTransition } from 'react'
 import { Button, Form, Modal, Stack } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import ExportToExcel from '@/components/buttons/ExportToExcel';
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
+import { useShallow } from 'zustand/shallow';
 
 const defaultSort: SortingState = [{ id: "urutan", desc: false }]
 const defaultDivisiForm: Divisi = { nama: "", is_active: true }
 
-const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => {
-  useEffect(() => { toast.error(err) }, [err])
-
+const ClientPage = ({ data }: { data: DivisiTable[] }) => {
   const router = useRouter()
-  const openConfirmDelete = useConfirmDelete((state) => state.setOpen)
-  const closeConfirmDelete = useConfirmDelete((state) => state.setClose)
+
+  const {
+    setOpen: openConfirmDelete,
+    setClose: closeConfirmDelete,
+    isPosting,
+    setIsPosting,
+  } = useConfirmDelete(
+    useShallow((state) => ({
+      setOpen: state.setOpen,
+      setClose: state.setClose,
+      isPosting: state.isPosting,
+      setIsPosting: state.setIsPosting,
+    }))
+  )
+
   const [table, setTable] = useState<Table<DivisiTable> | null>(null);
   const [divisiForm, setDivisiForm] = useState<Divisi>(defaultDivisiForm)
   const [editingId, setEditingId] = useState<string>("");
   const [show, setShow] = useState<boolean>(false);
-  const [isPosting, setIsPosting] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition()
 
   const onCloseModal = () => {
@@ -43,15 +54,9 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false);
       throw new Error(body?.error ?? 'Request failed')
     }
 
-    setIsPosting(false);
-    startTransition(() => {
-      router.refresh();
-    })
-    onCloseModal();
     return body
   }
 
@@ -67,16 +72,9 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false);
       throw new Error(body?.error ?? 'Request failed')
     }
 
-    setIsPosting(false);
-    startTransition(() => {
-      router.refresh();
-    })
-    onCloseModal();
-    setEditingId("");
     return body
   }
 
@@ -91,7 +89,12 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
 
     if (editingId === "") {
       toast.promise(
-        postDivisi(payload), {
+        postDivisi(payload).then(() => {
+          startTransition(() => {
+            router.refresh();
+          });
+          onCloseModal();
+        }).finally(() => setIsPosting(false)), {
         pending: "Menambah divisi...",
         success: "Berhasil menambah divisi!",
         error: {
@@ -107,7 +110,13 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
       )
     } else {
       toast.promise(
-        updateDivisi({ ...payload, id: editingId }), {
+        updateDivisi({ ...payload, id: editingId }).then(() => {
+          setEditingId("");
+          startTransition(() => {
+            router.refresh();
+          });
+          onCloseModal();
+        }).finally(() => setIsPosting(false)), {
         pending: "Update divisi...",
         success: "Berhasil update divisi!",
         error: {
@@ -136,15 +145,9 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false);
       throw new Error(body?.error ?? 'Request failed')
     }
 
-    closeConfirmDelete()
-    setIsPosting(false);
-    startTransition(() => {
-      router.refresh();
-    })
     return body
   }
 
@@ -155,7 +158,12 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
     }
 
     toast.promise(
-      deleteDivisi(kode), {
+      deleteDivisi(kode).then(() => {
+        closeConfirmDelete()
+        startTransition(() => {
+          router.refresh();
+        })
+      }).finally(() => setIsPosting(false)), {
       pending: "Menghapus divisi...",
       success: "Berhasil menghapus divisi!",
       error: {
@@ -263,8 +271,8 @@ const ClientPage = ({ data, err }: { data: DivisiTable[] | null, err: any }) => 
           </Modal.Body>
 
           <Modal.Footer>
-            <Button type='button' variant='danger' onClick={onCloseModal}>Batal</Button>
-            <Button type='submit' variant='primary' disabled={isPosting && true}>{editingId === "" ? "Submit" : "Update"}</Button>
+            <Button type='button' variant='danger' disabled={isPosting} onClick={onCloseModal}>Batal</Button>
+            <Button type='submit' variant='primary' disabled={isPosting}>{editingId === "" ? "Submit" : "Update"}</Button>
           </Modal.Footer>
         </Form>
       </Modal>

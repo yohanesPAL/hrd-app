@@ -153,7 +153,8 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
               return data.message
             }
             return "Request failed"
-          }
+          },
+          autoClose: false,
         }
       })
     } else if (showModal.type === "edit") {
@@ -175,7 +176,8 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
               return data.message
             }
             return "Request failed"
-          }
+          },
+          autoClose: false,
         }
       })
     }
@@ -219,7 +221,8 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
             return data.message
           }
           return "Request failed"
-        }
+        },
+        autoClose: false,
       }
     })
   }

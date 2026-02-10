@@ -11,11 +11,13 @@ import (
 )
 
 func GetAcaraDashboard(c *gin.Context) {
+	userId := c.Query("user_id")
+
 	db := models.DB
 
 	today := time.Now().Format("2006-01-02")
 
-	rows, err := db.Query(`SELECT title, start, end FROM acara WHERE end >= ? ORDER BY end ASC LIMIT 6`, today)
+	rows, err := db.Query(`SELECT title, start, end FROM acara WHERE akun_id = ? AND end >= ? ORDER BY end ASC LIMIT 6`, userId, today)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("gagal ambil acara: %s", err)})
 		return

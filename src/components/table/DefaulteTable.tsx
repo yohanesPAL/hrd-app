@@ -12,7 +12,7 @@ function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", load
   defaultSort: SortingState,
   tableWidth?: string,
   loading?: boolean,
-  SetTableComponent: Dispatch<SetStateAction<TableType<T> | null>>,
+  SetTableComponent?: Dispatch<SetStateAction<TableType<T> | null>>,
 }) {
   const [sorting, setSorting] = useState<SortingState>(defaultSort);
   const [globalFilter, setGlobalFilter] = useState("");

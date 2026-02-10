@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import ExportToExcel from '@/components/buttons/ExportToExcel';
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
+import { useShallow } from 'zustand/shallow';
 
 const defaultSort: SortingState = [{ id: "urutan", desc: false }];
 const defaultJabatanForm: JabatanForm = { id_divisi: "", nama: "", is_active: true };
@@ -15,13 +16,24 @@ const defaultJabatanForm: JabatanForm = { id_divisi: "", nama: "", is_active: tr
 const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: DivisiInterface[] }) => {
   const router = useRouter();
 
-  const openConfirmDelete = useConfirmDelete((state) => state.setOpen)
-  const closeConfirmDelete = useConfirmDelete((state) => state.setClose)
+  const {
+    setOpen: openConfirmDelete,
+    setClose: closeConfirmDelete,
+    isPosting,
+    setIsPosting,
+  } = useConfirmDelete(
+    useShallow((state) => ({
+      setOpen: state.setOpen,
+      setClose: state.setClose,
+      isPosting: state.isPosting,
+      setIsPosting: state.setIsPosting,
+    }))
+  )
+
   const [table, setTable] = useState<Table<JabatanTable> | null>(null);
   const [jabatanForm, setJabatanForm] = useState<JabatanForm>(defaultJabatanForm)
   const [editingId, setEditingId] = useState<string>("")
   const [show, setShow] = useState<boolean>(false);
-  const [isPosting, setIsPosting] = useState<boolean>(false)
   const [isPending, startTransition] = useTransition();
 
   const onCloseModal = () => {
@@ -41,15 +53,9 @@ const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: Di
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false);
       throw new Error(body?.error ?? 'Request failed');
     }
 
-    setIsPosting(false);
-    startTransition(() => {
-      router.refresh();
-    })
-    onCloseModal();
     return body
   }
 
@@ -65,16 +71,9 @@ const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: Di
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false);
       throw new Error(body?.error ?? 'Request failed')
     }
 
-    setIsPosting(false);
-    startTransition(() => {
-      router.refresh();
-    })
-    onCloseModal();
-    setEditingId("");
     return body
   }
 
@@ -85,7 +84,12 @@ const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: Di
 
     if (editingId === "") {
       toast.promise(
-        postJabatan(payload), {
+        postJabatan(payload).then(() => {
+          startTransition(() => {
+            router.refresh();
+          })
+          onCloseModal();
+        }).finally(() => setIsPosting(false)), {
         pending: "Menambah jabatan...",
         success: "Berhasil menambah jabatan!",
         error: {
@@ -100,7 +104,13 @@ const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: Di
       })
     } else {
       toast.promise(
-        patchJabatan({ ...payload, id: editingId }), {
+        patchJabatan({ ...payload, id: editingId }).then(() => {
+          setEditingId("");
+          startTransition(() => {
+            router.refresh();
+          })
+          onCloseModal();
+        }).finally(() => setIsPosting(false)), {
         pending: "Update jabatan...",
         success: "Berhasil update jabatan!",
         error: {
@@ -128,15 +138,9 @@ const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: Di
     const body = await res.json().catch(() => null);
 
     if (!res.ok) {
-      setIsPosting(false);
       throw new Error(body?.error ?? 'Request failed')
     }
 
-    closeConfirmDelete();
-    setIsPosting(false);
-    startTransition(() => {
-      router.refresh();
-    })
     return body
   }
 
@@ -144,7 +148,12 @@ const ClientPage = ({ data, divisiList }: { data: JabatanTable[], divisiList: Di
     if (!kode) return toast.error("id tidak boleh kosong!");
 
     toast.promise(
-      deleteJabatan(kode), {
+      deleteJabatan(kode).then(() => {
+        closeConfirmDelete();
+        startTransition(() => {
+          router.refresh();
+        })
+      }).finally(() => setIsPosting(false)), {
       pending: "Menghapus jabatan...",
       success: "Berhasil menghapus jabatan!",
       error: {
