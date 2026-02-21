@@ -1,6 +1,6 @@
 'use client';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import TableWrapper from '../tableWrapper/TableWrapper';
+import TableWrapper from '../TableWrapper';
 import { Table } from 'react-bootstrap';
 import { Table as TableType, ColumnDef, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from '@tanstack/react-table'
 import { Button, Form } from 'react-bootstrap';

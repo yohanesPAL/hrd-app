@@ -1,0 +1,347 @@
+'use client'
+import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { id } from "date-fns/locale/id";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { FormEvent, useEffect, useState, useTransition } from "react";
+import { Button, Form, Modal, Stack } from "react-bootstrap";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import LoadingScreen from "@/components/LoadingScreen/LoadingScreen";
+import useProfile from "@/stores/profile/ProfileStore";
+import DataNotFound from "@/app/not-found/page";
+import InternalServerError from "@/app/500/page";
+
+interface EventModal {
+  show: boolean;
+  type: "add" | "edit";
+}
+
+function toDatetimeLocal(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+const locales = {
+  "id-ID": id,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
+
+const eventDefault: EventForm = { akun_id: "", title: "", start: new Date(), end: new Date() }
+
+const ClientPage = ({ data }: { data: EventData[] }) => {
+  const router = useRouter()
+  const today = new Date();
+  const userId: string = useProfile((state) => state.profile?.id)!
+  const [showModal, setShowModal] = useState<EventModal>({ show: false, type: "add" });
+  const [eventForm, setEventForm] = useState<EventForm>(eventDefault)
+  const [editingId, setEditingId] = useState<string>("");
+  const [events, setEvents] = useState<EventData[]>(data);
+  const [isPosting, setIsPosting] = useState<boolean>(false);
+  const [isPending, startTransition] = useTransition();
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [currentView, setCurrentView] = useState<View>("month");
+
+  const onModalClose = () => {
+    setShowModal({ show: false, type: "add" });
+    setEventForm(eventDefault);
+    setEditingId("");
+  }
+
+  const getAcara = async (date: Date) => {
+    const tglMulai = new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth() - 1,
+        1,
+        0, 0, 0
+      )
+    );
+
+    const tglAkhir = new Date(
+      Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth() + 2,
+        1,
+        0, 0, 0
+      )
+    );
+
+    const res = await fetch(`/api/acara/${userId}?tm=${tglMulai.toISOString()}&ta=${tglAkhir.toISOString()}`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      const err = body?.error ?? "Request failed"
+
+      if (res.status === 404) return <DataNotFound />
+      return <InternalServerError msg={err} />
+    }
+
+    let data: EventData[] = await res.json();
+    data = data.map(item => ({ ...item, start: new Date(item.start), end: new Date(item.end) }));
+    console.log(data)
+    setEvents(data);
+  }
+
+  const postAcara = async (payload: EventForm) => {
+    const res = await fetch("/api/acara", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+
+    const body = await res.json().catch(() => null)
+
+    if (!res.ok) {
+      setIsPosting(false)
+      throw new Error(body?.error ?? "request failed")
+    }
+
+    return body
+  }
+
+  const patchAcara = async (payload: EventData) => {
+    const res = await fetch(`/api/acara/${payload.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+
+    const body = await res.json().catch(() => null)
+
+    if (!res.ok) {
+      setIsPosting(false)
+      throw new Error(body?.error ?? "request failed")
+    }
+
+    return body
+  }
+
+  const onSubmit = (payload: EventForm, e: FormEvent<HTMLElement>) => {
+    e.preventDefault();
+    if (!payload) return toast.error("data tidak boleh kosong");
+    setIsPosting(true)
+
+    if (showModal.type === "add") {
+      toast.promise(
+        postAcara(payload).then(() => {
+          startTransition(() => {
+            router.refresh();
+          })
+          setIsPosting(false);
+          setShowModal({ show: false, type: "add" });
+          setEventForm(eventDefault);
+        }), {
+        pending: "Menambah acara...",
+        success: "Berhasil tambah acara",
+        error: {
+          render({ data }) {
+            if (data instanceof Error) {
+              return data.message
+            }
+            return "Request failed"
+          },
+          autoClose: false,
+        }
+      })
+    } else if (showModal.type === "edit") {
+      toast.promise(
+        patchAcara({ ...payload, id: editingId }).then(() => {
+          startTransition(() => {
+            router.refresh();
+          })
+          setIsPosting(false);
+          setShowModal({ show: false, type: "add" });
+          setEventForm(eventDefault);
+          setEditingId("");
+        }), {
+        pending: "Update acara...",
+        success: "Berhasil update acara",
+        error: {
+          render({ data }) {
+            if (data instanceof Error) {
+              return data.message
+            }
+            return "Request failed"
+          },
+          autoClose: false,
+        }
+      })
+    }
+  }
+
+  const deleteAcara = async (id: string) => {
+    const res = await fetch(`/api/acara/${id}?aid=${userId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(id)
+    })
+
+    const body = await res.json().catch(() => null)
+    if (!res.ok) {
+      setIsPosting(false)
+      throw new Error(body?.error ?? "request failed")
+    }
+
+    return body;
+  }
+
+  const onDeleteAcara = (id: string) => {
+    if (!id) return toast.error("id tidak boleh kosong")
+    setIsPosting(true)
+
+    toast.promise(
+      deleteAcara(id).then(() => {
+        startTransition(() => {
+          router.refresh();
+        });
+        setIsPosting(false);
+        setShowModal({ show: false, type: "add" });
+      }), {
+      pending: "Menghapus acara...",
+      success: "Berhasil hapus acara",
+      error: {
+        render({ data }) {
+          if (data instanceof Error) {
+            return data.message
+          }
+          return "Request failed"
+        },
+        autoClose: false,
+      }
+    })
+  }
+
+  const handleSelectSlot = (start: any, end: any) => {
+    setEventForm({ akun_id: userId, title: "", start: start, end: end });
+    setShowModal({ show: true, type: "add" });
+  };
+
+  const handleSelectEvent = (event: EventData) => {
+    setEditingId(event.id)
+    setEventForm({ akun_id: userId, title: event.title, start: event.start, end: event.end })
+    setShowModal({ show: true, type: "edit" });
+  }
+
+  useEffect(() => {
+    setEvents(data);
+  }, [data])
+
+  return (
+    <>
+      <LoadingScreen show={isPending} />
+      <div style={{ height: "80vh" }}>
+        <Calendar
+          date={currentDate}
+          view={currentView}
+          selectable
+          localizer={localizer}
+          culture="id-ID"
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          views={["month", "week", "day", "agenda"]}
+          defaultView="month"
+          onView={(view) => setCurrentView(view)}
+          onNavigate={(date, view) => {
+            setCurrentDate(date);
+            getAcara(date);
+          }}
+          onSelectSlot={(slotInfo) => { handleSelectSlot(slotInfo.start, slotInfo.end) }}
+          onSelectEvent={(event) => handleSelectEvent(event)}
+          eventPropGetter={(event) => {
+            let backgroundColor = '#3174ad'
+            if (event.end < today) {
+              backgroundColor = 'gray'
+            } else if (event.start <= today && event.end >= today) {
+              backgroundColor = '#31ad46'
+            }
+
+            return {
+              style: {
+                backgroundColor,
+                borderRadius: '5px',
+                opacity: 0.9,
+                color: 'white',
+                border: '0px',
+                display: 'block',
+              },
+            };
+          }}
+        />
+      </div>
+      <Stack className="my-4">
+        <span>status:</span>
+        <Stack direction='horizontal' gap={1}>
+          <span className="px-1 rounded" style={{ background: "gray", color: "white" }}>Sudah Lewat</span>
+          <span>|</span>
+          <span className="px-1 rounded" style={{ background: "#31ad46", color: "white" }}>Berlangsung</span>
+          <span>|</span>
+          <span className="px-1 rounded" style={{ background: "#3174ad", color: "white" }}>Mendatang</span>
+        </Stack>
+      </Stack>
+      <Modal show={showModal.show} onHide={onModalClose} className="p-0">
+        <Form onSubmit={(e) => onSubmit(eventForm, e)}>
+          <Modal.Header>
+            <Modal.Title>{showModal.type === "add" ? "Tambah" : "Edit"} Acara</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Group>
+              <Form.Label>Title</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={eventForm.title}
+                onChange={(e) => setEventForm({ ...eventForm, title: e.currentTarget.value })}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Tanggal Awal</Form.Label>
+              <Form.Control
+                required
+                type="datetime-local"
+                value={toDatetimeLocal(eventForm.start)}
+                onChange={(e) => setEventForm({ ...eventForm, start: new Date(e.currentTarget.value) })}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Tanggal Akhir</Form.Label>
+              <Form.Control
+                required
+                type="datetime-local"
+                value={toDatetimeLocal(eventForm.end)}
+                onChange={(e) => setEventForm({ ...eventForm, end: new Date(e.currentTarget.value) })}
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <div className="d-flex flex-row align-items-center justify-content-between w-100">
+              {showModal.type === "edit" ? <Button type="button" variant="danger" onClick={() => onDeleteAcara(editingId)} disabled={isPosting && true}>Hapus</Button> : <div></div>}
+              <Stack direction="horizontal" gap={2}>
+                <Button type="button" variant="warning" onClick={onModalClose}>Batal</Button>
+                <Button type="submit" variant="primary" disabled={isPosting && true}>{showModal.type === "edit" ? "Update" : "Submit"}</Button>
+              </Stack>
+            </div>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+    </>
+  )
+}
+
+export default ClientPage

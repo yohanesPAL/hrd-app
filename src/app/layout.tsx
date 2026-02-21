@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
-import ConfirmDeleteModal from "@/components/confirmModal/ConfirmDeleteModal";
+import ConfirmDeleteModal from "@/components/ConfirmModal/ConfirmDeleteModal";
 
 const robotoMono = Roboto_Mono({
   variable: "--font-roboto-mono",

@@ -12,3 +12,13 @@ type PostAbsenReq struct {
 	Absent     bool   `json:"absent"`
 	JamKerja   int    `json:"jam_kerja"`
 }
+
+type GetAbsenRes struct {
+	AbsenId        string `json:"absen_id"`
+	Nama           string `json:"nama"`
+	Divisi         string `json:"divisi"`
+	JumlahAbsen    int    `json:"jumlah_absen"`
+	TotalTerlambat int    `json:"total_terlambat"`
+	TotalLembur    int    `json:"total_lembur"`
+	TotalJamKerja  int    `json:"total_jam_kerja"`
+}

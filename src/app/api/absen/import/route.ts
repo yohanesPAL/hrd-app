@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { ServerFetch } from "@/utils/ServerFetch";
-import { data } from "motion/react-client";
 
 type RowData = {
   absen_id: string;
@@ -129,7 +128,7 @@ export async function POST(req: NextRequest) {
     const lembur: number = Math.max(0, scanKeluarMinutes - jamKeluar);
     const totalJamKerja: number = scanMasuk
       ? scanKeluar
-        ? scanKeluarMinutes
+        ? scanKeluarMinutes - jamMasuk
         : jamKeluar - jamMasuk
       : 0;
     const tglParts: string[] = tanggal.split("/");
@@ -162,7 +161,7 @@ export async function POST(req: NextRequest) {
 
   const data = await res.json();
 
-  return NextResponse.json(data, { status: res.status });
+  return NextResponse.json(data, {status: res.status});
 }
 
 export async function DELETE(req: NextRequest) {

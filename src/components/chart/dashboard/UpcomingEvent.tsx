@@ -1,4 +1,5 @@
 'use client';
+import { UpcomingEvent as UpcomingEventType } from '@/modules/event/event.schema';
 import { ListGroup, ListGroupItem, Stack } from 'react-bootstrap';
 
 const formatter = new Intl.DateTimeFormat('en-GB', {
@@ -13,7 +14,7 @@ const dateFormatter = (date: Date) => {
   return formatter.format(new Date(date)).replace(',', '');
 }
 
-const UpcomingEvent = ({ upcoming, ongoing }: { upcoming: EventForm[], ongoing: EventForm[] }) => {
+const UpcomingEvent = ({ upcoming, ongoing }: { upcoming: UpcomingEventType[], ongoing: UpcomingEventType[] }) => {
   return (
     <div className='px-4'>
       <h3 className='text-center mb-4'>Jadwal Acara</h3>

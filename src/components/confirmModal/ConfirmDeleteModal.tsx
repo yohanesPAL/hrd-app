@@ -1,5 +1,5 @@
 'use client';
-import useConfirmDelete from '@/stores/confirmDelete/confirmDeleteStore';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 import { Button, Modal } from 'react-bootstrap'
 
 const ConfirmDeleteModal = () => {

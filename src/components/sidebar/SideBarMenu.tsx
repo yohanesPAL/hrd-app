@@ -17,7 +17,7 @@ const MasterChildren: MenuInterface[] = [
   { nama: "Jabatan", href: "jabatan", icon: "bi-briefcase-fill" },
 ]
 
-const Menu: MenuInterface[] = [
+const HrdMenu: MenuInterface[] = [
   { nama: "Dashboard", href: "dashboard", icon: "bi-speedometer2" },
   { nama: "Master", href: "master", icon: "bi-database", children: MasterChildren },
   { nama: "Kalender Acara", href: "kalender", icon: "bi-calendar-event"},
@@ -27,6 +27,9 @@ const Menu: MenuInterface[] = [
   { nama: "Dokumen", href: "dokumen", icon: "bi-file-earmark-medical-fill", children: DokumenChildren },
 ]
 
-
-
-export default Menu
+export function getMenu(role: string) {
+  switch(role) {
+    case "hrd": return HrdMenu
+    default: return []
+  }
+}
