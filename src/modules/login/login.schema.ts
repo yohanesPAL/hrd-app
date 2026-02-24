@@ -5,11 +5,12 @@ export const CredentialSchema = z.object({
   password: z.string().min(1),
 })
 
-export type Credential = z.infer<typeof CredentialSchema>;
+export const AccountSchema = CredentialSchema.extend({
+  id: z.string().min(1),
+  role: z.string().min(1),
+  karyawan_id: z.string().min(1),
+  nama: z.string().min(1),
+})
 
-export interface Account extends Credential {
-  id: string;
-  role: string;
-  karyawan_id: string;
-  nama: string;
-}
+export type Credential = z.infer<typeof CredentialSchema>;
+export type Account = z.infer<typeof AccountSchema>;

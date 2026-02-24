@@ -1,9 +1,5 @@
 import { create } from 'zustand'
-
-interface Navbar {
-  isShow: boolean,
-  setShow: (isShow: boolean) => void
-}
+import { Navbar } from './navbar.type';
 
 const useNavbar = create<Navbar>((set) => ({
   isShow: true,

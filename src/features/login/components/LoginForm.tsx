@@ -1,8 +1,9 @@
 "use client";
 import { Button, FloatingLabel, Form, Stack } from 'react-bootstrap';
 import styles from "../css/login.module.css"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Credential } from '@/modules/login/login.schema';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 
 const loginFormDefault: Credential = {
   username: "",
@@ -10,9 +11,11 @@ const loginFormDefault: Credential = {
 }
 
 const LoginForm = ({ loading, loginHandler }: { loading: boolean, loginHandler: (username: string, password: string) => void }) => {
+  const {resetStore} = useConfirmDelete()
   const [loginForm, setLoginForm] = useState<Credential>(loginFormDefault);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
+  useEffect(() => {resetStore()}, [])
   return (
     <Form className="w-50" style={{ maxWidth: '500px' }}
       onSubmit={(e) => {

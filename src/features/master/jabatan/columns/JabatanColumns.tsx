@@ -1,23 +1,23 @@
-import { Stack, Button } from "react-bootstrap"
+import { PositionForm, PositionTable } from "@/modules/jabatan/jabatan.schema"
+import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
 import { ColumnDef } from "@tanstack/react-table"
 import { Dispatch, SetStateAction } from "react"
-import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
-import { DivisionForm, DivisionTable } from "@/modules/divisi/division.schema"
+import { Button, Stack } from "react-bootstrap"
 
-export const divisiColumns = ({
-  setDivisiForm,
+export const jabatanColumns = ({
+  setJabatanForm,
   setShow,
   openConfirmDelete,
   onDelete,
 }: {
-  setDivisiForm: Dispatch<SetStateAction<DivisionForm>>,
+  setJabatanForm: Dispatch<SetStateAction<PositionForm>>,
   setShow: Dispatch<SetStateAction<boolean>>,
   openConfirmDelete: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void,
   onDelete: (id: string) => void,
-
-}): ColumnDef<DivisionTable>[] => [
-    { accessorKey: "no", header: "No", sortingFn: "alphanumeric" },
-    { accessorKey: "nama", header: "Nama Divisi" },
+}): ColumnDef<PositionTable>[] => [
+    { accessorKey: "no", header: "No", sortingFn: 'alphanumeric' },
+    { accessorKey: "nama", header: "Jabatan" },
+    { accessorKey: "nama_divisi", header: "Divisi" },
     {
       accessorKey: "is_active", header: "Status", cell: ({ getValue }) => {
         return getValue() as boolean ? "Aktif" : "Non Aktif"
@@ -32,15 +32,15 @@ export const divisiColumns = ({
         return (
           <Stack direction='horizontal' gap={2}>
             <Button type="button" variant='success' onClick={() => {
-              setDivisiForm({ nama: row.original.nama, is_active: row.original.is_active, id: kode });
+              setJabatanForm({
+                id_divisi: row.original.id_divisi,
+                nama: row.original.nama,
+                is_active: row.original.is_active,
+                id: kode,
+              });
               setShow(true);
             }}><i className="bi bi-pencil-fill"></i></Button>
-            <Button type="button" variant='danger' onClick={() => {
-              openConfirmDelete(
-                { nama: row.original.nama, id: kode },
-                (id: string) => { onDelete(id) }
-              )
-            }}><i className="bi bi-trash-fill"></i></Button>
+            <Button type="button" variant='danger' onClick={() => openConfirmDelete({ nama: row.original.nama, id: kode }, (id) => { onDelete(id) })}><i className="bi bi-trash-fill"></i></Button>
           </Stack>
         )
       }

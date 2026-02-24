@@ -1,7 +1,9 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { LoginService } from "./modules/login/login.service";
 import { CredentialSchema } from "./modules/login/login.schema";
+import { createLoginService } from "./modules/login/login.factory";
+
+const loginService = createLoginService()
 
 export const { handlers, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,
@@ -17,11 +19,13 @@ export const { handlers, signOut, auth } = NextAuth({
 
         const credential = CredentialSchema.parse(payload);
         try {
-          const user = await LoginService.userLogin({
+          const user = await loginService.userLogin({
             username: credential.username,
             password: credential.password,
           })
           
+          if(!user) return null
+
           return {
             id: String(user.id),
             role: user.role,

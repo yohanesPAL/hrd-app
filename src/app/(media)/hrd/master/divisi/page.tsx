@@ -1,12 +1,15 @@
 import PageTitle from '@/components/PageTitle'
 import DivisiPage from '@/features/master/divisi/components/DivisiPage';
-import { createDivisionService } from '@/modules/divisi/division.factory'
+import { getDivisionsAction } from '@/features/master/divisi/divisiAction';
 import { DivisionTable } from '@/modules/divisi/division.schema';
 
+const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 const Divisi = async () => {  
-  const divisionService = createDivisionService();
-  const division: DivisionTable[] = await divisionService.getAllDivisions();
-  
+  await sleep(2000);
+  const division: DivisionTable[] = await getDivisionsAction()
+
   return (
     <>
       <PageTitle>Divisi</PageTitle>

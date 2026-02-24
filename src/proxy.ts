@@ -7,13 +7,13 @@ export async function proxy(req: NextRequest) {
     secret: process.env.AUTH_SECRET,
   });
 
-  if (!token) {
+  if (!token && !req.headers.get("next-action")) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
-  
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/media/:path*"],
+  matcher: ["/((?!login|api/auth|_next/static|_next/image|favicon.ico).*)"],
 };

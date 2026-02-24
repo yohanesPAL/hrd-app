@@ -1,16 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware';
-
-interface Profile {
-  id: string;
-  role: string;
-}
-
-interface ProfileStore {
-  profile: Profile | null;
-  setProfile: (newProfile: Profile) => void;
-  clearProfile: () => void;
-}
+import { ProfileStore } from './profile.type';
 
 const useProfile = create<ProfileStore>()(
   persist<ProfileStore>(

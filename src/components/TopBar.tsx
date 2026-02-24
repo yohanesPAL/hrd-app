@@ -1,7 +1,7 @@
 "use client";
 import Image from 'next/image'
 import { Button, Dropdown, DropdownDivider, DropdownMenu, DropdownToggle, Navbar } from 'react-bootstrap'
-import useNavbar from '@/stores/navbar/NavbarStore'
+import useNavbar from '@/stores/navbar/navbar.store'
 import Link from 'next/link';
 import { useLogout } from '@/hooks/useLogout';
 

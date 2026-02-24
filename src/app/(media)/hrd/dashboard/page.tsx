@@ -26,7 +26,6 @@ async function Dashboard() {
     upcomingEvents = upcoming;
     onGoingEvents = onGoing;
   } catch (err) {
-    console.log(err)
     if(err instanceof Err) {
       return <InternalServerError msg={err.message}/>
     }

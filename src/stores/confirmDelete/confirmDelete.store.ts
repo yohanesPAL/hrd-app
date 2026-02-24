@@ -14,6 +14,7 @@ const useConfirmDelete = create<ConfirmDelete>((set) => ({
   isPosting: false,
   setIsPosting: (state: boolean) => set({isPosting: state}),
   onConfirm: undefined,
+  resetStore: () => set({props: getDefaultProps(), isPosting: false}),
 }));
 
 export default useConfirmDelete;

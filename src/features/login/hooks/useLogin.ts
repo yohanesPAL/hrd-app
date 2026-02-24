@@ -1,5 +1,5 @@
 "use client";
-import useProfile from "@/stores/profile/ProfileStore";
+import useProfile from "@/stores/profile/profile.store";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

@@ -8,7 +8,7 @@ import { Button, Form, Modal, Stack } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen";
-import useProfile from "@/stores/profile/ProfileStore";
+import useProfile from "@/stores/profile/profile.store";
 import DataNotFound from "@/app/not-found/page";
 import InternalServerError from "@/app/500/page";
 
@@ -88,7 +88,6 @@ const ClientPage = ({ data }: { data: EventData[] }) => {
 
     let data: EventData[] = await res.json();
     data = data.map(item => ({ ...item, start: new Date(item.start), end: new Date(item.end) }));
-    console.log(data)
     setEvents(data);
   }
 

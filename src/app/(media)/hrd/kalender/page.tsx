@@ -1,6 +1,6 @@
 import PageTitle from '@/components/PageTitle'
 import ClientPage from './clientPage'
-import { ServerFetch } from '@/utils/ServerFetch'
+// import { ServerFetch } from '@/utils/ServerFetch'
 import DataNotFound from '@/app/not-found/page'
 import InternalServerError from '@/app/500/page'
 import { auth } from '@/auth'
@@ -26,24 +26,24 @@ const Kalender = async () => {
     )
   );
 
-  const res = await ServerFetch({ uri: `/acara/${session?.user.id}?tm=${tglMulai.toISOString()}&ta=${tglAkhir.toISOString()}` })
+  // const res = await ServerFetch({ uri: `/acara/${session?.user.id}?tm=${tglMulai.toISOString()}&ta=${tglAkhir.toISOString()}` })
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => null)
-    const err = body?.error ?? "Request failed"
+  // if (!res.ok) {
+  //   const body = await res.json().catch(() => null)
+  //   const err = body?.error ?? "Request failed"
 
-    if (res.status === 404) return <DataNotFound />
-    return <InternalServerError msg={err} />
-  }
+  //   if (res.status === 404) return <DataNotFound />
+  //   return <InternalServerError msg={err} />
+  // }
 
-  let data: EventData[] = await res.json();
-  data = data.map(item => ({...item, start: new Date(item.start), end: new Date(item.end)}));
+  // let data: EventData[] = await res.json();
+  // data = data.map(item => ({...item, start: new Date(item.start), end: new Date(item.end)}));
 
   return (
     <>
       <PageTitle>Kalender Acara</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <ClientPage data={data} />
+        {/* <ClientPage data={data} /> */}
       </div>
     </>
   )

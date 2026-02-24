@@ -6,7 +6,6 @@ import { Button, Form, Modal, Stack } from 'react-bootstrap'
 const DivisiFormModal = ({
   show,
   isPosting,
-  editingId,
   divisiForm,
   setDivisiForm,
   onCloseModal,
@@ -14,7 +13,6 @@ const DivisiFormModal = ({
 }: {
   show: boolean,
   isPosting: boolean,
-  editingId: string,
   divisiForm: DivisionForm,
   setDivisiForm: Dispatch<SetStateAction<DivisionForm>>
   onCloseModal: () => void;
@@ -28,9 +26,8 @@ const DivisiFormModal = ({
         onSubmit(divisiForm);
       }}>
         <Modal.Header closeButton>
-          <Modal.Title>{editingId === "" ? "Tambah" : "Update"} Divisi</Modal.Title>
+          <Modal.Title>{!divisiForm.id ? "Tambah" : "Update"} Divisi</Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
           <Stack gap={3}>
             <Form.Group>
@@ -39,6 +36,7 @@ const DivisiFormModal = ({
                 type='text'
                 placeholder='Ex: Admin'
                 required
+                autoFocus
                 value={divisiForm.nama}
                 onChange={(e) => setDivisiForm({ ...divisiForm, nama: e.currentTarget.value })}
               />
@@ -59,7 +57,7 @@ const DivisiFormModal = ({
 
         <Modal.Footer>
           <Button type='button' variant='danger' disabled={isPosting} onClick={onCloseModal}>Batal</Button>
-          <Button type='submit' variant='primary' disabled={isPosting}>{editingId === "" ? "Submit" : "Update"}</Button>
+          <Button type='submit' variant='primary' disabled={isPosting}>{!divisiForm.id ? "Submit" : "Update"}</Button>
         </Modal.Footer>
       </Form>
     </Modal>

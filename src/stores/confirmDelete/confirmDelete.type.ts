@@ -11,4 +11,5 @@ export interface ConfirmDelete {
   isPosting: boolean;
   setIsPosting: (state: boolean) => void;
   onConfirm?: (id: string) => void;
+  resetStore: () => void;
 }

@@ -7,7 +7,7 @@ import {
   DivisionFormSchema,
 } from "./division.schema";
 import pool from "@/lib/db";
-import { string, ZodError } from "zod";
+import { ZodError } from "zod";
 
 export class DivisionService {
   constructor(private divisionRepository: IDivisionRepository) {}
@@ -16,17 +16,11 @@ export class DivisionService {
     try {
       const divisions = await this.divisionRepository.getAll();
 
-      if (!divisions.length) {
-        throw new Err("no divisions found", 404);
-      }
-
       return divisions;
     } catch (error) {
       console.error("DivisionService.getAllDivisions error:", error);
 
-      if (error instanceof Err) {
-        throw error;
-      }
+      if (error instanceof Err) throw error;
 
       throw new Err("DivisionService unavailable", 500);
     }
@@ -50,17 +44,12 @@ export class DivisionService {
 
       console.error("DivisionService.createDivision error:", error);
 
-      if (error instanceof ZodError) {
-        throw new Err(`invalid request data`, 400);
-      }
-
-      if (error instanceof Err) {
-        throw error;
-      }
+      if (error instanceof ZodError) throw new Err(`invalid request data`, 400)
+      if (error instanceof Err) throw error
 
       throw new Err("DivisionService unavailable", 500);
     } finally {
-      if (conn) conn.release();
+      if (conn) await conn.release();
     }
   }
 
@@ -82,17 +71,12 @@ export class DivisionService {
 
       console.error("DivisionService.updateDivision error:", error);
 
-      if (error instanceof ZodError) {
-        throw new Err(`invalid request data`, 400);
-      }
-
-      if (error instanceof Err) {
-        throw error;
-      }
+      if (error instanceof ZodError) throw new Err(`invalid request data`, 400)
+      if (error instanceof Err) throw error
 
       throw new Err("DivisionService unavailable", 500);
     } finally {
-      if (conn) conn.release();
+      if (conn) await conn.release();
     }
   }
 
@@ -111,15 +95,13 @@ export class DivisionService {
     } catch (error: unknown) {
       await conn.rollback();
 
-      console.log("DivisionService.deleteDivision error:", error);
+      console.error("DivisionService.deleteDivision error:", error);
 
-      if(error instanceof Err) {
-        throw error;
-      }
+      if(error instanceof Err) throw error
 
       throw new Err("DivisionService unavailable", 500)
     } finally {
-      conn.release();
+      await conn.release();
     }
   }
 }

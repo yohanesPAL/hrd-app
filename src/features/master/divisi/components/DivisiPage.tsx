@@ -1,10 +1,9 @@
 'use client';
 import DefaultTable from '@/components/Table/DefaulteTable';
 import { SortingState, Table } from '@tanstack/react-table';
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { Button, Stack } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
 import ExportToExcel from '@/components/Buttons/ExportToExcel';
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
@@ -13,62 +12,53 @@ import { divisiColumns } from '../columns/DivisiColumns';
 import DivisiFormModal from './DivisiFormModal';
 import { DivisionForm, DivisionTable } from '@/modules/divisi/division.schema';
 import { createDivisionAction, deleteDivisionAction, updateDivisionAction } from '../divisiAction';
+import { useExecuteAction } from '@/hooks/useExecuteAction';
 
-const defaultDivisiForm: DivisionForm = { nama: "", is_active: true }
+const defaultDivisiForm: DivisionForm = { nama: "", is_active: true, id: undefined }
 const defaultSort: SortingState = [{ id: "no", desc: false }]
 
 const DivisiPage = ({ data }: { data: DivisionTable[] }) => {
-  const router = useRouter()
-
   const {
     setOpen: openConfirmDelete,
-    setClose: closeConfirmDelete,
     isPosting,
-    setIsPosting,
   } = useConfirmDelete(
     useShallow((state) => ({
       setOpen: state.setOpen,
-      setClose: state.setClose,
       isPosting: state.isPosting,
-      setIsPosting: state.setIsPosting,
     }))
   )
 
   const [table, setTable] = useState<Table<DivisionTable> | null>(null);
-  const [editingId, setEditingId] = useState<string>("");
   const [show, setShow] = useState<boolean>(false);
   const [divisiForm, setDivisiForm] = useState<DivisionForm>(defaultDivisiForm)
-  const [isPending, startTransition] = useTransition()
+  const { executeAction, isSuspense } = useExecuteAction();
 
   const onCloseModal = () => {
     setShow(false);
     setDivisiForm(defaultDivisiForm);
-    setEditingId("");
   }
 
   const onSubmit = async (payload: DivisionForm) => {
     if (!payload) return toast.error("data divisi tidak boleh kosong")
 
-    setIsPosting(true);
-
-    if (editingId === "") {
+    if (!divisiForm.id) {
       await toast.promise(
-        createDivisionAction(payload), {
+        executeAction(createDivisionAction, payload), {
         pending: "Membuat divisi...",
         success: "Berhasil buat divisi",
         error: "Ooops... ada yang salah",
       })
     } else {
+      if (!payload.id) return toast.error("id tidak boleh kosong")
+      const normalized = {...payload, id: payload.id}
       await toast.promise(
-        updateDivisionAction({ ...payload, id: editingId }), {
+        executeAction(updateDivisionAction, normalized), {
         pending: "Update divisi...",
         success: "Berhasil update divisi!",
         error: "Ooops... ada yang salah",
       })
     }
 
-    startTransition(() => router.refresh());
-    setIsPosting(false);
     onCloseModal();
   }
 
@@ -76,14 +66,11 @@ const DivisiPage = ({ data }: { data: DivisionTable[] }) => {
     if (!kode) return toast.error("kode tidak boleh kosong");
 
     await toast.promise(
-      deleteDivisionAction(kode), {
+      executeAction(deleteDivisionAction, kode), {
       pending: "Menghapus divisi...",
       success: "Berhasil menghapus divisi!",
       error: "Ooops... ada yang salah",
     })
-
-    closeConfirmDelete();
-    startTransition(() => router.refresh());
   }
 
   const onExport = () => {
@@ -104,7 +91,6 @@ const DivisiPage = ({ data }: { data: DivisionTable[] }) => {
       <DefaultTable<DivisionTable>
         data={data ?? []}
         columns={divisiColumns({
-          setEditingId,
           setDivisiForm,
           setShow,
           openConfirmDelete,
@@ -112,13 +98,12 @@ const DivisiPage = ({ data }: { data: DivisionTable[] }) => {
         })}
         defaultSort={defaultSort}
         SetTableComponent={setTable}
-        loading={isPending}
+        loading={isSuspense}
       />
 
       <DivisiFormModal
         show={show}
         isPosting={isPosting}
-        editingId={editingId}
         divisiForm={divisiForm}
         setDivisiForm={setDivisiForm}
         onCloseModal={onCloseModal}

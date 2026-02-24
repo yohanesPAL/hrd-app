@@ -28,9 +28,9 @@ export class DivisionRepository implements IDivisionRepository {
       return DivisionTableSchema.array().parse(normalized);
     } catch (error: unknown) {
       console.error("DivisionRepository.getAll error:", error);
-      if (error instanceof ZodError) {
-        throw new Err("invalid divisions data", 400);
-      }
+
+      if (error instanceof ZodError) throw new Err("invalid divisions data", 400);
+      
       throw new Err("failed to read divisions", 500);
     }
   }
@@ -69,7 +69,7 @@ export class DivisionRepository implements IDivisionRepository {
 
       return true;
     } catch (error: unknown) {
-      console.log("DivisionRepository.delete error:", error);
+      console.error("DivisionRepository.delete error:", error);
       throw new Err("failed to delete division", 500);
     }
   }

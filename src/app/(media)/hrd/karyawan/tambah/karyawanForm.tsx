@@ -5,7 +5,7 @@ import { Button, Col, Form, InputGroup, Row, Stack } from 'react-bootstrap'
 import InputGroupText from 'react-bootstrap/esm/InputGroupText';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import useProfile from '@/stores/profile/ProfileStore';
+import useProfile from '@/stores/profile/profile.store';
 
 const defaulKaryawanForm: KaryawanForm = {
   nik: "",

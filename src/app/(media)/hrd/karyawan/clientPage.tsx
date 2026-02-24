@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation';
 import { Button, Form, Modal, Stack, } from 'react-bootstrap';
 import Link from 'next/link';
-import useProfile from '@/stores/profile/ProfileStore';
+import useProfile from '@/stores/profile/profile.store';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 import { useShallow } from 'zustand/shallow';
 

@@ -1,21 +1,38 @@
-import { LoginRepository } from "./login.repository";
-import { Account, Credential } from "./login.schema";
-import bcrypt from "bcrypt"
+import { ZodError } from "zod";
+import { ILoginRepository } from "./login.interface";
+import { Credential, CredentialSchema } from "./login.schema";
+import bcrypt from "bcrypt";
 import { Err } from "@/lib/err";
 
-const dummyHash = "$2a$12$KI4oRpUY8YescA2kaGkdKunFTAEF7dUOb5ACJiIgcdgmUONJxrJ5i"; //123
+const dummyHash =
+  "$2a$12$KI4oRpUY8YescA2kaGkdKunFTAEF7dUOb5ACJiIgcdgmUONJxrJ5i";
 
-export const LoginService = {
+export class LoginService {
+  constructor(private loginRepository: ILoginRepository) {}
+
   async userLogin(credential: Credential) {
-    const account: Account | null = await LoginRepository.getAccount(credential.username);
+    try {
+      CredentialSchema.parse(credential);
 
-    const hashPassword = account?.password ?? dummyHash
-    const isValid = await bcrypt.compare(credential.password, hashPassword);
+      const account = await this.loginRepository.getAccount(
+        credential.username,
+      );
 
-    if(!isValid || !account) throw new Err("username atau password salah", 400);
+      const hashPassword = account?.password ?? dummyHash;
+      const isValid = await bcrypt.compare(credential.password, hashPassword);
 
-    const {password, ...clientAccount} = account;
+      if (!isValid || !account) return null;
 
-    return clientAccount
+      const { password, ...clientAccount } = account;
+
+      return clientAccount;
+    } catch (error: unknown) {
+      console.error("LoginService.userLogin error:", error);
+
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
+      if (error instanceof Err) throw error;
+
+      throw new Err("LoginService unavailable", 500)
+    }
   }
 }

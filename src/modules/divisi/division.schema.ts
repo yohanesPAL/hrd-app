@@ -10,9 +10,9 @@ export const DivisionTableSchema = BaseDivisionSchema.extend({
   no: z.number().min(1),
 });
 
-export const DivisionFormSchema = BaseDivisionSchema.omit({
-  id: true,
-}); 
+export const DivisionFormSchema = BaseDivisionSchema.extend({
+  id: z.string().optional(),
+})
 
 export type BaseDivision = z.infer<typeof BaseDivisionSchema>;
 export type DivisionTable = z.infer<typeof DivisionTableSchema>;
