@@ -55,7 +55,7 @@ const LoginForm = ({ loading, loginHandler }: { loading: boolean, loginHandler: 
             </span>
           </FloatingLabel>
         </Form.Group>
-        <Button type="submit" variant="primary" className={`w-auto align-self-start`} disabled={loading}>
+        <Button type="submit" variant="primary" className={`align-self-start`} style={{width: "100px"}} disabled={loading}>
           <span hidden={!loading} className="spinner-border spinner-border-sm" style={{marginRight: "4px"}}></span>
           <span hidden={loading}>Login</span>
         </Button>

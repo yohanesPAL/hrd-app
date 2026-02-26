@@ -1,15 +1,13 @@
 'use client'
 import PageTitle from '@/components/PageTitle';
-import { ProfileInterface } from '@/types/ProfileType'
 import { Table } from 'react-bootstrap';
-import { toast } from 'react-toastify'
-import styles from './profile.module.css'
+import styles from '../css/profile.module.css';
+import { BaseEmployee } from '@/modules/karyawan/employee.schema';
+import { formatDateDDMMYYYY } from '@/utils/dateFormatting';
 
-const ClientPage = ({ data }: { data: ProfileInterface}) => {
+const KaryawanProfile = ({ data }: { data: BaseEmployee}) => {
   let statusAktif = '';
-  if(data) {
-    statusAktif = data?.status_aktif === "1" ? "Aktif" : "Non Aktif"
-  }
+  if(data) statusAktif = data?.status_aktif ? "Aktif" : "Non Aktif"
 
   return (
     <>
@@ -40,11 +38,11 @@ const ClientPage = ({ data }: { data: ProfileInterface}) => {
             </tr>
             <tr>
               <td>HP</td><td>:</td><td>{data?.hp || "-"}</td>
-              <td>Tanggal Masuk</td><td>:</td><td>{data?.tgl_masuk.slice(0, 10) || "-"}</td>
+              <td>Tanggal Masuk</td><td>:</td><td>{formatDateDDMMYYYY(data?.tgl_masuk) || "-"}</td>
             </tr>
             <tr>
               <td>Divisi</td><td>:</td><td>{data?.divisi}</td>
-              <td>Tanggal Keluar</td><td>:</td><td>{data?.tgl_keluar.slice(0, 10) || "-"}</td>
+              <td>Tanggal Keluar</td><td>:</td><td>{formatDateDDMMYYYY(data?.tgl_keluar) || "-"}</td>
             </tr>
             <tr>
               <td>Jabatan</td><td>:</td><td>{data?.jabatan}</td>
@@ -61,4 +59,4 @@ const ClientPage = ({ data }: { data: ProfileInterface}) => {
   )
 }
 
-export default ClientPage
+export default KaryawanProfile

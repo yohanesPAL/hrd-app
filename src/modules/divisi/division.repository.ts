@@ -4,6 +4,8 @@ import {
   DivisionTable,
   DivisionForm,
   BaseDivision,
+  ActiveDivision,
+  ActiveDivisionSchema,
 } from "./division.schema";
 import { RowDataPacket } from "mysql2";
 import { IDivisionRepository } from "./division.interface";
@@ -33,6 +35,20 @@ export class DivisionRepository implements IDivisionRepository {
       
       throw new Err("failed to read divisions", 500);
     }
+  }
+
+  async getActive(): Promise<ActiveDivision[]> {
+      try {
+        const [rows] = await pool.query("SELECT CAST(id AS CHAR) AS id, nama FROM divisi WHERE is_active = 1");
+
+        return ActiveDivisionSchema.array().parse(rows)
+      } catch (error: unknown) {
+        console.error("DivisionRepository.getActive error:", error)
+
+        if (error instanceof ZodError) throw new Err("invalid active division data", 400)
+
+        throw new Err("failed to fetch active division", 500)
+      }
   }
 
   async create(data: DivisionForm, conn: Connection): Promise<boolean> {

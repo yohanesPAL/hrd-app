@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
-import { Role } from "@/types/RolseType";
+import { Role } from "@/types/RolesType";
 
 export function withAuth<Args extends any[], R>(
   action: (session: Session, ...args: Args) => R,

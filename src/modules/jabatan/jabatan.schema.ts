@@ -16,6 +16,11 @@ export const PositionFormSchema = BasePositionSchema.extend({
   id: z.string().optional(),
 })
 
+export const ActivePositionSchema = BasePositionSchema.omit({
+  is_active: true,
+})
+
 export type BasePosition = z.infer<typeof BasePositionSchema>
 export type PositionTable = z.infer<typeof PositionTableSchema>
 export type PositionForm = z.infer<typeof PositionFormSchema>
+export type ActivePosition = z.infer<typeof ActivePositionSchema>

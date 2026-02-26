@@ -21,7 +21,7 @@ export class JamAbsenRepository implements IJamAbsenRepository {
 
       if(error instanceof ZodError) throw new Err("invalid jam absen data", 400);
 
-      throw new Err("failed to read jam absen", 500)
+      throw new Err("failed to fetch jam absen", 500)
     }
   }
 

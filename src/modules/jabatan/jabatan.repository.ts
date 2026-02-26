@@ -1,6 +1,8 @@
 import { ZodError } from "zod";
 import { IPositionRepository } from "./jabatan.interface";
 import {
+  ActivePosition,
+  ActivePositionSchema,
   BasePosition,
   PositionForm,
   PositionTable,
@@ -36,6 +38,22 @@ export class PositionRepository implements IPositionRepository {
       throw new Err("failed to read positions", 500);
     }
   }
+
+ async getActive(): Promise<ActivePosition[]> {
+  try {
+    const [rows] = await pool.query(
+      "SELECT CAST(id AS CHAR) AS id, CAST(id_divisi AS CHAR) AS id_divisi, nama FROM jabatan j WHERE j.is_active = 1"
+    )
+
+    return ActivePositionSchema.array().parse(rows);
+  } catch (error: unknown) {
+    console.error("PositionRepositoru.getActive error:", error);
+
+    if (error instanceof ZodError) throw new Err("invalid active positions data", 400);
+
+    throw new Err("failed to read positions", 500)
+  }
+ }
 
   async create(data: PositionForm, conn: Connection): Promise<boolean> {
     try {

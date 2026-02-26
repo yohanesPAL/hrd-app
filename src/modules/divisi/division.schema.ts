@@ -14,6 +14,11 @@ export const DivisionFormSchema = BaseDivisionSchema.extend({
   id: z.string().optional(),
 })
 
+export const ActiveDivisionSchema = BaseDivisionSchema.omit({
+  is_active: true,
+})
+
 export type BaseDivision = z.infer<typeof BaseDivisionSchema>;
 export type DivisionTable = z.infer<typeof DivisionTableSchema>;
 export type DivisionForm = z.infer<typeof DivisionFormSchema>;
+export type ActiveDivision = z.infer<typeof ActiveDivisionSchema>;

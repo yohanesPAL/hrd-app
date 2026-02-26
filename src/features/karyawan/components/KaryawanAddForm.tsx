@@ -1,13 +1,18 @@
 'use client';
 import { getTodayYYYYMMDD } from '@/utils/getToday';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { Button, Col, Form, InputGroup, Row, Stack } from 'react-bootstrap'
 import InputGroupText from 'react-bootstrap/esm/InputGroupText';
 import { toast } from 'react-toastify';
+import { KaryawanFormOptions } from '../types/KaryawanTypes';
+import { BaseEmployee, EmployeeForm } from '@/modules/karyawan/employee.schema';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
+import { useExecuteAction } from '@/hooks/useExecuteAction';
+import { createKaryawan } from '../KaryawanAction';
 import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
 
-const defaulKaryawanForm: KaryawanForm = {
+const defaulKaryawanForm: EmployeeForm = {
   nik: "",
   nama: "",
   jk: "Pria",
@@ -20,64 +25,44 @@ const defaulKaryawanForm: KaryawanForm = {
   status_aktif: true,
   status_karyawan: "",
   durasi_kontrak: 0,
-  kode_absensi: "",
+  kode_absensi: null,
   tgl_masuk: getTodayYYYYMMDD(),
 }
 
-const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | null }) => {
+const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => {
   const router = useRouter();
-  const [karyawanForm, setKaryawanForm] = useState<KaryawanForm>(defaulKaryawanForm)
-  const [isPosting, setIsPosting] = useState<boolean>(false)
-  const role = useProfile((state) => state.profile?.role)
+  const [karyawanForm, setKaryawanForm] = useState<EmployeeForm>(defaulKaryawanForm)
+  const { executeAction } = useExecuteAction()
+  const profile = useProfile((state) => state.profile);
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const postKaryawan = async (payload: KaryawanForm) => {
-    const res = await fetch("/api/karyawan", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const body = await res.json().catch(() => null)
-
-    if (!res.ok) {
-      setIsPosting(false);
-      throw new Error(body?.error ?? "request failed")
-    }
-    return body;
-  }
-
-  const onSubmit = (payload: KaryawanForm, e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (payload: EmployeeForm) => {
     if (!payload) return toast.error("data tidak boleh kosong");
     if (payload.nik.length !== 16) return toast.error("NIK tidak sesuai")
     if (payload.status_karyawan === "Kontrak" && payload.durasi_kontrak < 1) {
       return toast.error("Durasi karyawan kontrak tidak boleh kurang dari 1 hari")
     }
+    setSubmitted(true);
 
-    setIsPosting(true);
+    await toast.promise(
+      executeAction(createKaryawan, payload).catch((err) => {
+        setSubmitted(false);
+        throw err;
+      }), {
+      pending: "Membuat karyawan...",
+      success: "Berhasil buat karywan",
+      error: "Ooops... ada yang salah",
+    })
 
-    toast.promise(
-      postKaryawan(payload).then(() => router.push(`/media/${role}/karyawan`)), {
-      pending: "Menambah karyawan...",
-      success: "Berhasil menambah karyawan!",
-      error: {
-        render({ data }) {
-          if (data instanceof Error) {
-            return data.message
-          }
-          return 'Request failed'
-        },
-        autoClose: false,
-      },
-    }
-    )
+    router.push(`/${profile?.role}/karyawan`)
   }
   return (
     <>
       <h2 className='mb-4'>Form Karyawan</h2>
-      <Form onSubmit={(e) => onSubmit(karyawanForm, e)}>
+      <Form onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(karyawanForm);
+      }}>
         <Stack gap={4}>
           <Row>
             <Form.Group as={Col}>
@@ -119,7 +104,7 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
               <Form.Select
                 required
                 value={karyawanForm.jk}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, jk: e.currentTarget.value === "Pria" ? "Pria" : "Wanita" })}
+                onChange={(e) => setKaryawanForm({ ...karyawanForm, jk: e.currentTarget.value as BaseEmployee["jk"] })}
               >
                 <option value={"Pria"}>Pria</option>
                 <option value={"Wanita"}>Wanita</option>
@@ -145,7 +130,7 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, divisi: e.currentTarget.value })}
               >
                 <option value={""}>--Pilih Divisi--</option>
-                {depedencies?.divisi.map((item) => (
+                {formOptions?.division.map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
                 ))}
               </Form.Select>
@@ -159,7 +144,7 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, jabatan: e.currentTarget.value })}
               >
                 <option value={""}>--Pilih Jabatan--</option>
-                {depedencies?.jabatan.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
+                {formOptions?.position.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
                 ))
                 }
@@ -203,7 +188,7 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
                   placeholder='Ex: 2'
                   required
                   value={karyawanForm.durasi_kontrak}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, durasi_kontrak: parseInt(e.currentTarget.value) })}
+                  onChange={(e) => setKaryawanForm({ ...karyawanForm, durasi_kontrak: Number(e.currentTarget.value) })}
                 />
                 <InputGroupText>Hari</InputGroupText>
               </InputGroup>
@@ -214,8 +199,8 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
               <Form.Control
                 type='text'
                 placeholder='Ex: 541'
-                value={karyawanForm.kode_absensi}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, kode_absensi: e.currentTarget.value })}
+                value={karyawanForm.kode_absensi ?? ""}
+                onChange={(e) => setKaryawanForm({ ...karyawanForm, kode_absensi: e.currentTarget.value === "" ? null : e.currentTarget.value })}
               />
             </Form.Group>
           </Row>
@@ -228,7 +213,7 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
                   placeholder='Ex: 2'
                   required
                   value={karyawanForm.cuti_terakhir}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_terakhir: parseInt(e.currentTarget.value) })}
+                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_terakhir: Number(e.currentTarget.value) })}
                 />
                 <InputGroupText>Hari</InputGroupText>
               </InputGroup>
@@ -242,7 +227,7 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
                   placeholder='Ex: 2'
                   required
                   value={karyawanForm.cuti_sekarang}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_sekarang: parseInt(e.currentTarget.value) })}
+                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_sekarang: Number(e.currentTarget.value) })}
                 />
                 <InputGroupText>Hari</InputGroupText>
               </InputGroup>
@@ -257,7 +242,7 @@ const KaryawanForm = ({ depedencies }: { depedencies: KaryawanFormDepedencies | 
               onChange={(e) => setKaryawanForm({ ...karyawanForm, tgl_masuk: e.currentTarget.value })}
             />
           </Form.Group>
-          <Button type="submit" style={{ width: '100px' }} disabled={isPosting && false}>Submit</Button>
+          <Button type="submit" style={{ width: '100px' }} disabled={submitted}>Submit</Button>
         </Stack>
       </Form>
     </>

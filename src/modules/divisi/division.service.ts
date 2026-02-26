@@ -26,6 +26,20 @@ export class DivisionService {
     }
   }
 
+  async getActiveDivisions() {
+    try {
+      const divisions = await this.divisionRepository.getActive();
+
+      return divisions;
+    } catch (error: unknown) {
+      console.log("DivisionService.getActiveDivision error:", error);
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("DivisionService unavailable", 500);
+    }
+  }
+
   async createDivision(data: DivisionForm) {
     let conn;
     try {

@@ -26,6 +26,20 @@ export class PositionService {
     }
   }
 
+  async getActivePositions() {
+    try {
+      const positions = await this.positionRepository.getActive();
+
+      return positions;
+    } catch (error: unknown) {
+      console.error("PositionService.getAllPositions error:", error);
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("DivisionService unavailable", 500);
+    }
+  }
+
   async createPosition(data: PositionForm) {
     let conn;
     try {

@@ -1,62 +1,48 @@
 'use client';
-import React, { FormEvent, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Col, Form, InputGroup, Row, Stack } from 'react-bootstrap';
 import InputGroupText from 'react-bootstrap/esm/InputGroupText';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
+import { BaseEmployee, EmployeeUpdate } from '@/modules/karyawan/employee.schema';
+import { KaryawanFormOptions } from '../types/KaryawanTypes';
+import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
+import { updateKaryawan } from '../KaryawanAction';
+import { useExecuteAction } from '@/hooks/useExecuteAction';
 
-const EditKaryawanForm = ({ karyawanData, depedencies }: { karyawanData: KaryawanEditForm, depedencies: KaryawanFormDepedencies }) => {
+const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee["id"], karyawanData: EmployeeUpdate, formOptions: KaryawanFormOptions }) => {
   const router = useRouter()
   const role = useProfile((state) => state.profile?.role)
-  const [karyawanForm, setKaryawanForm] = useState<KaryawanEditForm>(karyawanData)
-  const [isPosting, setIsPosting] = useState<boolean>(false);
+  const [karyawanForm, setKaryawanForm] = useState<EmployeeUpdate>(karyawanData)
+  const { executeAction } = useExecuteAction();
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const patchKaryawan = async (payload: KaryawanEditForm) => {
-    const res = await fetch(`/api/karyawan/${karyawanForm.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const body = await res.json().catch(() => null);
-
-    if (!res.ok) {
-      setIsPosting(false);
-      throw new Error(body?.error ?? "request failed");
-    }
-    return body
-  }
-
-  const onSubmit = (payload: KaryawanEditForm, e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const onSubmit = async (payload: EmployeeUpdate) => {
     if (!payload) return toast.error("data tidak ditemukan");
-    if (!karyawanForm.id) return toast.error("id tidak ditemukan");
-    setIsPosting(true)
+    if (!id) return toast.error("id tidak ditemukan");
+    setSubmitted(true);
 
-    toast.promise(
-      patchKaryawan(payload).then(() => router.push(`/media/${role}/karyawan`)), {
+    await toast.promise(
+      executeAction(updateKaryawan, id, payload).catch((err) => {
+        setSubmitted(false);
+        throw err;
+      }), {
       pending: "Update karyawan...",
-      success: "Berhasil update karyawan",
-      error: {
-        render({ data }) {
-          if (data instanceof Error) {
-            return data.message
-          }
-          return 'Reqiest failed'
-        },
-        autoClose: false,
-      }
+      success: "Berhasil update karyawan...",
+      error: "Ooops... ada yang salah",
     })
+
+    router.push(`/${role}/karyawan`);
   }
 
   return (
     <>
       <h2 className='mb-4'>Form Karyawan</h2>
-      <Form onSubmit={(e) => onSubmit(karyawanForm, e)}>
+      <Form onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit(karyawanForm);
+      }}>
         <Stack gap={4}>
           <Row>
             <Form.Group as={Col}>
@@ -98,7 +84,7 @@ const EditKaryawanForm = ({ karyawanData, depedencies }: { karyawanData: Karyawa
               <Form.Select
                 required
                 value={karyawanForm.jk}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, jk: e.currentTarget.value as KaryawanEditForm["jk"] })}
+                onChange={(e) => setKaryawanForm({ ...karyawanForm, jk: e.currentTarget.value as EmployeeUpdate["jk"] })}
               >
                 <option value={"Pria"}>Pria</option>
                 <option value={"Wanita"}>Wanita</option>
@@ -123,7 +109,7 @@ const EditKaryawanForm = ({ karyawanData, depedencies }: { karyawanData: Karyawa
                 value={karyawanForm.divisi}
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, divisi: e.currentTarget.value, jabatan: "" })}
               >
-                {depedencies.divisi.map((item) => (
+                {formOptions.division.map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
                 ))}
               </Form.Select>
@@ -137,7 +123,7 @@ const EditKaryawanForm = ({ karyawanData, depedencies }: { karyawanData: Karyawa
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, jabatan: e.currentTarget.value })}
               >
                 <option value={""}>-- Pilih Jabatan --</option>
-                {depedencies.jabatan.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
+                {formOptions.position.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
                   <option key={item.id} value={String(item.id)}>{item.nama}</option>
                 ))}
               </Form.Select>
@@ -223,7 +209,7 @@ const EditKaryawanForm = ({ karyawanData, depedencies }: { karyawanData: Karyawa
               <Form.Control
                 type='date'
                 required
-                value={karyawanForm.tgl_masuk.slice(0, 10)}
+                value={karyawanForm.tgl_masuk?.slice(0, 10)}
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, tgl_masuk: e.currentTarget.value })}
               />
             </Form.Group>
@@ -232,16 +218,16 @@ const EditKaryawanForm = ({ karyawanData, depedencies }: { karyawanData: Karyawa
               <Form.Label>Tanggal Keluar</Form.Label>
               <Form.Control
                 type='date'
-                value={karyawanForm.tgl_keluar.slice(0, 10)}
+                value={karyawanForm.tgl_keluar?.slice(0, 10)}
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, tgl_keluar: e.currentTarget.value })}
               />
             </Form.Group>
           </Row>
-          <Button type="submit" style={{ width: '100px' }} disabled={isPosting && true}>Submit</Button>
+          <Button type="submit" style={{ width: '100px' }} disabled={submitted}>Submit</Button>
         </Stack>
       </Form>
     </>
   )
 }
 
-export default EditKaryawanForm
+export default KaryawanEditForm

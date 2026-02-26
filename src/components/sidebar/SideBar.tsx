@@ -23,7 +23,7 @@ const SideBar = ({ role, namaKaryawan }: { role: string, namaKaryawan: string })
               <h1>HR System</h1>
             </Link>
             <Link href={`/${role}/dashboard`} className='d-flex flex-row gap-3 align-items-center justify-content-center p-2 white-shade overflow-hidden' style={{ minWidth: "15rem", height: "5rem" }}>
-              <Image alt='profile-picture' width={50} height={50} src={'/pp.webp'} className="rounded-circle" style={{ objectFit: 'cover' }} />
+              <Image alt='profile-picture' width={50} height={50} src={'/images.jpg'} className="rounded-circle" style={{ objectFit: 'cover' }} />
               <div className='d-flex flex-column align-items-start w-100 justify-content-center'>
                 <span>{namaKaryawan}</span>
                 <span>{role.toUpperCase()}</span>
