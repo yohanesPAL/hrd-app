@@ -1,7 +1,7 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
-import { createDivisionService } from "@/modules/divisi/division.factory";
-import { BaseDivision, DivisionForm } from "@/modules/divisi/division.schema";
+import { createDivisionService } from "@/modules/master/divisi/division.factory";
+import { BaseDivision, DivisionForm } from "@/modules/master/divisi/division.schema";
 import { revalidatePath } from "next/cache";
 
 const divisionServices = createDivisionService();

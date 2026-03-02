@@ -14,7 +14,6 @@ import {
 } from "./employee.schema";
 import pool from "@/lib/db";
 import { ZodError } from "zod";
-import { formatDateYYYYMMDD } from "@/utils/dateFormatting";
 
 export class EmployeeService {
   constructor(private employeeRepository: IEmployeeRepository) {}
@@ -61,7 +60,33 @@ export class EmployeeService {
       console.error("EmployeeService.getKaryawanForUpdate error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid id", 400);
-      if(error instanceof Err) throw error
+      if (error instanceof Err) throw error;
+
+      throw new Err("EmployeeService unavailable", 500);
+    }
+  }
+
+  async getEmployeeAbsentDivCode(absentCode: string[]) {
+    if (absentCode.length === 0) throw new Err("invalid request data", 400);
+
+    try {
+      const absentDiv =
+        await this.employeeRepository.getDivisionCode(absentCode);
+
+      const divCodeMap = new Map<string, string>();
+      absentDiv.forEach((item) => {
+        if (!item.kode_absensi) throw new Err("kode absent is null", 400);
+
+        if (!divCodeMap.has(item.kode_absensi)) {
+          divCodeMap.set(item.kode_absensi, item.divisi);
+        }
+      });
+
+      return divCodeMap;
+    } catch (error: unknown) {
+      console.error("EmployeeService.getEmployeeAbsentDivCode error:", error);
+
+      if (error instanceof Err) throw error;
 
       throw new Err("EmployeeService unavailable", 500);
     }
@@ -119,8 +144,8 @@ export class EmployeeService {
   async updateEmployee(id: BaseEmployee["id"], data: EmployeeUpdate) {
     let conn;
     try {
-      if(data.tgl_keluar === "") data.tgl_keluar = null;
-      
+      if (data.tgl_keluar === "") data.tgl_keluar = null;
+
       EmployeeUpdateSchema.parse(data);
       conn = await pool.getConnection();
       await conn.beginTransaction();
@@ -184,7 +209,7 @@ export class EmployeeService {
       if (conn) await conn.rollback();
       console.error("EmployeeService.updateEmployeeKodeAbsen error:", error);
 
-      if(error instanceof ZodError) throw data;
+      if (error instanceof ZodError) throw data;
       if (error instanceof Err) throw error;
 
       throw new Err("EmployeeService unavailable", 500);

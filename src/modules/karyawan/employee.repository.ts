@@ -3,6 +3,8 @@ import { IEmployeeRepository } from "./employee.interface";
 import {
   BaseEmployee,
   BaseEmployeeSchema,
+  EmployeeAbsentDiv,
+  EmployeeAbsentDivSchema,
   EmployeeForm,
   EmployeeTable,
   EmployeeTableSchema,
@@ -90,8 +92,12 @@ export class EmployeeRepository implements IEmployeeRepository {
 
       const normalize: EmployeeUpdate = {
         ...rows[0],
-        tgl_masuk: rows[0].tgl_masuk ? formatDateYYYYMMDD(rows[0].tgl_masuk) : "",
-        tgl_keluar: rows[0].tgl_keluar ? formatDateYYYYMMDD(rows[0].tgl_keluar) : "",
+        tgl_masuk: rows[0].tgl_masuk
+          ? formatDateYYYYMMDD(rows[0].tgl_masuk)
+          : "",
+        tgl_keluar: rows[0].tgl_keluar
+          ? formatDateYYYYMMDD(rows[0].tgl_keluar)
+          : "",
         status_aktif: rows[0].status_aktif === 1,
       };
 
@@ -100,6 +106,22 @@ export class EmployeeRepository implements IEmployeeRepository {
       console.error("EmployeeRepository.getForUpdateById error:", error);
 
       throw new Err("failed to fetch employee for update", 500);
+    }
+  }
+
+  async getDivisionCode(absentCodes: string[]): Promise<EmployeeAbsentDiv[]> {
+    try {
+      const placeholder = absentCodes.map((item) => "?").join(", ");
+      const values = absentCodes.map((item) => item);
+
+      const sql = `SELECT kode_absensi, divisi FROM karyawan WHERE kode_absensi IN (${placeholder})`;
+      const [rows] = await pool.query<RowDataPacket[]>(sql, values);
+
+      return EmployeeAbsentDivSchema.array().parse(rows);
+    } catch (error: unknown) {
+      console.error("EmployeeRepository.getDivisionCode error:", error);
+
+      throw new Err("failed to fetch div code employee", 500);
     }
   }
 

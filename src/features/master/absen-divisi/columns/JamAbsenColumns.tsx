@@ -1,4 +1,4 @@
-import { JamAbsenForm, JamAbsenTable } from "@/modules/jamAbsen/jamAbsen.schema";
+import { JamAbsenForm, JamAbsenTable } from "@/modules/master/jamAbsen/jamAbsen.schema";
 import { ColumnDef } from "@tanstack/react-table";
 import { Dispatch, SetStateAction } from "react";
 import { Button, Stack } from "react-bootstrap";

@@ -1,5 +1,5 @@
 'use client';
-import { DivisionForm } from '@/modules/divisi/division.schema';
+import { DivisionForm } from '@/modules/master/divisi/division.schema';
 import { Dispatch, SetStateAction } from 'react';
 import { Button, Form, Modal, Stack } from 'react-bootstrap'
 

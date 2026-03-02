@@ -2,7 +2,7 @@ import { Stack, Button } from "react-bootstrap"
 import { ColumnDef } from "@tanstack/react-table"
 import { Dispatch, SetStateAction } from "react"
 import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
-import { DivisionForm, DivisionTable } from "@/modules/divisi/division.schema"
+import { DivisionForm, DivisionTable } from "@/modules/master/divisi/division.schema"
 
 export const divisiColumns = ({
   setDivisiForm,

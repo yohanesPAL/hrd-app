@@ -1,7 +1,7 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
-import { createPositionService } from "@/modules/jabatan/jabatan.factory";
-import { BasePosition, PositionForm } from "@/modules/jabatan/jabatan.schema";
+import { createPositionService } from "@/modules/master/jabatan/jabatan.factory";
+import { BasePosition, PositionForm } from "@/modules/master/jabatan/jabatan.schema";
 import { revalidatePath } from "next/cache";
 
 const positionsServices = createPositionService();

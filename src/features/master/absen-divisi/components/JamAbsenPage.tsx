@@ -1,7 +1,7 @@
 "use client";
 import DefaultTable from "@/components/Table/DefaulteTable";
 import { useExecuteAction } from "@/hooks/useExecuteAction";
-import { JamAbsenForm, JamAbsenTable } from "@/modules/jamAbsen/jamAbsen.schema";
+import { JamAbsenForm, JamAbsenTable } from "@/modules/master/jamAbsen/jamAbsen.schema";
 import useConfirmDelete from "@/stores/confirmDelete/confirmDelete.store";
 import { SortingState } from "@tanstack/react-table";
 import { useState } from "react";

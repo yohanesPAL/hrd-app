@@ -1,8 +1,8 @@
 import { Err } from "@/lib/err";
-import { createDivisionService } from "@/modules/divisi/division.factory";
-import { DivisionService } from "@/modules/divisi/division.service";
-import { createPositionService } from "@/modules/jabatan/jabatan.factory";
-import { PositionService } from "@/modules/jabatan/jabatan.service";
+import { createDivisionService } from "@/modules/master/divisi/division.factory";
+import { DivisionService } from "@/modules/master/divisi/division.service";
+import { createPositionService } from "@/modules/master/jabatan/jabatan.factory";
+import { PositionService } from "@/modules/master/jabatan/jabatan.service";
 
 export function createGetEmployeeFormOptions() {
   return new GetEmployeeFormOptions(

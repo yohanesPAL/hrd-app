@@ -1,6 +1,6 @@
 "use client";
-import { DivisionTable } from '@/modules/divisi/division.schema';
-import { PositionForm } from '@/modules/jabatan/jabatan.schema';
+import { DivisionTable } from '@/modules/master/divisi/division.schema';
+import { PositionForm } from '@/modules/master/jabatan/jabatan.schema';
 import { Dispatch, SetStateAction } from 'react';
 import { Button, Form, Modal, Stack } from 'react-bootstrap';
 

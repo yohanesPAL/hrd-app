@@ -1,7 +1,7 @@
 import PageTitle from '@/components/PageTitle'
 import { getJamAbsenAction } from '@/features/master/absen-divisi/jamAbsenAction'
 import JamAbsenPage from '@/features/master/absen-divisi/components/JamAbsenPage';
-import { JamAbsenTable } from '@/modules/jamAbsen/jamAbsen.schema'
+import { JamAbsenTable } from '@/modules/master/jamAbsen/jamAbsen.schema'
 
 const AbsenDivisi = async () => {
   const jamAbsen: JamAbsenTable[] = await getJamAbsenAction();

@@ -1,7 +1,7 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
-import { createJamAbsenService } from "@/modules/jamAbsen/jamAbsen.factory";
-import { JamAbsenForm } from "@/modules/jamAbsen/jamAbsen.schema";
+import { createJamAbsenService } from "@/modules/master/jamAbsen/jamAbsen.factory";
+import { JamAbsenForm } from "@/modules/master/jamAbsen/jamAbsen.schema";
 import { revalidatePath } from "next/cache";
 
 const jamAbsenService = createJamAbsenService();

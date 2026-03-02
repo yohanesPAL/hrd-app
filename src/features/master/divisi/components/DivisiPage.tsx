@@ -10,7 +10,7 @@ import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 import { useShallow } from 'zustand/shallow';
 import { divisiColumns } from '../columns/DivisiColumns';
 import DivisiFormModal from './DivisiFormModal';
-import { DivisionForm, DivisionTable } from '@/modules/divisi/division.schema';
+import { DivisionForm, DivisionTable } from '@/modules/master/divisi/division.schema';
 import { createDivisionAction, deleteDivisionAction, updateDivisionAction } from '../divisiAction';
 import { useExecuteAction } from '@/hooks/useExecuteAction';
 

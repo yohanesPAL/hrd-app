@@ -50,7 +50,7 @@ function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", load
             onChange={e => table.setPageSize(Number(e.target.value))}
             style={{ width: "100px" }}
           >
-            {[10, 20, 30, 50].map(size => (
+            {[10, 25, 50, 100].map(size => (
               <option key={size} value={size}>
                 {size}
               </option>

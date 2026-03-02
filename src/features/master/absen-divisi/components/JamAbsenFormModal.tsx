@@ -1,4 +1,4 @@
-import { JamAbsenForm } from '@/modules/jamAbsen/jamAbsen.schema';
+import { JamAbsenForm } from '@/modules/master/jamAbsen/jamAbsen.schema';
 import { Dispatch, SetStateAction } from 'react';
 import { Button, Form, Modal, Stack } from 'react-bootstrap';
 

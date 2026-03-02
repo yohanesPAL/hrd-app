@@ -1,7 +1,7 @@
 import PageTitle from '@/components/PageTitle'
 import DivisiPage from '@/features/master/divisi/components/DivisiPage';
 import { getDivisionsAction } from '@/features/master/divisi/divisiAction';
-import { DivisionTable } from '@/modules/divisi/division.schema';
+import { DivisionTable } from '@/modules/master/divisi/division.schema';
 
 const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));

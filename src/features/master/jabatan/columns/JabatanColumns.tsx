@@ -1,4 +1,4 @@
-import { PositionForm, PositionTable } from "@/modules/jabatan/jabatan.schema"
+import { PositionForm, PositionTable } from "@/modules/master/jabatan/jabatan.schema"
 import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
 import { ColumnDef } from "@tanstack/react-table"
 import { Dispatch, SetStateAction } from "react"

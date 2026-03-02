@@ -26,6 +26,11 @@ export const BaseEmployeeSchema = z
 
 export const EmployeeIdSchema = BaseEmployeeSchema.shape.id;
 
+export const EmployeeAbsentDivSchema = BaseEmployeeSchema.pick({
+  kode_absensi: true,
+  divisi: true,
+});
+
 export const EmployeeTableSchema = BaseEmployeeSchema.omit({
   durasi_kontrak: true,
   cuti_terakhir: true,
@@ -67,3 +72,4 @@ export type EmployeeKodeAbsenForm = z.infer<typeof EmployeeKodeAbsenFormSchema>;
 export type EmployeeUpdate = Partial<z.infer<typeof EmployeeUpdateSchema>> &
   Partial<EmployeeSpForm> &
   Partial<EmployeeKodeAbsenForm>;
+export type EmployeeAbsentDiv = z.infer<typeof EmployeeAbsentDivSchema>;
