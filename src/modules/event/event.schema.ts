@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const BaseEventSchema = z.object({
+export const BaseEventSchema = z.object({
   id: z.string().min(1),
   akun_id: z.string().min(1),
   title: z.string().min(1),
@@ -8,23 +8,21 @@ const BaseEventSchema = z.object({
   end: z.date().min(1),
 });
 
-export const PatchEventSchema = BaseEventSchema.extend({
-  start: z.string().min(1),
-  end: z.string().min(1),
-});
+export const AccountIdSchema = BaseEventSchema.shape.akun_id;
 
-export const PostEventSchema = PatchEventSchema.omit({
+export const EventFormSchema = BaseEventSchema.omit({
   id: true,
-})
+}).extend({
+  akun_id: z.string().optional(),
+});
 
 export const UpcomingEventSchema = BaseEventSchema.pick({
   title: true,
   start: true,
   end: true,
-})
+});
 
 export type BaseEvent = z.infer<typeof BaseEventSchema>;
-export type PostEvent = z.infer<typeof PostEventSchema>;
-export type PatchEvent = z.infer<typeof PatchEventSchema>;
+export type EventForm = z.infer<typeof EventFormSchema>;
+export type AccountId = z.infer<typeof AccountIdSchema>;
 export type UpcomingEvent = z.infer<typeof UpcomingEventSchema>;
-export type Event = Omit<BaseEvent, "akun_id">;

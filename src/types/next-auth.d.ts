@@ -1,10 +1,10 @@
+import { Account } from "@/modules/login/login.schema";
 import { DefaultSession } from "next-auth";
-import { Role } from "./RolesType";
 
 declare module "next-auth" {
   interface User {
     namaKaryawan: string;
-    role: Role;
+    role: Account["role"];
     karyawanId: string;
   }
 
@@ -12,7 +12,7 @@ declare module "next-auth" {
     user: {
       id: string;
       namaKaryawan: string;
-      role: Role;
+      role: Account["role"];
       karyawanId: string;
     } & DefaultSession["user"];
   }
@@ -21,7 +21,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     username: string;
-    role: Role;
+    role: Account["role"];
     karyawanId: string;
     namaKaryawan: string;
   }

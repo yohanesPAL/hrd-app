@@ -10,7 +10,7 @@ import styles from './sidebar.module.css'
 
 const SideBar = ({ role, namaKaryawan }: { role: string, namaKaryawan: string }) => {
   const route = usePathname();
-  const Menu = getMenu(role);
+  const menu = getMenu(role);
   const isActive = (path: string) => route.startsWith(path);
   const showNavbar = useNavbar((state) => state.isShow);
 
@@ -31,7 +31,7 @@ const SideBar = ({ role, namaKaryawan }: { role: string, namaKaryawan: string })
             </Link>
           </div>
           <Stack>
-            {Menu.map((item) => {
+            {menu.map((item) => {
               if (item.children) {
                 return (
                   <Accordion key={item.nama} flush style={{ background: 'var(--secondary)' }}>

@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { CredentialSchema } from "./modules/login/login.schema";
+import { Account, CredentialSchema } from "./modules/login/login.schema";
 import { createLoginService } from "./modules/login/login.factory";
 
 const loginService = createLoginService()
@@ -52,7 +52,7 @@ export const { handlers, signOut, auth } = NextAuth({
         session.user.id = token.sub;
       }
       session.user.namaKaryawan = token.namaKaryawan as string;
-      session.user.role = token.role as string;
+      session.user.role = token.role as Account["role"];
       session.user.karyawanId = token.karyawanId as string;
 
       return session;

@@ -7,7 +7,7 @@ export const CredentialSchema = z.object({
 
 export const AccountSchema = CredentialSchema.extend({
   id: z.string().min(1),
-  role: z.string().min(1),
+  role: z.enum(["hrd", "karyawan"]),
   karyawan_id: z.string().min(1),
   nama: z.string().min(1),
 })

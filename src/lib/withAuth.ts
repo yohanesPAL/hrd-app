@@ -1,11 +1,11 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import type { Session } from "next-auth";
-import { Role } from "@/types/RolesType";
+import { Account } from "@/modules/login/login.schema";
 
 export function withAuth<Args extends any[], R>(
   action: (session: Session, ...args: Args) => R,
-  allowedRoles?: Role[],
+  allowedRoles?: Account["role"][],
 ) {
   return async (...args: Args): Promise<R> => {
     const session = await auth();
