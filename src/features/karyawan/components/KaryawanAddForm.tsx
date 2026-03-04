@@ -5,8 +5,7 @@ import { Button, Col, Form, InputGroup, Row, Stack } from 'react-bootstrap'
 import InputGroupText from 'react-bootstrap/esm/InputGroupText';
 import { toast } from 'react-toastify';
 import { KaryawanFormOptions } from '../types/KaryawanTypes';
-import { BaseEmployee, EmployeeForm } from '@/modules/karyawan/employee.schema';
-import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
+import { BaseEmployee, EmployeeForm } from '@/modules/employee/employee.schema';
 import { useExecuteAction } from '@/hooks/useExecuteAction';
 import { createKaryawan } from '../KaryawanAction';
 import { useRouter } from 'next/navigation';

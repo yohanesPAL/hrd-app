@@ -1,5 +1,5 @@
 import { Err } from "@/lib/err";
-import { IEmployeeRepository } from "./employee.interface";
+import { IEmployeeRepository, IEmployeeService } from "./employee.interface";
 import {
   BaseEmployee,
   EmployeeForm,
@@ -12,23 +12,25 @@ import {
   EmployeeUpdate,
   EmployeeUpdateSchema,
 } from "./employee.schema";
-import pool from "@/lib/db";
 import { ZodError } from "zod";
+import { ServiceRes } from "@/types/ServiceTypes";
+import { UserId } from "../user/user.schema";
+import { Connection } from "mysql2/promise";
 
-export class EmployeeService {
+export class EmployeeService implements IEmployeeService {
   constructor(private employeeRepository: IEmployeeRepository) {}
 
   async getAllEmployees() {
     try {
       const karyawan = await this.employeeRepository.getAll();
 
-      return karyawan;
-    } catch (error: unknown) {
+      return { success: true, status: 200, data: karyawan };
+    } catch (error) {
       console.error("EmployeeService.getAllEmployee error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
+      throw new Err("EmployeeService.getAllEmployees unavailable", 500);
     }
   }
 
@@ -38,14 +40,14 @@ export class EmployeeService {
 
       const details = await this.employeeRepository.getById(id);
 
-      return details;
-    } catch (error: unknown) {
+      return { success: true, status: 200, data: details };
+    } catch (error) {
       console.error("EmployeeService.getEmployeeDeails error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid id", 400);
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
+      throw new Err("EmployeeService.getEmployeeById unavailable", 500);
     }
   }
 
@@ -55,14 +57,14 @@ export class EmployeeService {
 
       const karyawan = await this.employeeRepository.getForUpdateById(id);
 
-      return karyawan;
+      return { success: true, status: 200, data: karyawan };
     } catch (error: unknown) {
       console.error("EmployeeService.getKaryawanForUpdate error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid id", 400);
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
+      throw new Err("EmployeeService.getEmployeeForUpdate unavailable", 500);
     }
   }
 
@@ -82,111 +84,97 @@ export class EmployeeService {
         }
       });
 
-      return divCodeMap;
+      return { success: true, status: 200, data: divCodeMap };
     } catch (error: unknown) {
       console.error("EmployeeService.getEmployeeAbsentDivCode error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
+      throw new Err(
+        "EmployeeService.getEmployeeAbsentDivCode unavailable",
+        500,
+      );
+    }
+  }
+
+  async getOpenEmployees(selectedId: UserId): Promise<ServiceRes> {
+    try {
+      const employees = this.employeeRepository.getOpenEmployees(selectedId);
+
+      return { success: true, status: 200, data: employees };
+    } catch (error) {
+      console.error("EmployeeService.getOpenEmployees error:", error);
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("EmployeeService.getOpenEmployees unavailable", 500);
     }
   }
 
   async createEmployee(data: EmployeeForm) {
-    let conn;
     try {
       EmployeeFormSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      await this.employeeRepository.create(data);
 
-      const res = await this.employeeRepository.create(data, conn);
-
-      await conn.commit();
-
-      return { success: res, status: 201 };
+      return { success: true, status: 201 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
       console.error("EmployeeService.createEmployee error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
-    } finally {
-      if (conn) conn.release();
+      throw new Err("EmployeeService.createEmployee unavailable", 500);
     }
   }
 
-  async deleteEmployee(id: string) {
+  async deleteEmployee(id: string, conn: Connection) {
     if (!id || typeof id !== "string")
       throw new Err("invalid request data", 400);
 
-    const conn = await pool.getConnection();
     try {
-      await conn.beginTransaction();
+      await this.employeeRepository.delete(id, conn);
 
-      const res = this.employeeRepository.delete(id, conn);
-
-      await conn.commit();
-      return { success: res, status: 200 };
+      return { success: true, status: 200 };
     } catch (error: unknown) {
-      await conn.rollback();
       console.error("EmployeeService.deleteEmployee error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
-    } finally {
-      conn.release();
+      throw new Err("EmployeeService.deleteEmployee unavailable", 500);
     }
   }
 
   async updateEmployee(id: BaseEmployee["id"], data: EmployeeUpdate) {
-    let conn;
     try {
       if (data.tgl_keluar === "") data.tgl_keluar = null;
 
       EmployeeUpdateSchema.parse(data);
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
 
-      const res = await this.employeeRepository.update(id, data, conn);
+      await this.employeeRepository.update(id, data);
 
-      await conn.commit();
-      return { success: res, status: 200 };
+      return { success: true, status: 200 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
       console.error("EmployeeService.updateEmployee error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
-    } finally {
-      if (conn) conn.release();
+      throw new Err("EmployeeService.updateEmployee unavailable", 500);
     }
   }
 
   async updateEmployeeSP(id: BaseEmployee["id"], data: EmployeeSpForm) {
-    let conn;
     try {
       EmployeeSpFormSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      const res = await this.employeeRepository.update(id, data);
 
-      const res = await this.employeeRepository.update(id, data, conn);
-
-      await conn.commit();
       return { success: res, status: 200 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
       console.error("EmployeeService.updateEmployeeSP error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
-    } finally {
-      if (conn) conn.release();
+      throw new Err("EmployeeService.updateEmployeeSP unavailable", 500);
     }
   }
 
@@ -194,27 +182,19 @@ export class EmployeeService {
     id: BaseEmployee["id"],
     data: EmployeeKodeAbsenForm,
   ) {
-    let conn;
     try {
       EmployeeKodeAbsenFormSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      const res = await this.employeeRepository.update(id, data);
 
-      const res = await this.employeeRepository.update(id, data, conn);
-
-      await conn.commit();
       return { success: res, status: 200 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
       console.error("EmployeeService.updateEmployeeKodeAbsen error:", error);
 
       if (error instanceof ZodError) throw data;
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService unavailable", 500);
-    } finally {
-      if (conn) conn.release();
+      throw new Err("EmployeeService.updateEmployeeKodeAbsen unavailable", 500);
     }
   }
 }

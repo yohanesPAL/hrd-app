@@ -21,10 +21,11 @@ const HrdMenu: MenuInterface[] = [
   { nama: "Dashboard", href: "dashboard", icon: "bi-speedometer2" },
   { nama: "Master", href: "master", icon: "bi-database", children: MasterChildren },
   { nama: "Kalender Acara", href: "kalender", icon: "bi-calendar-event"},
-  { nama: "Karyawan", href: "karyawan", icon: "bi-person" },
+  { nama: "Karyawan", href: "karyawan", icon: "bi-people-fill" },
   { nama: "Absensi", href: "absensi", icon: "bi-calendar-check" },
   { nama: "Mobil", href: "mobil", icon: "bi-truck" },
   { nama: "Dokumen", href: "dokumen", icon: "bi-file-earmark-medical-fill", children: DokumenChildren },
+  { nama: "User", href: "user", icon: "bi-person-fill" },
 ]
 
 export function getMenu(role: string) {

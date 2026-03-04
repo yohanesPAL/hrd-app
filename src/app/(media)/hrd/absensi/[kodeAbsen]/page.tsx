@@ -5,8 +5,7 @@ import AbsensiDetailsPage from '@/features/absensi/details/components/AbsensiDet
 const AbsensiDetails = async ({ params }: { params: { kodeAbsen: string } }) => {
   const { kodeAbsen } = await params;
   const absensi = await getAbsenDetails(kodeAbsen);
-
-  console.log(absensi)
+  
   return (
     <>
     <PageTitle>Detail Absensi</PageTitle>

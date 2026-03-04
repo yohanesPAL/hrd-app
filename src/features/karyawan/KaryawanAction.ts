@@ -1,18 +1,20 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
-import { createEmployeeService } from "@/modules/karyawan/employee.factory";
+import { createEmployeeService } from "@/modules/employee/employee.factory";
 import {
   BaseEmployee,
   EmployeeForm,
   EmployeeKodeAbsenForm,
   EmployeeSpForm,
   EmployeeUpdate,
-} from "@/modules/karyawan/employee.schema";
-import { createGetEmployeeFormOptions } from "@/use-cases/karyawan/getEmployeeFormOptions";
+} from "@/modules/employee/employee.schema";
+import { createDeleteEmployeeService } from "@/use-cases/employee/deleteEmployee";
+import { createGetEmployeeFormOptions } from "@/use-cases/employee/getEmployeeFormOptions";
 import { revalidatePath } from "next/cache";
 
 const employeeService = createEmployeeService();
 const employeeFormOptions = createGetEmployeeFormOptions();
+const deleteEmployee = createDeleteEmployeeService();
 const PATH = "karyawan";
 
 export const getAllKaryawan = withAuth(async () => {
@@ -63,7 +65,7 @@ export const updateKaryawanKodeAbsen = withAuth(
 
 export const deleteKaryawan = withAuth(
   async (session, id: string) => {
-    await employeeService.deleteEmployee(id);
+    await deleteEmployee.execute(id);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },
   ["hrd"],

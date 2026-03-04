@@ -12,7 +12,7 @@ import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 import { useShallow } from 'zustand/shallow';
 import { useExecuteAction } from '@/hooks/useExecuteAction';
 import { karyawanColumns } from '../columns/KaryawanColumns';
-import { EmployeeKodeAbsenForm, EmployeeSpForm, EmployeeTable } from '@/modules/karyawan/employee.schema';
+import { EmployeeKodeAbsenForm, EmployeeSpForm, EmployeeTable } from '@/modules/employee/employee.schema';
 import KaryawanSpModal from './KaryawanSpModal';
 import KaryawanKodeAbsenModal from './KaryawanKodeAbsenModal';
 import { deleteKaryawan, updateKaryawanKodeAbsen, updateKaryawanSP } from '../KaryawanAction';

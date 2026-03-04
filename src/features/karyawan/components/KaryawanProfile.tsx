@@ -2,7 +2,7 @@
 import PageTitle from '@/components/PageTitle';
 import { Table } from 'react-bootstrap';
 import styles from '../css/profile.module.css';
-import { BaseEmployee } from '@/modules/karyawan/employee.schema';
+import { BaseEmployee } from '@/modules/employee/employee.schema';
 import { formatDateDDMMYYYY } from '@/utils/dateFormatting';
 
 const KaryawanProfile = ({ data }: { data: BaseEmployee}) => {

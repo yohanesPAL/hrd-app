@@ -15,7 +15,7 @@ export const BaseEmployeeSchema = z
     sp: z.number().nonnegative().max(3),
     cuti_terakhir: z.number().nonnegative(),
     cuti_sekarang: z.number().nonnegative(),
-    status_aktif: z.boolean().default(true),
+    status_aktif: z.number().transform((val) => val === 1),
     status_karyawan: z.string().min(1),
     tgl_masuk: z.date().nullable(),
     tgl_keluar: z.date().nullable(),
@@ -64,6 +64,14 @@ export const EmployeeKodeAbsenFormSchema = BaseEmployeeSchema.pick({
   kode_absensi: true,
 });
 
+export const OpenEmployeeSchema = BaseEmployeeSchema.pick({
+  id: true,
+  nik: true,
+  nama: true,
+}).extend({
+  jabatan: z.string().min(1),
+});
+
 export type BaseEmployee = z.infer<typeof BaseEmployeeSchema>;
 export type EmployeeTable = z.infer<typeof EmployeeTableSchema>;
 export type EmployeeForm = z.infer<typeof EmployeeFormSchema>;
@@ -73,3 +81,4 @@ export type EmployeeUpdate = Partial<z.infer<typeof EmployeeUpdateSchema>> &
   Partial<EmployeeSpForm> &
   Partial<EmployeeKodeAbsenForm>;
 export type EmployeeAbsentDiv = z.infer<typeof EmployeeAbsentDivSchema>;
+export type OpenEmployee = z.infer<typeof OpenEmployeeSchema>;

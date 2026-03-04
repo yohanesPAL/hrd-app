@@ -11,7 +11,7 @@ export function createGetEmployeeFormOptions() {
   );
 }
 
-export class GetEmployeeFormOptions {
+class GetEmployeeFormOptions {
   constructor(
     private divisionService: DivisionService,
     private positionService: PositionService,

@@ -5,7 +5,7 @@ import InputGroupText from 'react-bootstrap/esm/InputGroupText';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
-import { BaseEmployee, EmployeeUpdate } from '@/modules/karyawan/employee.schema';
+import { BaseEmployee, EmployeeUpdate } from '@/modules/employee/employee.schema';
 import { KaryawanFormOptions } from '../types/KaryawanTypes';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 import { updateKaryawan } from '../KaryawanAction';

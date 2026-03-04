@@ -1,3 +1,4 @@
+import { roleList } from "@/lib/roleList";
 import {z} from "zod"
 
 export const CredentialSchema = z.object({
@@ -7,7 +8,7 @@ export const CredentialSchema = z.object({
 
 export const AccountSchema = CredentialSchema.extend({
   id: z.string().min(1),
-  role: z.enum(["hrd", "karyawan"]),
+  role: z.enum(roleList),
   karyawan_id: z.string().min(1),
   nama: z.string().min(1),
 })

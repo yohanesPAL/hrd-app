@@ -9,6 +9,8 @@ import {
 } from "./event.schema";
 import { ZodError } from "zod";
 import pool from "@/lib/db";
+import { IEventService } from "./event.interface";
+import { ServiceRes } from "@/types/ServiceTypes";
 
 const isActive = (start: Date, end: Date) => {
   const now = new Date();
@@ -18,10 +20,10 @@ const isActive = (start: Date, end: Date) => {
   return now <= new Date(end) && now >= new Date(start);
 };
 
-export class EventService {
+export class EventService implements IEventService {
   constructor(private eventRepository: EventRepository) {}
 
-  async getEventsByAccount(id: AccountId, date: Date) {
+  async getEventsByAccount(id: AccountId, date: Date): Promise<ServiceRes> {
     if (!(date instanceof Date)) throw new Err("invalid request data", 400);
 
     try {
@@ -29,7 +31,7 @@ export class EventService {
 
       const events = await this.eventRepository.getByAccount(id, date);
 
-      return events;
+      return { success: true, status: 200, data: events };
     } catch (error: unknown) {
       console.error("EventService.getEventsByAccount error:", error);
 
@@ -40,7 +42,7 @@ export class EventService {
     }
   }
 
-  async getUpcomingEvents(id: AccountId) {
+  async getUpcomingEvents(id: AccountId): Promise<ServiceRes> {
     try {
       AccountIdSchema.parse(id);
 
@@ -56,7 +58,7 @@ export class EventService {
         }
       });
 
-      return { onGoing, upcoming };
+      return { success: true, status: 200, data: { onGoing, upcoming } };
     } catch (error: unknown) {
       console.error("EventService.getUpcomingEvents error:", error);
 
@@ -67,7 +69,7 @@ export class EventService {
     }
   }
 
-  async createEvent(data: EventForm) {
+  async createEvent(data: EventForm): Promise<ServiceRes> {
     let conn;
     try {
       EventFormSchema.parse(data);
@@ -92,7 +94,7 @@ export class EventService {
     }
   }
 
-  async updateEvent(id: AccountId, data: EventForm) {
+  async updateEvent(id: AccountId, data: EventForm): Promise<ServiceRes> {
     let conn;
     try {
       EventFormSchema.parse(data);
@@ -117,7 +119,7 @@ export class EventService {
     }
   }
 
-  async deleteEvent(id: AccountId) {
+  async deleteEvent(id: AccountId): Promise<ServiceRes> {
     let conn;
     try {
       AccountIdSchema.parse(id);

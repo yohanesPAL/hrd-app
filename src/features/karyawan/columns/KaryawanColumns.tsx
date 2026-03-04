@@ -1,4 +1,4 @@
-import { EmployeeKodeAbsenForm, EmployeeSpForm, EmployeeTable } from "@/modules/karyawan/employee.schema"
+import { EmployeeKodeAbsenForm, EmployeeSpForm, EmployeeTable } from "@/modules/employee/employee.schema"
 import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"

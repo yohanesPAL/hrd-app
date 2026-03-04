@@ -1,20 +1,20 @@
 import { Err } from "@/lib/err";
-import { createEmployeeService } from "@/modules/karyawan/employee.factory";
-import { EmployeeService } from "@/modules/karyawan/employee.service";
+import { createEmployeeService } from "@/modules/employee/employee.factory";
+import { EmployeeService } from "@/modules/employee/employee.service";
 
 export function createGetAbsentDivCode() {
   return new GetAbsentDivCode(createEmployeeService());
 }
 
-export class GetAbsentDivCode {
+class GetAbsentDivCode {
   constructor(private employeeService: EmployeeService) {}
 
   async execute(absentCode: string[]) {
     try {
-      const kodeDivMap =
+      const {data} =
         await this.employeeService.getEmployeeAbsentDivCode(absentCode);
 
-      return kodeDivMap;
+      return data;
     } catch (error: unknown) {
       console.error("GetAbsentDivCode error:", error);
 

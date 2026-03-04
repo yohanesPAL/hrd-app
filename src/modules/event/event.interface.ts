@@ -1,5 +1,6 @@
 import { Connection } from "mysql2/promise";
 import { AccountId, BaseEvent, EventForm, UpcomingEvent } from "./event.schema";
+import { ServiceRes } from "@/types/ServiceTypes";
 
 export interface IEventRepository {
   getByAccount(id: AccountId, date: Date): Promise<BaseEvent[]>;
@@ -7,4 +8,12 @@ export interface IEventRepository {
   create(data: EventForm, conn: Connection): Promise<boolean>;
   update(id: AccountId, data: EventForm, conn: Connection): Promise<boolean>;
   delete(id: AccountId, conn: Connection): Promise<boolean>;
+}
+
+export interface IEventService {
+  getEventsByAccount(id: AccountId, date: Date): Promise<ServiceRes>;
+  getUpcomingEvents(id: AccountId): Promise<ServiceRes>;
+  createEvent(data: EventForm): Promise<ServiceRes>;
+  updateEvent(id: AccountId, data: EventForm): Promise<ServiceRes>;
+  deleteEvent(id: AccountId): Promise<ServiceRes>;
 }

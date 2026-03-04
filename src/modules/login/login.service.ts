@@ -1,16 +1,16 @@
 import { ZodError } from "zod";
-import { ILoginRepository } from "./login.interface";
-import { Credential, CredentialSchema } from "./login.schema";
+import { ILoginRepository, ILoginService } from "./login.interface";
+import { Account, Credential, CredentialSchema } from "./login.schema";
 import bcrypt from "bcrypt";
 import { Err } from "@/lib/err";
 
 const dummyHash =
   "$2a$12$KI4oRpUY8YescA2kaGkdKunFTAEF7dUOb5ACJiIgcdgmUONJxrJ5i";
 
-export class LoginService {
+export class LoginService implements ILoginService {
   constructor(private loginRepository: ILoginRepository) {}
 
-  async userLogin(credential: Credential) {
+  async userLogin(credential: Credential): Promise<Partial<Account> | null> {
     try {
       CredentialSchema.parse(credential);
 
@@ -26,7 +26,7 @@ export class LoginService {
       const { password, ...clientAccount } = account;
 
       return clientAccount;
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("LoginService.userLogin error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid request data", 400);

@@ -12,12 +12,12 @@ const Kalender = async ({ searchParams }: { searchParams: { month: string } }) =
 
   if (!id) return null;
 
-  const events = await getEventsByAccount(id, date);
+  const {data} = await getEventsByAccount(id, date);
   return (
     <>
       <PageTitle>Kalender Acara</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <KalenderPage events={events} />
+        <KalenderPage events={data} />
       </div>
     </>
   )

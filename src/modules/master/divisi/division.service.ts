@@ -32,7 +32,7 @@ export class DivisionService {
 
       return divisions;
     } catch (error: unknown) {
-      console.log("DivisionService.getActiveDivision error:", error);
+      console.error("DivisionService.getActiveDivision error:", error);
 
       if (error instanceof Err) throw error;
 

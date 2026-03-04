@@ -1,4 +1,4 @@
-import { EmployeeKodeAbsenForm } from '@/modules/karyawan/employee.schema';
+import { EmployeeKodeAbsenForm } from '@/modules/employee/employee.schema';
 import { Dispatch, SetStateAction } from 'react';
 import { Button, Form, Modal, Stack } from 'react-bootstrap';
 import { KaryawanOnEdit } from '../types/KaryawanTypes';

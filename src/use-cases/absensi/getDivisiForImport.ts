@@ -9,7 +9,7 @@ export function createGetJamAbsenForImport() {
 
 type JamAbsen = Omit<BaseJamAbsen, "id" | "divisi">;
 
-export class GetJamAbsenForImport {
+class GetJamAbsenForImport {
   constructor(private jamAbsenService: JamAbsenService) {}
 
   async execute() {
