@@ -97,27 +97,28 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async getOpenEmployees(selectedId: UserId): Promise<ServiceRes> {
+  async getUnaccountedEmployees(selectedId: UserId): Promise<ServiceRes> {
     try {
-      const employees = this.employeeRepository.getOpenEmployees(selectedId);
+      const employees = this.employeeRepository.getUnaccountedEmployees(selectedId);
 
       return { success: true, status: 200, data: employees };
     } catch (error) {
-      console.error("EmployeeService.getOpenEmployees error:", error);
+      console.error("EmployeeService.getUnaccountedEmployees error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("EmployeeService.getOpenEmployees unavailable", 500);
+      throw new Err("EmployeeService.getUnaccountedEmployees unavailable", 500);
     }
   }
 
-  async createEmployee(data: EmployeeForm) {
+  // returning created employee id
+  async createEmployee(data: EmployeeForm, conn: Connection) {
     try {
       EmployeeFormSchema.parse(data);
 
-      await this.employeeRepository.create(data);
+      const insertedId = await this.employeeRepository.create(data, conn);
 
-      return { success: true, status: 201 };
+      return { success: true, status: 201, data: insertedId};
     } catch (error: unknown) {
       console.error("EmployeeService.createEmployee error:", error);
 

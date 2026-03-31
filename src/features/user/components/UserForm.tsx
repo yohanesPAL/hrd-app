@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Button, Form, Modal, Spinner, Stack } from 'react-bootstrap'
 import { FormType, OpenEmployeeState } from '../types/UserTypes'
 import { UserForm as UserFormType, UserId } from '@/modules/user/user.schema'
-import { getOpenEmployees } from '../UserAction'
+import { getUnaccountedEmployees } from '../UserAction'
 import { roleSelect } from '@/lib/roleList'
 import { toast } from 'react-toastify'
 
@@ -29,14 +29,14 @@ const UserForm = ({
   isPosting: boolean,
   updatingId: string,
 }) => {
-  const [openEmployees, setOpenEmpployees] = useState<OpenEmployeeState>({ isLoading: false, data: [] });
+  const [unaccountedEmployees, setUnaccountedEmpployees] = useState<OpenEmployeeState>({ isLoading: false, data: [] });
 
   useEffect(() => {
     if (showModal) {
       async function execute() {
-        setOpenEmpployees({ isLoading: true, data: [] });
-        const employees = await getOpenEmployees(updatingId);
-        setOpenEmpployees({ isLoading: false, data: employees });
+        setUnaccountedEmpployees({ isLoading: true, data: [] });
+        const employees = await getUnaccountedEmployees(updatingId);
+        setUnaccountedEmpployees({ isLoading: false, data: employees });
       }
 
       execute();
@@ -102,17 +102,17 @@ const UserForm = ({
             <Form.Group>
               <Stack gap={2} direction='horizontal' style={{ marginBottom: "8px" }}>
                 <Form.Label style={{ margin: "0px" }}>Karyawan</Form.Label>
-                {openEmployees.isLoading && <Spinner animation="border" variant="secondary" size='sm' />}
+                {unaccountedEmployees.isLoading && <Spinner animation="border" variant="secondary" size='sm' />}
               </Stack>
               <Form.Select
                 required
                 value={userForm.karyawan_id}
                 onChange={(e) => setUserForm({ ...userForm, karyawan_id: e.currentTarget.value })}
-                disabled={openEmployees.isLoading}
+                disabled={unaccountedEmployees.isLoading}
               >
-                {openEmployees.isLoading && <option>Loading...</option>}
+                {unaccountedEmployees.isLoading && <option>Loading...</option>}
                 <option value="">--Pilih Karyawan--</option>
-                {openEmployees.data.map(item =>
+                {unaccountedEmployees.data.map(item =>
                   <option key={item.id} value={item.id}>{item.nik} | {item.nama} | {item.jabatan}</option>
                 )}
               </Form.Select>

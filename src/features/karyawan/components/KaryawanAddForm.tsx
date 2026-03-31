@@ -21,9 +21,7 @@ const defaulKaryawanForm: EmployeeForm = {
   jabatan: "",
   cuti_terakhir: 0,
   cuti_sekarang: 0,
-  status_aktif: true,
-  status_karyawan: "",
-  durasi_kontrak: 0,
+  is_active: 1,
   kode_absensi: null,
   tgl_masuk: getTodayYYYYMMDD(),
 }
@@ -38,9 +36,7 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
   const onSubmit = async (payload: EmployeeForm) => {
     if (!payload) return toast.error("data tidak boleh kosong");
     if (payload.nik.length !== 16) return toast.error("NIK tidak sesuai")
-    if (payload.status_karyawan === "Kontrak" && payload.durasi_kontrak < 1) {
-      return toast.error("Durasi karyawan kontrak tidak boleh kurang dari 1 hari")
-    }
+
     setSubmitted(true);
 
     await toast.promise(
@@ -155,42 +151,12 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               <Form.Label>Status Aktif</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.status_aktif ? 1 : 0}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, status_aktif: e.currentTarget.value === "1" })}
+                value={karyawanForm.is_active ? 1 : 0}
+                onChange={(e) => setKaryawanForm({ ...karyawanForm, is_active: Number(e.currentTarget.value) as EmployeeForm["is_active"] })}
               >
-                <option value={"1"}>Aktif</option>
-                <option value={"0"}>Non Aktif</option>
+                <option value={1}>Aktif</option>
+                <option value={0}>Non Aktif</option>
               </Form.Select>
-            </Form.Group>
-
-            <Form.Group as={Col}>
-              <Form.Label>Status Karyawan</Form.Label>
-              <Form.Select
-                required
-                value={karyawanForm.status_karyawan}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, status_karyawan: e.currentTarget.value })}
-              >
-                <option value={""}>--Status Karyawan--</option>
-                <option value={"Kontrak"}>Kontrak</option>
-                <option value={"Tetap"}>Tetap</option>
-                <option value={"Resign"}>Resign</option>
-                <option value={"Cutoff"}>Cutoff</option>
-              </Form.Select>
-            </Form.Group>
-          </Row>
-          <Row>
-            <Form.Group as={Col}>
-              <Form.Label>Durasi Kontrak (Dalam hari)</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  type='number'
-                  placeholder='Ex: 2'
-                  required
-                  value={karyawanForm.durasi_kontrak}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, durasi_kontrak: Number(e.currentTarget.value) })}
-                />
-                <InputGroupText>Hari</InputGroupText>
-              </InputGroup>
             </Form.Group>
 
             <Form.Group as={Col}>
@@ -203,6 +169,7 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               />
             </Form.Group>
           </Row>
+
           <Row>
             <Form.Group as={Col}>
               <Form.Label>Cuti Terakhir (Dalam hari)</Form.Label>

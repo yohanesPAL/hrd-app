@@ -2,19 +2,19 @@
 import { withAuth } from "@/lib/withAuth";
 import { createUserService } from "@/modules/user/user.factory";
 import { UserForm, UserId } from "@/modules/user/user.schema";
-import { createGetOpenEmployeesService } from "@/use-cases/user/getOpenEmployees";
+import { createGetUnaccountedEmployeesService } from "@/use-cases/user/getUnaccountedEmployees";
 import { revalidatePath } from "next/cache";
 
 const userService = createUserService();
-const getOpenEmployeeService = createGetOpenEmployeesService();
+const getUnaccountedEmployeeService = createGetUnaccountedEmployeesService();
 const PATH = "user"
 
 export const getAllUsers = withAuth(async () => {
   return await userService.getAllUsers();
 });
 
-export const getOpenEmployees = withAuth(async (session, selectedId: UserId) => {
-  return await getOpenEmployeeService.execute(selectedId);
+export const getUnaccountedEmployees = withAuth(async (session, selectedId: UserId) => {
+  return await getUnaccountedEmployeeService.execute(selectedId);
 });
 
 export const createUser = withAuth(

@@ -1,9 +1,4 @@
-interface MenuInterface {
-  nama: string;
-  icon: string;
-  href: string;
-  children?: any[];
-}
+import { MenuInterface } from "./Menu.types"
 
 const DokumenChildren: MenuInterface[] = [
   { nama: "Pengajuan Cuti", href: "pengajuan-cuti", icon: "bi-file-earmark-medical-fill" },
@@ -17,7 +12,7 @@ const MasterChildren: MenuInterface[] = [
   { nama: "Jabatan", href: "jabatan", icon: "bi-briefcase-fill" },
 ]
 
-const HrdMenu: MenuInterface[] = [
+export const HrdMenu: MenuInterface[] = [
   { nama: "Dashboard", href: "dashboard", icon: "bi-speedometer2" },
   { nama: "Master", href: "master", icon: "bi-database", children: MasterChildren },
   { nama: "Kalender Acara", href: "kalender", icon: "bi-calendar-event"},
@@ -27,10 +22,3 @@ const HrdMenu: MenuInterface[] = [
   { nama: "Dokumen", href: "dokumen", icon: "bi-file-earmark-medical-fill", children: DokumenChildren },
   { nama: "User", href: "user", icon: "bi-person-fill" },
 ]
-
-export function getMenu(role: string) {
-  switch(role) {
-    case "hrd": return HrdMenu
-    default: return []
-  }
-}

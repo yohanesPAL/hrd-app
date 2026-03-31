@@ -15,12 +15,10 @@ export const BaseEmployeeSchema = z
     sp: z.number().nonnegative().max(3),
     cuti_terakhir: z.number().nonnegative(),
     cuti_sekarang: z.number().nonnegative(),
-    status_aktif: z.number().transform((val) => val === 1),
-    status_karyawan: z.string().min(1),
     tgl_masuk: z.date().nullable(),
     tgl_keluar: z.date().nullable(),
-    durasi_kontrak: z.number().nonnegative(),
     kode_absensi: z.string().nullable(),
+    is_active: z.number().transform((val) => val === 1),
   })
   .strict();
 
@@ -32,7 +30,6 @@ export const EmployeeAbsentDivSchema = BaseEmployeeSchema.pick({
 });
 
 export const EmployeeTableSchema = BaseEmployeeSchema.omit({
-  durasi_kontrak: true,
   cuti_terakhir: true,
   cuti_sekarang: true,
   tgl_masuk: true,
@@ -47,6 +44,7 @@ export const EmployeeFormSchema = BaseEmployeeSchema.omit({
   tgl_keluar: true,
 }).extend({
   tgl_masuk: z.string().min(1),
+  is_active: z.boolean().transform((val) => val ? 1 : 0),
 });
 
 export const EmployeeUpdateSchema = BaseEmployeeSchema.omit({

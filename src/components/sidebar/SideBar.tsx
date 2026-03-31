@@ -4,9 +4,9 @@ import { Accordion, Nav, Navbar, Stack } from 'react-bootstrap'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useNavbar from '@/stores/navbar/navbar.store'
-import { getMenu } from './SidebarMenu'
 import { NavLink } from './NavLink'
 import styles from './sidebar.module.css'
+import { getMenu } from './Menu/Menu.handler'
 
 const SideBar = ({ role, namaKaryawan }: { role: string, namaKaryawan: string }) => {
   const route = usePathname();

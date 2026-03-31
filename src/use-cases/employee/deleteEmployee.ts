@@ -26,7 +26,7 @@ class DeleteEmployee {
         karyawanId,
         conn,
       );
-      console.log(res)
+      
       await this.userService.deleteUser(res.data, conn);
       await this.employeeService.deleteEmployee(karyawanId, conn);
 

@@ -35,7 +35,7 @@ export const getKaryawanFormOptions = withAuth(async () => {
 
 export const createKaryawan = withAuth(
   async (session, data: EmployeeForm) => {
-    await employeeService.createEmployee(data);
+    // await employeeService.createEmployee(data);
   },
   ["hrd"],
 );

@@ -6,6 +6,7 @@ import {
   EmployeeAbsentDiv,
   EmployeeAbsentDivSchema,
   EmployeeForm,
+  EmployeeFormSchema,
   EmployeeTable,
   EmployeeUpdate,
   OpenEmployee,
@@ -15,13 +16,13 @@ import { Err } from "@/lib/err";
 import { ZodError } from "zod";
 import { EmployeeMapper } from "./employee.mapper";
 import { UserId } from "../user/user.schema";
-import { Connection } from "mysql2/promise";
+import { Connection, ResultSetHeader } from "mysql2/promise";
 
 export class EmployeeRepository implements IEmployeeRepository {
   async getAll(): Promise<EmployeeTable[]> {
     try {
       const [rows]: any[] = await pool.query(
-        `SELECT k.id, nik, k.nama, jk, alamat, hp, d.nama AS divisi, j.nama AS jabatan, status_aktif, sp, status_karyawan, kode_absensi
+        `SELECT k.id, nik, k.nama, jk, alamat, hp, d.nama AS divisi, j.nama AS jabatan, k.is_active, sp, kode_absensi
           FROM karyawan k
           JOIN divisi d ON (d.id = k.divisi)
           JOIN jabatan j ON (j.id = k.jabatan)`,
@@ -40,8 +41,8 @@ export class EmployeeRepository implements IEmployeeRepository {
 
   async getById(id: BaseEmployee["id"]): Promise<BaseEmployee> {
     try {
-      const [rows] = await pool.query(
-        `SELECT k.id, nik, k.nama, jk, alamat, hp, d.nama AS divisi, j.nama AS jabatan, sp, cuti_terakhir, cuti_sekarang, status_aktif, status_karyawan, tgl_masuk, tgl_keluar, durasi_kontrak, kode_absensi
+      const [rows]: any = await pool.query(
+        `SELECT k.id, nik, k.nama, jk, alamat, hp, d.nama AS divisi, j.nama AS jabatan, sp, cuti_terakhir, cuti_sekarang, k.is_active, tgl_masuk, tgl_keluar, kode_absensi
             FROM karyawan k
             JOIN divisi d ON (d.id = k.divisi)
             JOIN jabatan j ON (j.id = k.jabatan)
@@ -49,7 +50,7 @@ export class EmployeeRepository implements IEmployeeRepository {
         [id],
       );
 
-      return BaseEmployeeSchema.parse(rows);
+      return BaseEmployeeSchema.parse(rows[0]);
     } catch (error: unknown) {
       console.error("EmployeeRepository.getDetails error:", error);
 
@@ -63,7 +64,7 @@ export class EmployeeRepository implements IEmployeeRepository {
   async getForUpdateById(id: BaseEmployee["id"]): Promise<EmployeeUpdate> {
     try {
       const [rows]: any[] = await pool.query(
-        `SELECT nik, nama, jk, alamat, hp, divisi, jabatan, cuti_terakhir, cuti_sekarang, status_aktif, status_karyawan, tgl_masuk, tgl_keluar, durasi_kontrak 
+        `SELECT nik, nama, jk, alamat, hp, divisi, jabatan, cuti_terakhir, cuti_sekarang, status_aktif, tgl_masuk, tgl_keluar 
           FROM karyawan k
           WHERE k.id = ?`,
         [id],
@@ -99,7 +100,8 @@ export class EmployeeRepository implements IEmployeeRepository {
     }
   }
 
-  async getOpenEmployees(selectedId?: UserId): Promise<OpenEmployee[]> {
+  // Get employee that has no account
+  async getUnaccountedEmployees(selectedId?: UserId): Promise<OpenEmployee[]> {
     try {
       let selectedFilter = "";
       let args = "";
@@ -118,7 +120,7 @@ export class EmployeeRepository implements IEmployeeRepository {
 
       return OpenEmployeeSchema.array().parse(rows);
     } catch (error) {
-      console.error("EmployeeRepository.getOpenEmployees error:", error);
+      console.error("EmployeeRepository.getUnaccountedEmployees error:", error);
 
       if (error instanceof ZodError)
         throw new Err("invalid open employees data", 400);
@@ -127,19 +129,21 @@ export class EmployeeRepository implements IEmployeeRepository {
     }
   }
 
-  async create(data: EmployeeForm): Promise<boolean> {
+  async create(data: EmployeeForm, conn: Connection): Promise<string> {
     try {
-      const fields = Object.keys(data) as (keyof EmployeeForm)[];
+      const validated = EmployeeFormSchema.parse(data);
+
+      const fields = Object.keys(validated) as (keyof EmployeeForm)[];
       if (fields.length === 0) throw new Err("invalid request data", 400);
 
       const columns = fields.join(", ");
       const placeholder = fields.map(() => "?").join();
-      const values = fields.map((field) => data[field]);
+      const values = fields.map((field) => validated[field]);
 
       const sql = `INSERT INTO karyawan (${columns}) VALUES (${placeholder})`;
-      await pool.query(sql, values);
+      const [res] = await conn.query<ResultSetHeader>(sql, values);
 
-      return true;
+      return String(res.insertId);
     } catch (error) {
       console.error("EmployeeRepository.create error:", error);
 
@@ -149,7 +153,7 @@ export class EmployeeRepository implements IEmployeeRepository {
 
   async delete(id: string, conn: Connection): Promise<boolean> {
     try {
-      await conn.query("DELETE FROM karyawan WHERE id = ?", [id]);
+      await conn.query("UPDATE karyawan SET is_active = 0 WHERE id = ?", [id]);
 
       return true;
     } catch (error) {

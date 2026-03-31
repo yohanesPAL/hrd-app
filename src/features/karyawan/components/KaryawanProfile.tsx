@@ -4,56 +4,56 @@ import { Table } from 'react-bootstrap';
 import styles from '../css/profile.module.css';
 import { BaseEmployee } from '@/modules/employee/employee.schema';
 import { formatDateDDMMYYYY } from '@/utils/dateFormatting';
+import { EmployeeContractTable } from '@/modules/employee/contract/employee.contract.schema';
+import ContractsTable from '../contract/components/ContractsTable';
 
-const KaryawanProfile = ({ data }: { data: BaseEmployee}) => {
+const KaryawanProfile = ({ profile, contracts }: { profile: BaseEmployee, contracts: EmployeeContractTable[] }) => {
   let statusAktif = '';
-  if(data) statusAktif = data?.status_aktif ? "Aktif" : "Non Aktif"
+  if (profile) statusAktif = profile?.is_active ? "Aktif" : "Non Aktif"
 
   return (
     <>
       <PageTitle>Profile</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <Table className={`w-100 table-bordered ${styles.tableBg}`}>
+        <Table className={`w-100 table-bordered ${styles.tableBg}`} style={{ marginBottom: "48px" }}>
           <tbody>
             <tr>
-              <td style={{width:"15%"}}>NIK</td>
+              <td style={{ width: "15%" }}>NIK</td>
               <td>:</td>
-              <td style={{width:"35%"}}>{data?.nik}</td>
+              <td style={{ width: "35%" }}>{profile?.nik}</td>
 
-              <td style={{width:"15%"}}>Cuti Terakhir</td>
+              <td style={{ width: "15%" }}>Cuti Terakhir</td>
               <td>:</td>
-              <td style={{width:"35%"}}>{data?.cuti_terakhir} Hari</td>
+              <td style={{ width: "35%" }}>{profile?.cuti_terakhir} Hari</td>
             </tr>
             <tr>
-              <td>Nama</td><td>:</td><td>{data?.nama}</td>
-              <td>Cuti Sekarang</td><td>:</td><td>{data?.cuti_sekarang} Hari</td>
+              <td>Nama</td><td>:</td><td>{profile?.nama}</td>
+              <td>Cuti Sekarang</td><td>:</td><td>{profile?.cuti_sekarang} Hari</td>
             </tr>
             <tr>
-              <td>Jenis Kelamin</td><td>:</td><td>{data?.jk}</td>
+              <td>Alamat</td><td>:</td><td>{profile?.alamat}</td>
               <td>Status Aktif</td><td>:</td><td>{statusAktif}</td>
             </tr>
             <tr>
-              <td>Alamat</td><td>:</td><td>{data?.alamat}</td>
-              <td>Status Karyawan</td><td>:</td><td>{data?.status_karyawan}</td>
+              <td>Jenis Kelamin</td><td>:</td><td>{profile?.jk}</td>
+              <td>Tanggal Masuk</td><td>:</td><td>{formatDateDDMMYYYY(profile?.tgl_masuk) || "-"}</td>
             </tr>
             <tr>
-              <td>HP</td><td>:</td><td>{data?.hp || "-"}</td>
-              <td>Tanggal Masuk</td><td>:</td><td>{formatDateDDMMYYYY(data?.tgl_masuk) || "-"}</td>
+              <td>HP</td><td>:</td><td>{profile?.hp || "-"}</td>
+              <td>Tanggal Keluar</td><td>:</td><td>{formatDateDDMMYYYY(profile?.tgl_keluar) || "-"}</td>
             </tr>
             <tr>
-              <td>Divisi</td><td>:</td><td>{data?.divisi}</td>
-              <td>Tanggal Keluar</td><td>:</td><td>{formatDateDDMMYYYY(data?.tgl_keluar) || "-"}</td>
+              <td>Divisi</td><td>:</td><td>{profile?.divisi}</td>
+              <td>SP</td><td>:</td><td>{profile?.sp}</td>
             </tr>
             <tr>
-              <td>Jabatan</td><td>:</td><td>{data?.jabatan}</td>
-              <td>Durasi Kontrak</td><td>:</td><td>{!data?.durasi_kontrak ? "-" : `${data?.durasi_kontrak} Hari`}</td>
-            </tr>
-            <tr>
-              <td>SP</td><td>:</td><td>{data?.sp}</td>
-              <td>Kode Absensi</td><td>:</td><td>{data?.kode_absensi}</td>
+              <td>Jabatan</td><td>:</td><td>{profile?.jabatan}</td>
+              <td>Kode Absensi</td><td>:</td><td>{profile?.kode_absensi}</td>
             </tr>
           </tbody>
         </Table>
+
+        <ContractsTable contracts={contracts} />
       </div>
     </>
   )

@@ -48,14 +48,13 @@ export const karyawanColumns = ({
     { accessorKey: "jabatan", header: "Jabatan" },
     { accessorKey: "divisi", header: "Divisi" },
     {
-      accessorKey: "status_aktif", header: "Status", cell: ({ getValue }) => {
+      accessorKey: "is_active", header: "Status", cell: ({ getValue }) => {
         return getValue() as boolean ? "Aktif" : "Non Aktif"
       },
       meta: {
         print: (value: any) => value ? "Aktif" : "Non Aktif",
       }
     },
-    { accessorKey: "status_karyawan", header: "Status Karyawan" },
     { accessorKey: "kode_absensi", header: "Kode Absen" },
     {
       id: "aksi", header: "Aksi", cell: ({ row }) => {

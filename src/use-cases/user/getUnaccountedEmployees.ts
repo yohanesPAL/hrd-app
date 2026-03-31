@@ -3,24 +3,24 @@ import { createEmployeeService } from "@/modules/employee/employee.factory";
 import { EmployeeService } from "@/modules/employee/employee.service";
 import { UserId } from "@/modules/user/user.schema";
 
-export function createGetOpenEmployeesService() {
-  return new GetOpenEmployees(createEmployeeService());
+export function createGetUnaccountedEmployeesService() {
+  return new GetUnaccountedEmployees(createEmployeeService());
 }
 
-class GetOpenEmployees {
+class GetUnaccountedEmployees {
   constructor(private employeeService: EmployeeService) {}
 
   async execute(selectedId: UserId) {
     try {
-      const { data } = await this.employeeService.getOpenEmployees(selectedId);
+      const { data } = await this.employeeService.getUnaccountedEmployees(selectedId);
 
       return data;
     } catch (error) {
-      console.error("GetOpenEmployees error:", error);
+      console.error("GetUnaccountedEmployees error:", error);
 
       if (error instanceof Err) throw error;
 
-      throw new Err("GetOpenEmployees unavailable", 500);
+      throw new Err("GetUnaccountedEmployees unavailable", 500);
     }
   }
 }

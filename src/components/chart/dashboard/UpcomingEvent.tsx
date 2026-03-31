@@ -66,6 +66,14 @@ const UpcomingEvent = ({ upcoming, ongoing }: { upcoming: UpcomingEventType[], o
             </div>
           )
         }
+
+        {
+          ongoing.length === 0 && upcoming.length === 0 && (
+            <div>
+              <h5 className='text-center'>Kosong</h5>
+            </div>
+          )
+        }
       </Stack>
     </div>
   )

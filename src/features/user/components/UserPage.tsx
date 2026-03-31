@@ -4,11 +4,9 @@ import { UserForm as UserFormType, UserId, UserTable } from '@/modules/user/user
 import { SortingState } from '@tanstack/react-table';
 import { UserColumns } from '../columns/UserColumns';
 import ButtonWithIcon from '@/components/Buttons/ButtonWithIcon';
-import { Form, Modal, Spinner, Stack } from 'react-bootstrap';
 import { useState } from 'react';
-import { roleSelect } from '@/lib/roleList';
-import { createUser, deleteUser, getOpenEmployees, updateUser } from '../UserAction';
-import { FormType, OpenEmployeeState } from '../types/UserTypes';
+import { createUser, deleteUser, updateUser } from '../UserAction';
+import { FormType } from '../types/UserTypes';
 import UserForm from './UserForm';
 import { toast } from 'react-toastify';
 import { useExecuteAction } from '@/hooks/useExecuteAction';
