@@ -1,5 +1,7 @@
 import pool from "@/lib/db";
 import { Err } from "@/lib/err";
+import { createEmployeeContractService } from "@/modules/employee/contract/employee.contract.factory";
+import { EmployeeContractService } from "@/modules/employee/contract/employee.contract.service";
 import { createEmployeeService } from "@/modules/employee/employee.factory";
 import { EmployeeService } from "@/modules/employee/employee.service";
 import { createUserService } from "@/modules/user/user.factory";
@@ -22,12 +24,15 @@ class DeleteEmployee {
       conn = await pool.getConnection();
       await conn.beginTransaction();
 
-      const res = await this.userService.getUserIdByKaryawanId(
+      const userId = await this.userService.getUserIdByKaryawanId(
         karyawanId,
         conn,
       );
       
-      await this.userService.deleteUser(res.data, conn);
+      if(userId.data) {
+        await this.userService.deleteUser(userId.data, conn);
+      }
+
       await this.employeeService.deleteEmployee(karyawanId, conn);
 
       await conn.commit();

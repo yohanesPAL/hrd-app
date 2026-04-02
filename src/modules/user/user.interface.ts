@@ -4,7 +4,7 @@ import { ServiceRes } from "@/types/ServiceTypes";
 
 export interface IUserRepository {
   getAll(): Promise<UserTable[]>;
-  getIdByKaryawanId(karyawanId: string, conn: Connection): Promise<UserId>;
+  getIdByKaryawanId(karyawanId: string, conn: Connection): Promise<UserId | null>;
   create(data: UserPersistence): Promise<boolean>;
   update(id: UserId, data: UserPersistence): Promise<boolean>;
   delete(id: UserId, conn?: Connection): Promise<boolean>;

@@ -75,4 +75,16 @@ export class EmployeeContractRepository implements IEmployeeContractRepository {
         throw new Err("failed to delete employee contract", 500);
       }
   }
+
+  async deleteByKaryawanId(karyawanId: BaseEmployee["id"], conn: Connection): Promise<boolean> {
+      try {
+        await conn.query("DELETE FROM kontrak_karyawan WHERE karyawan_id = ?", [karyawanId]);
+
+        return true;
+      } catch (error) {
+        console.error("EmployeeContractRepository.deleteByKaryawanId error:", error);
+
+        throw new Err("failed to delete employee contract by karyawan id", 500);
+      }
+  }
 }

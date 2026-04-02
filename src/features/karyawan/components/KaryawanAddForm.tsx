@@ -10,6 +10,16 @@ import { useExecuteAction } from '@/hooks/useExecuteAction';
 import { createKaryawan } from '../KaryawanAction';
 import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
+import { EmployeeContractForm } from '@/modules/employee/contract/employee.contract.schema';
+import { formatDateYYYYMMDD } from '@/utils/dateFormatting';
+
+const contractFormDefault: EmployeeContractForm = {
+  tgl_kontrak: new Date(),
+  tgl_berakhir: null,
+  jenis: "kontrak",
+  total_kontrak: 0,
+  karyawan_id: "",
+}
 
 const defaulKaryawanForm: EmployeeForm = {
   nik: "",
@@ -29,24 +39,27 @@ const defaulKaryawanForm: EmployeeForm = {
 const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => {
   const router = useRouter();
   const [karyawanForm, setKaryawanForm] = useState<EmployeeForm>(defaulKaryawanForm)
+  const [contractForm, setContractForm] = useState<EmployeeContractForm>(contractFormDefault)
   const { executeAction } = useExecuteAction()
   const profile = useProfile((state) => state.profile);
   const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const onSubmit = async (payload: EmployeeForm) => {
-    if (!payload) return toast.error("data tidak boleh kosong");
-    if (payload.nik.length !== 16) return toast.error("NIK tidak sesuai")
+  const onSubmit = async (employee: EmployeeForm, contract: EmployeeContractForm) => {
+    if (!employee || !contract) return toast.error("data tidak boleh kosong");
+    if (employee.nik.length !== 16) return toast.error("NIK tidak sesuai")
 
     setSubmitted(true);
 
     await toast.promise(
-      executeAction(createKaryawan, payload).catch((err) => {
+      executeAction(createKaryawan, employee, contract).catch((err) => {
         setSubmitted(false);
         throw err;
       }), {
       pending: "Membuat karyawan...",
       success: "Berhasil buat karywan",
-      error: "Ooops... ada yang salah",
+      error: {
+        render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+      },
     })
 
     router.push(`/${profile?.role}/karyawan`)
@@ -56,7 +69,7 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
       <h2 className='mb-4'>Form Karyawan</h2>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(karyawanForm);
+        onSubmit(karyawanForm, contractForm);
       }}>
         <Stack gap={4}>
           <Row>
@@ -208,6 +221,50 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               onChange={(e) => setKaryawanForm({ ...karyawanForm, tgl_masuk: e.currentTarget.value })}
             />
           </Form.Group>
+
+          <h2 className='mb-0 mt-2'>Kontrak Form</h2>
+          <Form.Group>
+            <Form.Label>Jenis Kontrak</Form.Label>
+            <Form.Select
+              required
+              value={contractForm.jenis}
+              onChange={(e) => {
+                if (e.currentTarget.value === "tetap") {
+                  setContractForm({ ...contractForm, tgl_berakhir: null })
+                } else {
+                  setContractForm({ ...contractForm, tgl_berakhir: new Date() })
+                }
+                setContractForm({ ...contractForm, jenis: e.currentTarget.value as EmployeeContractForm["jenis"] })
+              }}
+            >
+              <option value={"tetap"}>Tetap</option>
+              <option value={"kontrak"}>Kontrak</option>
+            </Form.Select>
+          </Form.Group>
+          <Row>
+            <Form.Group as={Col}>
+              <Form.Label>Tanggal Kontrak</Form.Label>
+              <Form.Control
+                type='date'
+                required
+                value={formatDateYYYYMMDD(contractForm.tgl_kontrak)}
+                onChange={(e) => setContractForm({ ...contractForm, tgl_kontrak: new Date(e.currentTarget.value) })}
+              />
+            </Form.Group>
+            {
+              contractForm.jenis === "kontrak" && (
+                <Form.Group as={Col}>
+                  <Form.Label>Tanggal Berakhir</Form.Label>
+                  <Form.Control
+                    type='date'
+                    required
+                    value={contractForm.tgl_berakhir ? formatDateYYYYMMDD(contractForm.tgl_berakhir) : ""}
+                    onChange={(e) => setContractForm({ ...contractForm, tgl_berakhir: new Date(e.currentTarget.value) })}
+                  />
+                </Form.Group>
+              )
+            }
+          </Row>
           <Button type="submit" style={{ width: '100px' }} disabled={submitted}>Submit</Button>
         </Stack>
       </Form>

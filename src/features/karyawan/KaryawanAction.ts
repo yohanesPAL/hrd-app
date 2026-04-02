@@ -1,5 +1,6 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
+import { EmployeeContractForm } from "@/modules/employee/contract/employee.contract.schema";
 import { createEmployeeService } from "@/modules/employee/employee.factory";
 import {
   BaseEmployee,
@@ -8,6 +9,7 @@ import {
   EmployeeSpForm,
   EmployeeUpdate,
 } from "@/modules/employee/employee.schema";
+import { createCreateEmployeeService } from "@/use-cases/employee/createEmployee";
 import { createDeleteEmployeeService } from "@/use-cases/employee/deleteEmployee";
 import { createGetEmployeeFormOptions } from "@/use-cases/employee/getEmployeeFormOptions";
 import { revalidatePath } from "next/cache";
@@ -15,6 +17,7 @@ import { revalidatePath } from "next/cache";
 const employeeService = createEmployeeService();
 const employeeFormOptions = createGetEmployeeFormOptions();
 const deleteEmployee = createDeleteEmployeeService();
+const createEmployee = createCreateEmployeeService();
 const PATH = "karyawan";
 
 export const getAllKaryawan = withAuth(async () => {
@@ -34,8 +37,8 @@ export const getKaryawanFormOptions = withAuth(async () => {
 }, ["hrd"]);
 
 export const createKaryawan = withAuth(
-  async (session, data: EmployeeForm) => {
-    // await employeeService.createEmployee(data);
+  async (session, employee: EmployeeForm, contract: EmployeeContractForm) => {
+    await createEmployee.execute(employee, contract);
   },
   ["hrd"],
 );

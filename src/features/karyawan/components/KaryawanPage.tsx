@@ -125,7 +125,7 @@ const KaryawanPage = ({ data }: { data: EmployeeTable[] }) => {
         })}
         defaultSort={defaultSort}
         loading={isSuspense}
-        tableWidth='110%'
+        tableWidth='115%'
         SetTableComponent={setTable}
       />
 

@@ -123,6 +123,7 @@ export class EmployeeService implements IEmployeeService {
       console.error("EmployeeService.createEmployee error:", error);
 
       if (error instanceof Err) throw error;
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
 
       throw new Err("EmployeeService.createEmployee unavailable", 500);
     }

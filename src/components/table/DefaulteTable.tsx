@@ -37,7 +37,7 @@ function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", load
   })
 
   useEffect(() => {
-    if(SetTableComponent)SetTableComponent(table)
+    if (SetTableComponent) SetTableComponent(table)
   }, [table])
 
   return (
@@ -99,6 +99,16 @@ function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", load
           </thead>
 
           <tbody>
+            {data.length === 0 && !loading && (
+              <tr>
+                <td colSpan={table.getAllColumns().length} className="text-center py-4">
+                  <div className='d-flex flex-column gap-2 align-items-center justify-content-center'>
+                    <span className="ms-2">No data found</span>
+                  </div>
+                </td>
+              </tr>
+            )}
+
             {loading ? (
               <tr>
                 <td colSpan={table.getAllColumns().length} className="text-center py-4">
@@ -108,15 +118,21 @@ function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", load
                   </div>
                 </td>
               </tr>
-            ) : table.getRowModel().rows.map(row => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            ) : table.getRowModel().rows.map(row => {
+              const rowClassName = row.getVisibleCells().reduce((cls, cell) => {
+                const fn = cell.column.columnDef.meta?.getRowClassName
+                return cls || (fn ? fn(cell.getValue(), row.original) : "")
+              }, "")
+              return (
+                <tr key={row.id} className={rowClassName}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
           </tbody>
         </Table>
       </TableWrapper>

@@ -36,6 +36,8 @@ export const EmployeeTableSchema = BaseEmployeeSchema.omit({
   tgl_keluar: true,
 }).extend({
   no: z.number().nonnegative(),
+  jenis_kontrak: z.string().nullable(),
+  tgl_berakhir: z.date().nullable(),
 });
 
 export const EmployeeFormSchema = BaseEmployeeSchema.omit({
@@ -44,7 +46,7 @@ export const EmployeeFormSchema = BaseEmployeeSchema.omit({
   tgl_keluar: true,
 }).extend({
   tgl_masuk: z.string().min(1),
-  is_active: z.boolean().transform((val) => val ? 1 : 0),
+  is_active: z.number(),
 });
 
 export const EmployeeUpdateSchema = BaseEmployeeSchema.omit({

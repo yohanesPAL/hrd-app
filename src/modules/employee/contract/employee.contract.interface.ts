@@ -8,6 +8,7 @@ export interface IEmployeeContractRepository {
   create(data: EmployeeContractForm, conn: Connection): Promise<boolean>;
   update(id: BaseEmployee["id"], data: EmployeeContractForm): Promise<boolean>;
   delete(id: BaseEmployee["id"]): Promise<boolean>;
+  deleteByKaryawanId(karyawanId: BaseEmployee["id"], conn: Connection): Promise<boolean>;
 }
 
 export interface IEmployeeContractService {
@@ -15,4 +16,5 @@ export interface IEmployeeContractService {
   createContract(data: EmployeeContractForm, conn: Connection): Promise<ServiceRes>;
   updateContract(id: BaseEmployee["id"], data: EmployeeContractForm): Promise<ServiceRes>;
   deleteContract(id: BaseEmployee["id"]): Promise<ServiceRes>;
+  deleteContractByKaryawanId(karyawanId: BaseEmployee["id"], conn: Connection): Promise<ServiceRes>;
 }

@@ -56,16 +56,21 @@ const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) =
       executeAction(createKaryawanContractAction, { ...data, karyawan_id: params.id as string }), {
       pending: "Membuat kontrak...",
       success: "Berhasil buat kontrak",
-      error: "Ooops... ada yang salah",
+      error: {
+        render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+      },
     })
   }
 
   const patchContract = async (id: BaseEmployeeContrat["id"], data: EmployeeContractForm) => {
+    data.karyawan_id = id;
     await toast.promise(
       executeAction(updateKaryawanContractAction, id, data), {
       pending: "Update kontrak...",
       success: "Berhasil update kontrak",
-      error: "Ooops... ada yang salah",
+      error: {
+        render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+      },
     })
   }
 

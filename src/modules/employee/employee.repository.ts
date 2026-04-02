@@ -22,10 +22,15 @@ export class EmployeeRepository implements IEmployeeRepository {
   async getAll(): Promise<EmployeeTable[]> {
     try {
       const [rows]: any[] = await pool.query(
-        `SELECT k.id, nik, k.nama, jk, alamat, hp, d.nama AS divisi, j.nama AS jabatan, k.is_active, sp, kode_absensi
-          FROM karyawan k
+        `SELECT k.id, nik, k.nama, jk, alamat, hp, d.nama AS divisi, j.nama AS jabatan, k.is_active, sp, kode_absensi, jenis_kontrak, tgl_berakhir FROM karyawan k
           JOIN divisi d ON (d.id = k.divisi)
-          JOIN jabatan j ON (j.id = k.jabatan)`,
+          JOIN jabatan j ON (j.id = k.jabatan)
+          LEFT JOIN (
+         	  SELECT kk.karyawan_id, jenis AS jenis_kontrak, tgl_berakhir FROM kontrak_karyawan kk
+				    JOIN (
+    				   SELECT karyawan_id, MAX(id) as max_id FROM kontrak_karyawan GROUP BY karyawan_id
+				    ) latest ON kk.id = latest.max_id
+          ) t1 ON (t1.karyawan_id = k.id);`,
       );
 
       return EmployeeMapper.toTableRows(rows);
@@ -144,8 +149,10 @@ export class EmployeeRepository implements IEmployeeRepository {
       const [res] = await conn.query<ResultSetHeader>(sql, values);
 
       return String(res.insertId);
-    } catch (error) {
+    } catch (error: any) {
       console.error("EmployeeRepository.create error:", error);
+
+      if(error.code === "ER_DUP_ENTRY" || error.errno === 1062 ) throw new Err("NIK sudah ada", 400);
 
       throw new Err("failed to create employee", 500);
     }

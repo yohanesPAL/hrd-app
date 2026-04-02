@@ -26,9 +26,11 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async getIdByKaryawanId(karyawanId: string, conn: Connection): Promise<UserId> {
+  async getIdByKaryawanId(karyawanId: string, conn: Connection): Promise<UserId | null> {
       try {
         const [rows]: any[] = await conn.query("SELECT id FROM akun WHERE karyawan_id = ?", [karyawanId]);
+        
+        if(rows.length === 0) return null;
 
         return UserIdSchema.parse(rows[0].id);
       } catch (error) {
@@ -42,7 +44,7 @@ export class UserRepository implements IUserRepository {
 
   async create(data: UserPersistence): Promise<boolean> {
     try {
-      const [res] = await pool.query(
+      await pool.query(
         "INSERT INTO akun (username, password, role, karyawan_id) VALUES (?,?,?,?)",
         [data.username, data.password, data.role, data.karyawan_id],
       );

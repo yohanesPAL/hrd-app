@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Dispatch, SetStateAction } from "react"
 import { Button, Stack } from "react-bootstrap"
 import { KaryawanOnEdit } from "../types/KaryawanTypes"
+import { formatDateDDMMYYYY } from "@/utils/dateFormatting"
 
 export const karyawanColumns = ({
   role,
@@ -53,6 +54,20 @@ export const karyawanColumns = ({
       },
       meta: {
         print: (value: any) => value ? "Aktif" : "Non Aktif",
+        getRowClassName(value) {
+          return value ? "" : "table-dark";
+        },
+      }
+    },
+    {
+      accessorKey: "jenis_kontrak", header: "Status Karyawan", cell: ({getValue}) => {
+        const kontrak = getValue() as string | null;
+        return kontrak ? kontrak.charAt(0).toUpperCase() + kontrak.slice(1) : "-"
+      }
+    },
+    {
+      accessorKey: "tgl_berakhir", header: "Tgl Akhir Kontrak", cell: ({getValue}) => {
+        return !getValue() ? "-" : formatDateDDMMYYYY(getValue() as Date)
       }
     },
     { accessorKey: "kode_absensi", header: "Kode Absen" },
