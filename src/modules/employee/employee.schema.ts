@@ -56,6 +56,7 @@ export const EmployeeUpdateSchema = BaseEmployeeSchema.omit({
 }).extend({
   tgl_masuk: z.string().min(1),
   tgl_keluar: z.string().nullable(),
+  is_active: z.number(),
 });
 
 export const EmployeeSpFormSchema = BaseEmployeeSchema.pick({ sp: true });

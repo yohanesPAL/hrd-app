@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import SideBar from "@/components/Sidebar/Sidebar";
-import TopBar from "@/components/TopBar";
+import TopBar from "@/components/TopBar/TopBar";
 import BottomBar from "@/components/BottomBar";
 import PageTransition from "./PageTransition";
 

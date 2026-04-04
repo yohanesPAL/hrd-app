@@ -15,7 +15,7 @@ const EditKaryawan = async ({ params }: { params: Promise<{ id: string }> }) => 
     <>
       <PageTitle>Edit Karyawan</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <KaryawanEditForm id={id} karyawanData={karyawan} formOptions={formOptions}/>
+        <KaryawanEditForm id={id} karyawanData={karyawan.data} formOptions={formOptions}/>
       </div>
     </>
   )

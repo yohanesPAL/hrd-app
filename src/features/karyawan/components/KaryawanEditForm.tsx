@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button, Col, Form, InputGroup, Row, Stack } from 'react-bootstrap';
 import InputGroupText from 'react-bootstrap/esm/InputGroupText';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
-import { BaseEmployee, EmployeeUpdate } from '@/modules/employee/employee.schema';
+import { BaseEmployee, EmployeeForm, EmployeeUpdate } from '@/modules/employee/employee.schema';
 import { KaryawanFormOptions } from '../types/KaryawanTypes';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 import { updateKaryawan } from '../KaryawanAction';
@@ -134,44 +134,12 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Label>Status Aktif</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.status_aktif ? 1 : 0}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, status_aktif: e.currentTarget.value === "1" })}
+                value={karyawanForm.is_active ? 1 : 0}
+                onChange={(e) => setKaryawanForm({ ...karyawanForm, is_active: Number(e.currentTarget.value) as EmployeeForm["is_active"] })}
               >
                 <option value={1}>Aktif</option>
                 <option value={0}>Non Aktif</option>
               </Form.Select>
-            </Form.Group>
-
-            <Form.Group as={Col}>
-              <Form.Label>Status Karyawan</Form.Label>
-              <Form.Select
-                required
-                value={karyawanForm.status_karyawan}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, status_karyawan: e.currentTarget.value })}
-              >
-                <option value={"Kontrak"}>Kontrak</option>
-                <option value={"Tetap"}>Tetap</option>
-                <option value={"Resign"}>Resign</option>
-                <option value={"Cutoff"}>Cutoff</option>
-              </Form.Select>
-            </Form.Group>
-          </Row>
-          <Row>
-            <Form.Group as={Col}>
-              <Form.Label>Durasi Kontrak (Dalam hari)</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  type='number'
-                  placeholder='Ex: 2'
-                  required
-                  value={karyawanForm.durasi_kontrak}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, durasi_kontrak: Number(e.currentTarget.value) })}
-                />
-                <InputGroupText>Hari</InputGroupText>
-              </InputGroup>
-            </Form.Group>
-
-            <Form.Group as={Col}>
             </Form.Group>
           </Row>
           <Row>

@@ -69,7 +69,7 @@ export class EmployeeRepository implements IEmployeeRepository {
   async getForUpdateById(id: BaseEmployee["id"]): Promise<EmployeeUpdate> {
     try {
       const [rows]: any[] = await pool.query(
-        `SELECT nik, nama, jk, alamat, hp, divisi, jabatan, cuti_terakhir, cuti_sekarang, status_aktif, tgl_masuk, tgl_keluar 
+        `SELECT nik, nama, jk, alamat, hp, divisi, jabatan, cuti_terakhir, cuti_sekarang, is_active, tgl_masuk, tgl_keluar 
           FROM karyawan k
           WHERE k.id = ?`,
         [id],
