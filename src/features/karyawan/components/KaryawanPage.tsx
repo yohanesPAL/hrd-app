@@ -106,7 +106,7 @@ const KaryawanPage = ({ data }: { data: EmployeeTable[] }) => {
       <Stack direction='horizontal' gap={2}>
         <Button type='button' variant='primary' onClick={() => router.push(`/${role}/karyawan/tambah`)}>
           <i className='bi bi-person-fill'></i>
-          <span>Tambah</span>
+          <span style={{marginLeft: "4px"}}>Tambah</span>
         </Button>
         <ExportToExcel onExport={onExport} />
       </Stack>

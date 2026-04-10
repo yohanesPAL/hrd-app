@@ -5,6 +5,7 @@ import { UserForm as UserFormType } from '@/modules/user/user.schema'
 import { getUnaccountedEmployees } from '../UserAction'
 import { roleSelect } from '@/lib/roleList'
 import { toast } from 'react-toastify'
+import Select from 'react-select'
 
 const UserForm = ({
   showModal,
@@ -36,7 +37,7 @@ const UserForm = ({
       async function execute() {
         setUnaccountedEmpployees({ isLoading: true, data: [] });
         const employees = await getUnaccountedEmployees(updatingId);
-        setUnaccountedEmpployees({ isLoading: false, data: employees.data ?? [] });
+        setUnaccountedEmpployees({ isLoading: false, data: employees ?? [] });
       }
 
       execute();
@@ -62,6 +63,7 @@ const UserForm = ({
             <Form.Group>
               <Form.Label>Username</Form.Label>
               <Form.Control
+                style={{ background: "white" }}
                 type='text'
                 required
                 value={userForm.username}
@@ -71,6 +73,7 @@ const UserForm = ({
             <Form.Group>
               <Form.Label>Password</Form.Label>
               <Form.Control
+                style={{ background: "white" }}
                 type='password'
                 required={formType === "Tambah"}
                 value={userForm.password}
@@ -80,6 +83,7 @@ const UserForm = ({
             <Form.Group>
               <Form.Label>Confirm Password</Form.Label>
               <Form.Control
+                style={{ background: "white" }}
                 type='password'
                 required={formType === "Tambah"}
                 value={passConfirm}
@@ -89,6 +93,7 @@ const UserForm = ({
             <Form.Group>
               <Form.Label>Role</Form.Label>
               <Form.Select
+                style={{ background: "white" }}
                 required
                 value={userForm.role}
                 onChange={(e) => setUserForm({ ...userForm, role: e.currentTarget.value })}
@@ -104,18 +109,19 @@ const UserForm = ({
                 <Form.Label style={{ margin: "0px" }}>Karyawan</Form.Label>
                 {unaccountedEmployees.isLoading && <Spinner animation="border" variant="secondary" size='sm' />}
               </Stack>
-              <Form.Select
+              <Select
                 required
-                value={userForm.karyawan_id}
-                onChange={(e) => setUserForm({ ...userForm, karyawan_id: e.currentTarget.value })}
-                disabled={unaccountedEmployees.isLoading}
-              >
-                {unaccountedEmployees.isLoading && <option>Loading...</option>}
-                <option value="">--Pilih Karyawan--</option>
-                {unaccountedEmployees.data.map(item =>
-                  <option key={item.id} value={item.id}>{item.nik} | {item.nama} | {item.jabatan}</option>
-                )}
-              </Form.Select>
+                isLoading={unaccountedEmployees.isLoading}
+                placeholder="--Pilih Karyawan--"
+                options={unaccountedEmployees.data}
+                value={unaccountedEmployees.data.find(opt => opt.value === userForm.karyawan_id)}
+                onChange={(selected) =>
+                  setUserForm({
+                    ...userForm,
+                    karyawan_id: selected?.value || ""
+                  })
+                }
+              />
             </Form.Group>
           </Stack>
         </Modal.Body>

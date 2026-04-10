@@ -5,7 +5,7 @@ const ExportToExcel = ({ onExport }: { onExport: () => void }) => {
   return (
     <Button variant='success' type='button' onClick={onExport}>
       <i className="bi bi-file-earmark-excel-fill"></i>
-      <span>Export to Excel</span>
+      <span style={{marginLeft: "4px"}}>Export to Excel</span>
     </Button>
   )
 }

@@ -29,7 +29,8 @@ export class EmployeeContractService implements IEmployeeContractService {
     karyawanId: BaseEmployee["id"],
   ): Promise<ServiceRes<EmployeeContractTable[]>> {
     try {
-      const res = await this.employeeContractRepository.getByKaryawanId(karyawanId);
+      const res =
+        await this.employeeContractRepository.getByKaryawanId(karyawanId);
 
       return { success: true, status: 200, data: res };
     } catch (error) {
@@ -44,6 +45,29 @@ export class EmployeeContractService implements IEmployeeContractService {
         "EmployeeContractService.getContractByKaryawanId unavailable",
         500,
       );
+    }
+  }
+
+  async getContractNearExpiration(
+    daysBefore: number,
+  ): Promise<ServiceRes<EmployeeContractExpiration[]>> {
+    try {
+      if (typeof daysBefore !== "number")
+        throw new Err("days interval must be number");
+
+      const res =
+        await this.employeeContractRepository.getNearExpiration(daysBefore);
+
+      return {success: true, status: 200, data: res};
+    } catch (error) {
+      console.error(
+        "EmployeeContractService.getContractNearExpiration error:",
+        error,
+      );
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -161,29 +185,6 @@ export class EmployeeContractService implements IEmployeeContractService {
         "EmployeeContractService.deleteContractByKaryawanId unavailable",
         500,
       );
-    }
-  }
-
-  async getContractNearExpiration(
-    daysBefore: number,
-  ): Promise<EmployeeContractExpiration[]> {
-    try {
-      if (typeof daysBefore !== "number")
-        throw new Err("days interval must be number");
-
-      const res =
-        await this.employeeContractRepository.getNearExpiration(daysBefore);
-
-      return res;
-    } catch (error) {
-      console.error(
-        "EmployeeContractService.getContractNearExpiration error:",
-        error,
-      );
-
-      if (error instanceof Err) throw error;
-
-      throw new Err("internal server error", 500);
     }
   }
 }

@@ -2,6 +2,7 @@
 import PageTitle from '@/components/PageTitle'
 import KaryawanEditForm from '@/features/karyawan/components/KaryawanEditForm';
 import { getKaryawanFormOptions, getKaryawanForUpdate } from '@/features/karyawan/KaryawanAction';
+import { Err } from '@/lib/err';
 
 const EditKaryawan = async ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params;
@@ -10,6 +11,8 @@ const EditKaryawan = async ({ params }: { params: Promise<{ id: string }> }) => 
     getKaryawanFormOptions(),
     getKaryawanForUpdate(id),
   ])
+
+  if(!karyawan.data) throw new Err("invalid karyawan data", 500)
 
   return (
     <>

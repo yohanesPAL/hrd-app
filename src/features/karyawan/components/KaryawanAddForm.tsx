@@ -138,7 +138,7 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, divisi: e.currentTarget.value })}
               >
                 <option value={""}>--Pilih Divisi--</option>
-                {formOptions?.division.map((item) => (
+                {formOptions?.activeDivision.map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
                 ))}
               </Form.Select>
@@ -152,7 +152,7 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, jabatan: e.currentTarget.value })}
               >
                 <option value={""}>--Pilih Jabatan--</option>
-                {formOptions?.position.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
+                {formOptions?.activePosition.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
                 ))
                 }

@@ -10,7 +10,7 @@ const AbsensiDetails = async ({ params }: { params: { kodeAbsen: string } }) => 
     <>
     <PageTitle>Detail Absensi</PageTitle>
     <div className='page-container-border bg-white rounded p-2 pt-4'>
-      <AbsensiDetailsPage absensi={absensi}/>
+      <AbsensiDetailsPage absensi={absensi.data ?? []}/>
     </div>
     </>
   )

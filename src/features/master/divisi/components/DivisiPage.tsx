@@ -83,7 +83,7 @@ const DivisiPage = ({ data }: { data: DivisionTable[] }) => {
       <Stack direction='horizontal' gap={2}>
         <Button type='button' variant='primary' onClick={() => setShow(true)}>
           <i className='bi bi-stack'></i>
-          <span>Tambah</span>
+          <span style={{marginLeft: "4px"}}>Tambah</span>
         </Button>
         <ExportToExcel onExport={onExport} />
       </Stack>

@@ -85,7 +85,7 @@ const JabatanPage = ({ data, divisiList }: { data: PositionTable[], divisiList: 
       <Stack direction='horizontal' gap={2}>
         <Button type='button' variant='primary' onClick={() => setShow(true)} disabled={divisiList.length > 0 && false}>
           <i className='bi bi-briefcase-fill'></i>
-          <span>Tambah</span>
+          <span style={{marginLeft: "4px"}}>Tambah</span>
         </Button>
         <ExportToExcel onExport={onExport} />
       </Stack>

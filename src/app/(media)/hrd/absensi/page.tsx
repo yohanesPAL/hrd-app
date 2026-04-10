@@ -9,7 +9,7 @@ const Absensi = async () => {
     <>
       <PageTitle>Absensi</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <AbsensiPage absensi={absensi}/>
+        <AbsensiPage absensi={absensi.data ?? []}/>
       </div>
     </>
   )

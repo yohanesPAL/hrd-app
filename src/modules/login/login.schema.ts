@@ -4,7 +4,7 @@ import {z} from "zod"
 export const CredentialSchema = z.object({
   username: z.coerce.string().min(1),
   password: z.string().min(1),
-}).strict();
+});
 
 export const AccountSchema = CredentialSchema.extend({
   id: z.coerce.string().min(1),

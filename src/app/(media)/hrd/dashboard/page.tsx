@@ -22,9 +22,9 @@ async function Dashboard() {
   let upcomingEvents: UpcomingEventType[] = [];
   let onGoingEvents: UpcomingEventType[] = [];
   try {
-    const {data} = await getUpcomingEvents(id);
-    upcomingEvents = data.upcoming;
-    onGoingEvents = data.onGoing;
+    const events = await getUpcomingEvents(id);
+    upcomingEvents = events.data?.upcoming ?? [];
+    onGoingEvents = events.data?.onGoing ?? [];
   } catch (err) {
     if(err instanceof Err) {
       return <InternalServerError msg={err.message}/>

@@ -5,6 +5,7 @@ import pool from "@/lib/db";
 import { AbsensiTable } from "./absensi.schema";
 import { ZodError } from "zod";
 import { AbsensiMapper } from "./absensi.mapper";
+import { dbErr } from "@/lib/dbErr";
 
 export class AbsensiRepository implements IAbsensiRepository {
   async getAll(): Promise<AbsensiTable[]> {
@@ -43,10 +44,12 @@ export class AbsensiRepository implements IAbsensiRepository {
       );
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("AbsensiRepository.create error:", error);
 
-      throw new Err("failed to import absen", 500);
+      if(error.code == dbErr.duplicate) throw new Err("duplicate entry", 400);
+
+      throw new Err(error as string, 500);
     }
   }
 

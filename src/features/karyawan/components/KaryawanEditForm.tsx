@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
 import { BaseEmployee, EmployeeForm, EmployeeUpdate } from '@/modules/employee/employee.schema';
 import { KaryawanFormOptions } from '../types/KaryawanTypes';
-import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
 import { updateKaryawan } from '../KaryawanAction';
 import { useExecuteAction } from '@/hooks/useExecuteAction';
 
@@ -109,7 +108,7 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
                 value={karyawanForm.divisi}
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, divisi: e.currentTarget.value, jabatan: "" })}
               >
-                {formOptions.division.map((item) => (
+                {formOptions.activeDivision.map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
                 ))}
               </Form.Select>
@@ -123,7 +122,7 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
                 onChange={(e) => setKaryawanForm({ ...karyawanForm, jabatan: e.currentTarget.value })}
               >
                 <option value={""}>-- Pilih Jabatan --</option>
-                {formOptions.position.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
+                {formOptions.activePosition.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
                   <option key={item.id} value={String(item.id)}>{item.nama}</option>
                 ))}
               </Form.Select>

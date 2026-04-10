@@ -104,7 +104,7 @@ const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) =
         <h3>Table Kontrak</h3>
         <Button type='button' variant='primary' onClick={() => setShowModal(true)}>
           <i className='bi bi-plus-lg'></i>
-          <span>Tambah</span>
+          <span style={{marginLeft: "4px"}}>Tambah</span>
         </Button>
       </div>
 

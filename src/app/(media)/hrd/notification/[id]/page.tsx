@@ -4,7 +4,6 @@ import { getNotificaionsByUser } from '@/features/notification/NotificationActio
 
 export default async function Notification({ params }: { params: { id: string } }) {
   const { id } = await params;
-
   const notifications = await getNotificaionsByUser(id);
 
   return (

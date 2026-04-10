@@ -2,7 +2,7 @@ import { OpenEmployee } from "@/modules/employee/employee.schema";
 
 export type OpenEmployeeState = {
   isLoading: boolean,
-  data: OpenEmployee[]
+  data: {value: string, label: string}[]
 }
 
 export type FormType = "Tambah" | "Update";
