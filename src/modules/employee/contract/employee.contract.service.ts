@@ -5,6 +5,8 @@ import {
   EmployeeContractFormSchema,
   EmployeeContractIdSchema,
   EmployeeContractForm,
+  EmployeeContractExpiration,
+  EmployeeContractTable,
 } from "./employee.contract.schema";
 import { Err } from "@/lib/err";
 import { EmployeeContractRepository } from "./employee.contract.repository";
@@ -25,12 +27,11 @@ export class EmployeeContractService implements IEmployeeContractService {
 
   async getContractByKaryawanId(
     karyawanId: BaseEmployee["id"],
-  ): Promise<ServiceRes> {
+  ): Promise<ServiceRes<EmployeeContractTable[]>> {
     try {
-      const contracts =
-        await this.employeeContractRepository.getByKaryawanId(karyawanId);
+      const res = await this.employeeContractRepository.getByKaryawanId(karyawanId);
 
-      return { success: true, status: 200, data: contracts };
+      return { success: true, status: 200, data: res };
     } catch (error) {
       console.error(
         "EmployeeContractService.getContractByKaryawanId error:",
@@ -160,6 +161,29 @@ export class EmployeeContractService implements IEmployeeContractService {
         "EmployeeContractService.deleteContractByKaryawanId unavailable",
         500,
       );
+    }
+  }
+
+  async getContractNearExpiration(
+    daysBefore: number,
+  ): Promise<EmployeeContractExpiration[]> {
+    try {
+      if (typeof daysBefore !== "number")
+        throw new Err("days interval must be number");
+
+      const res =
+        await this.employeeContractRepository.getNearExpiration(daysBefore);
+
+      return res;
+    } catch (error) {
+      console.error(
+        "EmployeeContractService.getContractNearExpiration error:",
+        error,
+      );
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("internal server error", 500);
     }
   }
 }

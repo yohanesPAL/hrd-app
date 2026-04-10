@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const BaseEventSchema = z.object({
-  id: z.string().min(1),
-  akun_id: z.string().min(1),
+  id: z.coerce.string().min(1),
+  akun_id: z.coerce.string().min(1),
   title: z.string().min(1),
   start: z.date().min(1),
   end: z.date().min(1),
-});
+}).strict();
 
 export const AccountIdSchema = BaseEventSchema.shape.akun_id;
 

@@ -1,9 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { Account, CredentialSchema } from "./modules/login/login.schema";
-import { createLoginService } from "./modules/login/login.factory";
-
-const loginService = createLoginService()
+import { loginService } from "./modules/login/login.factory";
 
 export const { handlers, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,

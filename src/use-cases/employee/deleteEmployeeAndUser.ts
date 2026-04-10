@@ -1,18 +1,12 @@
 import pool from "@/lib/db";
 import { Err } from "@/lib/err";
-import { createEmployeeContractService } from "@/modules/employee/contract/employee.contract.factory";
-import { EmployeeContractService } from "@/modules/employee/contract/employee.contract.service";
-import { createEmployeeService } from "@/modules/employee/employee.factory";
+import { employeeService } from "@/modules/employee/employee.factory";
 import { EmployeeService } from "@/modules/employee/employee.service";
-import { createUserService } from "@/modules/user/user.factory";
+import { userService } from "@/modules/user/user.factory";
 import { UserService } from "@/modules/user/user.service";
 import { ServiceRes } from "@/types/ServiceTypes";
 
-export function createDeleteEmployeeService() {
-  return new DeleteEmployee(createEmployeeService(), createUserService());
-}
-
-class DeleteEmployee {
+class DeleteEmployeeAndUser {
   constructor(
     private employeeService: EmployeeService,
     private userService: UserService,
@@ -50,3 +44,5 @@ class DeleteEmployee {
     }
   }
 }
+
+export const deleteEmployeeAndUser = new DeleteEmployeeAndUser(employeeService, userService);

@@ -9,7 +9,7 @@ const Page = async () => {
     <>
       <PageTitle>User</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <UserPage users={users.data}/>
+        <UserPage users={users.data ?? []}/>
       </div>
     </>
   )

@@ -6,7 +6,6 @@ import {
   EmployeeAbsentDiv,
   EmployeeAbsentDivSchema,
   EmployeeForm,
-  EmployeeFormSchema,
   EmployeeTable,
   EmployeeUpdate,
   OpenEmployee,
@@ -136,14 +135,12 @@ export class EmployeeRepository implements IEmployeeRepository {
 
   async create(data: EmployeeForm, conn: Connection): Promise<string> {
     try {
-      const validated = EmployeeFormSchema.parse(data);
-
-      const fields = Object.keys(validated) as (keyof EmployeeForm)[];
+      const fields = Object.keys(data) as (keyof EmployeeForm)[];
       if (fields.length === 0) throw new Err("invalid request data", 400);
 
       const columns = fields.join(", ");
-      const placeholder = fields.map(() => "?").join();
-      const values = fields.map((field) => validated[field]);
+      const placeholder = fields.map(() => "?").join(",");
+      const values = fields.map((field) => data[field]);
 
       const sql = `INSERT INTO karyawan (${columns}) VALUES (${placeholder})`;
       const [res] = await conn.query<ResultSetHeader>(sql, values);

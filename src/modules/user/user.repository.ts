@@ -53,7 +53,7 @@ export class UserRepository implements IUserRepository {
     } catch (error: any) {
       console.error("UserRepository.create error:", error);
 
-      if (error.code === "ER_DUP_ENTRY")
+      if (error.code === dbErr.duplicate)
         throw new Err("username already exists", 409);
 
       throw new Err("failed to create user", 500);
@@ -68,10 +68,8 @@ export class UserRepository implements IUserRepository {
         args.unshift(data.password);
       }
 
-      const [res] = await pool.query(
-        `UPDATE akun SET ${passwordCol} username = ?, role = ?, karyawan_id = ? WHERE id = ?`,
-        args,
-      );
+      const query = `UPDATE akun SET ${passwordCol} username = ?, role = ?, karyawan_id = ? WHERE id = ?`
+      await pool.query(query, args);
 
       return true;
     } catch (error: any) {
@@ -87,7 +85,7 @@ export class UserRepository implements IUserRepository {
   async delete(id: UserId, conn?: Connection): Promise<boolean> {
     const connection = conn ? conn : pool;
     try {
-      const [res] = await connection.query("DELETE FROM akun WHERE id = ?", [id]);
+      await connection.query("DELETE FROM akun WHERE id = ?", [id]);
 
       return true;
     } catch (error) {

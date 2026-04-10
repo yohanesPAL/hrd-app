@@ -18,19 +18,14 @@ export class LoginRepository implements ILoginRepository {
       if (!rows[0]) return null;
       else {
         const akun: Account = rows[0] as Account;
-        const normalized: Account = {
-          ...akun,
-          id: String(akun.id),
-          karyawan_id: String(akun.karyawan_id),
-        };
-        return AccountSchema.parse(normalized);
+        return AccountSchema.parse(akun);
       }
     } catch (error: unknown) {
       console.error("LoginRepository.getAccount error:", error);
-      if (error instanceof ZodError) {
-        throw new Err("invalid account data", 400);
-      }
-      throw new Err("failed to read account", 500);
+
+      if (error instanceof ZodError) throw new Err("invalid account data", 400)
+
+      throw new Err("failed to login", 500);
     }
   }
 }

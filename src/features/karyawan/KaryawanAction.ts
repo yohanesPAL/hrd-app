@@ -1,7 +1,7 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
 import { EmployeeContractForm } from "@/modules/employee/contract/employee.contract.schema";
-import { createEmployeeService } from "@/modules/employee/employee.factory";
+import { employeeService } from "@/modules/employee/employee.factory";
 import {
   BaseEmployee,
   EmployeeForm,
@@ -9,15 +9,11 @@ import {
   EmployeeSpForm,
   EmployeeUpdate,
 } from "@/modules/employee/employee.schema";
-import { createCreateEmployeeService } from "@/use-cases/employee/createEmployee";
-import { createDeleteEmployeeService } from "@/use-cases/employee/deleteEmployee";
-import { createGetEmployeeFormOptions } from "@/use-cases/employee/getEmployeeFormOptions";
+import { createEmployeeWithContract } from "@/use-cases/employee/createEmployeeWithContract";
+import { deleteEmployeeAndUser } from "@/use-cases/employee/deleteEmployeeAndUser";
+import { getEmployeeFormOptions } from "@/use-cases/employee/getEmployeeFormOptions";
 import { revalidatePath } from "next/cache";
 
-const employeeService = createEmployeeService();
-const employeeFormOptions = createGetEmployeeFormOptions();
-const deleteEmployee = createDeleteEmployeeService();
-const createEmployee = createCreateEmployeeService();
 const PATH = "karyawan";
 
 export const getAllKaryawan = withAuth(async () => {
@@ -33,12 +29,12 @@ export const getKaryawanForUpdate = withAuth(async (session, id: BaseEmployee["i
 });
 
 export const getKaryawanFormOptions = withAuth(async () => {
-  return await employeeFormOptions.execute();
+  return await getEmployeeFormOptions.execute();
 }, ["hrd"]);
 
 export const createKaryawan = withAuth(
   async (session, employee: EmployeeForm, contract: EmployeeContractForm) => {
-    await createEmployee.execute(employee, contract);
+    await createEmployeeWithContract.execute(employee, contract);
   },
   ["hrd"],
 );
@@ -68,7 +64,7 @@ export const updateKaryawanKodeAbsen = withAuth(
 
 export const deleteKaryawan = withAuth(
   async (session, id: string) => {
-    await deleteEmployee.execute(id);
+    await deleteEmployeeAndUser.execute(id);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },
   ["hrd"],

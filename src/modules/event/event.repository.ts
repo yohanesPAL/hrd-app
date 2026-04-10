@@ -1,8 +1,8 @@
 import pool from "@/lib/db";
 import {
-  AccountId,  
-  BaseEvent,  
-  BaseEventSchema,  
+  AccountId,
+  BaseEvent,
+  BaseEventSchema,
   EventForm,
   UpcomingEvent,
   UpcomingEventSchema,
@@ -11,13 +11,13 @@ import { RowDataPacket } from "mysql2";
 import { IEventRepository } from "./event.interface";
 import { ZodError } from "zod";
 import { Err } from "@/lib/err";
-import { Connection } from "mysql2/promise";
 
 export class EventRepository implements IEventRepository {
-  async getByAccount(id: AccountId, date: Date): Promise<BaseEvent[]> {
-    const startDate = new Date(date.getFullYear(), date.getMonth() - 1, 1);
-    const endDate = new Date(date.getFullYear(), date.getMonth() + 2, 1);
-
+  async getByAccount(
+    id: AccountId,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<BaseEvent[]> {
     try {
       const [rows] = await pool.query<RowDataPacket[]>(
         `SELECT CAST(id AS CHAR) AS id, CAST(akun_id AS CHAR) AS akun_id, title, start, end FROM acara
@@ -54,9 +54,9 @@ export class EventRepository implements IEventRepository {
     }
   }
 
-  async create(data: EventForm, conn: Connection): Promise<boolean> {
+  async create(data: EventForm): Promise<boolean> {
     try {
-      const [res] = await conn.query(
+      await pool.query(
         `INSERT INTO acara (akun_id, title, start, end)
             VALUES (?, ?, ?, ?)`,
         [data.akun_id, data.title, data.start, data.end],
@@ -70,13 +70,9 @@ export class EventRepository implements IEventRepository {
     }
   }
 
-  async update(
-    id: AccountId,
-    data: EventForm,
-    conn: Connection,
-  ): Promise<boolean> {
+  async update(id: AccountId, data: EventForm): Promise<boolean> {
     try {
-      const [res] = await conn.query(
+      await pool.query(
         `UPDATE acara SET title = ?, start = ?, end = ? WHERE id = ?`,
         [data.title, data.start, data.end, id],
       );
@@ -89,9 +85,9 @@ export class EventRepository implements IEventRepository {
     }
   }
 
-  async delete(id: AccountId, conn: Connection): Promise<boolean> {
+  async delete(id: AccountId): Promise<boolean> {
     try {
-      const [res] = await conn.query("DELETE FROM acara WHERE id = ?", [id]);
+      await pool.query("DELETE FROM acara WHERE id = ?", [id]);
 
       return true;
     } catch (error: unknown) {

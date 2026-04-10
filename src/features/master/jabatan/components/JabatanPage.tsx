@@ -1,8 +1,8 @@
 'use client';
 import DefaultTable from '@/components/Table/DefaulteTable';
-import { ColumnDef, SortingState, Table } from '@tanstack/react-table';
-import { FormEvent, useEffect, useMemo, useState, useTransition } from 'react'
-import { Button, Form, Modal, Stack } from 'react-bootstrap';
+import { SortingState, Table } from '@tanstack/react-table';
+import { useState } from 'react'
+import { Button, Stack } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import ExportToExcel from '@/components/Buttons/ExportToExcel';
 import { exportTableToExcel } from '@/utils/exportTableToExcel';
@@ -16,7 +16,7 @@ import { jabatanColumns } from '../columns/JabatanColumns';
 import JabatanFormModal from './JabatanFormModal';
 
 const defaultSort: SortingState = [{ id: "no", desc: false }];
-const defaultJabatanForm: PositionForm = { id: undefined, id_divisi: "", nama: "", is_active: true };
+const defaultJabatanForm: PositionForm = { id: undefined, id_divisi: "", nama: "", is_active: 1 };
 
 const JabatanPage = ({ data, divisiList }: { data: PositionTable[], divisiList: DivisionTable[] }) => {
 

@@ -1,10 +1,9 @@
-import { createGetJamAbsenForImport } from "../../use-cases/absensi/getDivisiForImport";
 import ExcelJS from "exceljs";
-import { createGetAbsentDivCode } from "@/use-cases/absensi/getAbsentDivCode";
 import { Err } from "@/lib/err";
-import { IAbsensiRepository } from "./absensi.interface";
+import { IAbsenService, IAbsensiRepository } from "./absensi.interface";
 import pool from "@/lib/db";
 import {
+  AbsensiDetailTable,
   ExcelRowData,
   KodeAbsen,
   KodeAbsenSchema,
@@ -12,6 +11,11 @@ import {
 } from "./detail/absensi.detail.schema";
 import { IAbsensiDetailRepository } from "./detail/absensi.detail.interface";
 import { ZodError } from "zod";
+import { IJamAbsenService } from "../master/jamAbsen/jamAbsen.interface";
+import { AbsensiMapper } from "./absensi.mapper";
+import { IEmployeeService } from "../employee/employee.interface";
+import { ServiceRes } from "@/types/ServiceTypes";
+import { AbsensiTable } from "./absensi.schema";
 
 const parseTimeStringToMinutes = (timeStr: string) => {
   if (!timeStr) return 0;
@@ -19,20 +23,19 @@ const parseTimeStringToMinutes = (timeStr: string) => {
   return hours * 60 + minutes;
 };
 
-const getDivisiForImport = createGetJamAbsenForImport();
-const getAbsentDivCode = createGetAbsentDivCode();
-
-export class AbsensiService {
+export class AbsensiService implements IAbsenService {
   constructor(
     private absensiRepository: IAbsensiRepository,
     private absensiDetailRepository: IAbsensiDetailRepository,
+    private jamAbsenService: IJamAbsenService,
+    private employeeService: IEmployeeService,
   ) {}
 
-  async getAllAbsensi() {
+  async getAllAbsensi(): Promise<ServiceRes<AbsensiTable[]>> {
     try {
-      const absensi = this.absensiRepository.getAll();
+      const res = await this.absensiRepository.getAll();
 
-      return absensi;
+      return { success: true, status: 200, data: res };
     } catch (error: unknown) {
       console.error("AbsensiService.getAllAbsensi error:", error);
 
@@ -42,13 +45,15 @@ export class AbsensiService {
     }
   }
 
-  async getAbsensiByKodeAbsen(kodeAbsen: KodeAbsen) {
+  async getAbsensiByKodeAbsen(
+    kodeAbsen: KodeAbsen,
+  ): Promise<ServiceRes<AbsensiDetailTable[]>> {
     try {
       KodeAbsenSchema.parse(kodeAbsen);
 
-      const absensi = this.absensiDetailRepository.getByKodeAbsen(kodeAbsen);
+      const res = await this.absensiDetailRepository.getByKodeAbsen(kodeAbsen);
 
-      return absensi;
+      return { success: true, status: 200, data: res };
     } catch (error: unknown) {
       console.error("AbsensiService.getAbsensiByKodeAbsen error:", error);
 
@@ -59,8 +64,12 @@ export class AbsensiService {
     }
   }
 
-  async importAbsen(file: File) {
-    const jamAbsenMap = await getDivisiForImport.execute();
+  async importAbsen(file: File): Promise<ServiceRes> {
+    const jamAbsenDivisi = await this.jamAbsenService.getJamAbsenDivisi();
+    if (!jamAbsenDivisi.data)
+      throw new Err("failed to get jam absen divisi", 500);
+
+    const jamAbsenMap = AbsensiMapper.toJamAbsenDivisiMap(jamAbsenDivisi.data);
 
     const arrayBuffer = await file.arrayBuffer();
 
@@ -97,13 +106,15 @@ export class AbsensiService {
       });
     }
 
-    const divCodeMap = await getAbsentDivCode.execute([
+    const divCodeMap = await this.employeeService.getEmployeeAbsentDivCode([
       ...employeesAbsentCodes.keys(),
     ]);
+    if (!divCodeMap.data) throw new Err("failed to get employee divisi code");
+
     const absentData: ExcelRowData[] = [];
 
     rows.forEach((item) => {
-      const kodeDiv = divCodeMap.get(item.kode_absen);
+      const kodeDiv = divCodeMap.data!.get(item.kode_absen);
       if (!kodeDiv)
         throw new Err("divisi untuk kode absen tidak ditemukan", 400);
 
@@ -150,11 +161,8 @@ export class AbsensiService {
       conn = await pool.getConnection();
       await conn.beginTransaction();
 
-      const detail_res = await this.absensiDetailRepository.create(
-        absentData,
-        conn,
-      );
-      const res = await this.absensiRepository.create(conn);
+      await this.absensiDetailRepository.create(absentData, conn);
+      await this.absensiRepository.create(conn);
 
       await conn.commit();
       return { success: true, status: 200 };
@@ -170,14 +178,14 @@ export class AbsensiService {
     }
   }
 
-  async truncateAbsen() {
+  async truncateAbsen(): Promise<ServiceRes> {
     try {
-      const [res_detail, res_absen] = await Promise.all([
+      await Promise.all([
         this.absensiRepository.truncate(),
         this.absensiDetailRepository.truncate(),
       ]);
 
-      return true;
+      return { success: true, status: 200 };
     } catch (error: unknown) {
       console.error("AbsensiService.truncateAbsen error:", error);
 

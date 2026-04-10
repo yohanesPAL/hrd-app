@@ -22,6 +22,14 @@ export const EmployeeContractFormSchema = BaseEmployeeContractSchema.omit({
   id: true,
 })
 
+export const EmployeeContractExpirationSchema = BaseEmployeeContractSchema.pick({
+  id: true,
+}).extend({
+  tgl_berakhir: z.date(),
+  nama: z.string().min(1),
+})
+
 export type BaseEmployeeContrat = z.infer<typeof BaseEmployeeContractSchema>;
 export type EmployeeContractTable = z.infer<typeof EmployeeContractTableSchema>;
 export type EmployeeContractForm = z.infer<typeof EmployeeContractFormSchema>;
+export type EmployeeContractExpiration = z.infer<typeof EmployeeContractExpirationSchema>;

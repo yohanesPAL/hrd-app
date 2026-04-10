@@ -14,7 +14,7 @@ import { DivisionForm, DivisionTable } from '@/modules/master/divisi/division.sc
 import { createDivisionAction, deleteDivisionAction, updateDivisionAction } from '../divisiAction';
 import { useExecuteAction } from '@/hooks/useExecuteAction';
 
-const defaultDivisiForm: DivisionForm = { nama: "", is_active: true, id: undefined }
+const defaultDivisiForm: DivisionForm = { nama: "", is_active: 1, id: undefined }
 const defaultSort: SortingState = [{ id: "no", desc: false }]
 
 const DivisiPage = ({ data }: { data: DivisionTable[] }) => {

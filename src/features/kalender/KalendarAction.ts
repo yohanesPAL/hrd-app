@@ -1,10 +1,9 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
-import { createEventService } from "@/modules/event/event.factory";
+import { eventService } from "@/modules/event/event.factory";
 import { AccountId, EventForm } from "@/modules/event/event.schema";
 import { revalidatePath } from "next/cache";
 
-const eventService = createEventService();
 const PATH = "kalender";
 
 export const getEventsByAccount = withAuth(

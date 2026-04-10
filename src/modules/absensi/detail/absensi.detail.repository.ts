@@ -1,15 +1,15 @@
-import { Connection, RowDataPacket } from "mysql2/promise";
+import { RowDataPacket } from "mysql2/promise";
 import { IAbsensiDetailRepository } from "./absensi.detail.interface";
 import {
   AbsensiDetailTable,
-  AbsensiDetailTableSchema,
   ExcelRowData,
   KodeAbsen,
 } from "./absensi.detail.schema";
 import { Err } from "@/lib/err";
 import pool from "@/lib/db";
 import { ZodError } from "zod";
-import { formatDateYYYYMMDD } from "@/utils/dateFormatting";
+import { AbsensiMapper } from "../absensi.mapper";
+import { Connection } from "mysql2/promise";
 
 export class AbsensiDetailRepository implements IAbsensiDetailRepository {
   async getByKodeAbsen(
@@ -24,14 +24,8 @@ export class AbsensiDetailRepository implements IAbsensiDetailRepository {
         [kodeAbsen],
       );
 
-      const normalize = rows.map((item, index) => ({
-        ...item,
-        tanggal: formatDateYYYYMMDD(item.tanggal),
-        no: index + 1,
-      }))
-
-      return AbsensiDetailTableSchema.array().parse(normalize);
-    } catch (error: unknown) {
+      return AbsensiMapper.toAbsensiDetailTable(rows);
+    } catch (error) {
       console.error("AbsensiDetailRepository error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid absen detail data", 400);
@@ -46,15 +40,15 @@ export class AbsensiDetailRepository implements IAbsensiDetailRepository {
 
       const columns = fields.join(", ");
       const placeholder = data
-        .map((item) => `(${fields.map(() => "?").join(", ")})`)
+        .map(() => `(${fields.map(() => "?").join(", ")})`)
         .join(", ");
       const value = data.flatMap((item) => fields.map((field) => item[field]));
 
       const sql = `INSERT INTO absen_detail (${columns}) VALUES ${placeholder}`;
-      const [res] = await conn.query(sql, value);
+      await conn.query(sql, value);
 
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("AbsensiDetailRepository.create error:", error);
 
       throw new Err("failed to import absen detail", 500);
@@ -63,9 +57,10 @@ export class AbsensiDetailRepository implements IAbsensiDetailRepository {
 
   async truncate(): Promise<boolean> {
     try {
-      const [res] = await pool.query("TRUNCATE TABLE absen_detail");
+      await pool.query("TRUNCATE TABLE absen_detail");
+
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("AbsensiDetailRepository.truncate error:", error);
 
       throw new Err("failed to truncate absen detail", 500);

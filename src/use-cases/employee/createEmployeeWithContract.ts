@@ -5,17 +5,10 @@ import { EmployeeContractForm } from "@/modules/employee/contract/employee.contr
 import { ServiceRes } from "@/types/ServiceTypes";
 import pool from "@/lib/db";
 import { Err } from "@/lib/err";
-import { createEmployeeService } from "@/modules/employee/employee.factory";
-import { createEmployeeContractService } from "@/modules/employee/contract/employee.contract.factory";
+import { employeeService } from "@/modules/employee/employee.factory";
+import { employeeContractService } from "@/modules/employee/contract/employee.contract.factory";
 
-export function createCreateEmployeeService() {
-  return new CreateEmployee(
-    createEmployeeService(),
-    createEmployeeContractService(),
-  );
-}
-
-class CreateEmployee {
+class CreateEmployeeWithContract {
   constructor(
     private employeeService: EmployeeService,
     private contractService: EmployeeContractService,
@@ -36,6 +29,8 @@ class CreateEmployee {
         conn,
       );
 
+      if(!createEmployeeRes.data) throw new Err("failed to create employee", 500);
+
       await this.contractService.createContract(
         {
           ...contract,
@@ -53,9 +48,11 @@ class CreateEmployee {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("CerateEmployee unavailable", 500);
+      throw new Err("CreateEmployee unavailable", 500);
     } finally {
       if (conn) conn.release();
     }
   }
 }
+
+export const createEmployeeWithContract = new CreateEmployeeWithContract(employeeService, employeeContractService)

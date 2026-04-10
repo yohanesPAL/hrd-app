@@ -1,12 +1,12 @@
 import {z} from "zod"
 
 export const BaseJamAbsenSchema = z.object({
-  id: z.string().min(1),
-  divisi: z.string().min(1),
+  id: z.coerce.string().min(1),
+  divisi: z.coerce.string().min(1),
   masuk: z.number().min(1),
   keluar: z.number().min(1),
   keluar_sabtu: z.number().min(1),
-})
+}).strict();
 
 export const RawJamAbsenTableSchema = BaseJamAbsenSchema.extend({
   id: z.number().min(1),
@@ -33,12 +33,17 @@ export const JamAbsenFormSchema = BaseJamAbsenSchema.omit({
   keluar_sabtu: z.string().min(1),
 })
 
-export type RawJamAbsen = z.infer<typeof RawJamAbsenTableSchema>
-export type BaseJamAbsen = z.infer<typeof BaseJamAbsenSchema>
-export type JamAbsenTable = z.infer<typeof JamAbsenTableSchema>
-export type JamAbsenForm = z.infer<typeof JamAbsenFormSchema>
+export const JamAbsenDivisiSchema = BaseJamAbsenSchema.omit({
+  id: true,
+})
+
+export type RawJamAbsen = z.infer<typeof RawJamAbsenTableSchema>;
+export type BaseJamAbsen = z.infer<typeof BaseJamAbsenSchema>;
+export type JamAbsenTable = z.infer<typeof JamAbsenTableSchema>;
+export type JamAbsenForm = z.infer<typeof JamAbsenFormSchema>;
 export type JamAbsenFormDB = Pick<JamAbsenForm, "id"> & {
   masuk: Number;
   keluar: Number;
   keluar_sabtu: Number;
-}
+};
+export type JamAbsenDivisi = z.infer<typeof JamAbsenDivisiSchema>;

@@ -3,35 +3,44 @@ import { EventRepository } from "./event.repository";
 import {
   AccountId,
   AccountIdSchema,
+  BaseEvent,
   EventForm,
   EventFormSchema,
   UpcomingEvent,
 } from "./event.schema";
 import { ZodError } from "zod";
-import pool from "@/lib/db";
 import { IEventService } from "./event.interface";
 import { ServiceRes } from "@/types/ServiceTypes";
 
 const isActive = (start: Date, end: Date) => {
   const now = new Date();
-  if (now >= new Date(end) && now >= new Date(start)) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  if (now >= endDate && now >= startDate) {
     return true;
   }
-  return now <= new Date(end) && now >= new Date(start);
+  return now <= endDate && now >= startDate;
 };
 
 export class EventService implements IEventService {
   constructor(private eventRepository: EventRepository) {}
 
-  async getEventsByAccount(id: AccountId, date: Date): Promise<ServiceRes> {
+  async getEventsByAccount(
+    id: AccountId,
+    date: Date,
+  ): Promise<ServiceRes<BaseEvent[]>> {
     if (!(date instanceof Date)) throw new Err("invalid request data", 400);
 
     try {
-      AccountIdSchema.parse(id);
+      const validatedId = AccountIdSchema.parse(id);
 
-      const events = await this.eventRepository.getByAccount(id, date);
+      const startDate = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+      const endDate = new Date(date.getFullYear(), date.getMonth() + 2, 1);
 
-      return { success: true, status: 200, data: events };
+      const res = await this.eventRepository.getByAccount(validatedId, startDate, endDate);
+
+      return { success: true, status: 200, data: res };
     } catch (error: unknown) {
       console.error("EventService.getEventsByAccount error:", error);
 
@@ -42,11 +51,11 @@ export class EventService implements IEventService {
     }
   }
 
-  async getUpcomingEvents(id: AccountId): Promise<ServiceRes> {
+  async getUpcomingEvents(id: AccountId): Promise<ServiceRes<{onGoing: UpcomingEvent[], upcoming: UpcomingEvent[]}>> {
     try {
-      AccountIdSchema.parse(id);
+      const validatedId = AccountIdSchema.parse(id);
 
-      const events = await this.eventRepository.getUpcoming(id);
+      const events = await this.eventRepository.getUpcoming(validatedId);
 
       let onGoing: UpcomingEvent[] = [],
         upcoming: UpcomingEvent[] = [];
@@ -70,77 +79,53 @@ export class EventService implements IEventService {
   }
 
   async createEvent(data: EventForm): Promise<ServiceRes> {
-    let conn;
     try {
-      EventFormSchema.parse(data);
+      const validated = EventFormSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      await this.eventRepository.create(validated);
 
-      const res = await this.eventRepository.create(data, conn);
-
-      await conn.commit();
       return { success: true, status: 201 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
       console.error("EventService.createEvent error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
       if (error instanceof Err) throw error;
 
       throw new Err("EventService unavailable", 500);
-    } finally {
-      if (conn) conn.release();
     }
   }
 
   async updateEvent(id: AccountId, data: EventForm): Promise<ServiceRes> {
-    let conn;
     try {
-      EventFormSchema.parse(data);
+      const validated = EventFormSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      await this.eventRepository.update(id, validated);
 
-      const res = await this.eventRepository.update(id, data, conn);
-
-      await conn.commit();
       return { success: true, status: 200 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
       console.error("EventService.updateEvent error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
       if (error instanceof Err) throw error;
 
       throw new Err("EventService unavailable", 500);
-    } finally {
-      if (conn) conn.release();
     }
   }
 
   async deleteEvent(id: AccountId): Promise<ServiceRes> {
-    let conn;
     try {
-      AccountIdSchema.parse(id);
+      const validated = AccountIdSchema.parse(id);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      await this.eventRepository.delete(validated);
 
-      const res = await this.eventRepository.delete(id, conn);
-
-      await conn.commit();
       return { success: true, status: 200 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
       console.error("EventService.deleteEvent error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
       if (error instanceof Err) throw error;
 
       throw new Err("EventService unavailable", 500);
-    } finally {
-      if (conn) conn.release();
     }
   }
 }

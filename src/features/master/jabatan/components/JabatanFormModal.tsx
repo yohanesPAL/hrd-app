@@ -46,8 +46,8 @@ const JabatanFormModal = ({
                 <Form.Label>Status</Form.Label>
                 <Form.Select
                   required
-                  value={jabatanForm.is_active ? 1 : 0}
-                  onChange={(e) => setJabatanForm({ ...jabatanForm, is_active: e.currentTarget.value === "1" })}
+                  value={jabatanForm.is_active}
+                  onChange={(e) => setJabatanForm({ ...jabatanForm, is_active: Number(e.currentTarget.value) })}
                 >
                   <option value={1}>Aktif</option>
                   <option value={0}>Non Aktif</option>

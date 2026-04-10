@@ -11,8 +11,8 @@ export interface IUserRepository {
 }
 
 export interface IUserService {
-  getAllUsers(): Promise<ServiceRes>;
-  getUserIdByKaryawanId(karyawanId: string, conn: Connection): Promise<ServiceRes>;
+  getAllUsers(): Promise<ServiceRes<UserTable[]>>;
+  getUserIdByKaryawanId(karyawanId: string, conn: Connection): Promise<ServiceRes<UserId | null>>;
   createUser(data: UserForm): Promise<ServiceRes>;
   updateUser(id: UserId, data: UserUpdateForm): Promise<ServiceRes>;
   deleteUser(id: UserId, conn?: Connection): Promise<ServiceRes>;

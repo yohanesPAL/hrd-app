@@ -45,8 +45,8 @@ const DivisiFormModal = ({
               <Form.Label>Status</Form.Label>
               <Form.Select
                 required
-                value={divisiForm.is_active ? 1 : 0}
-                onChange={(e) => setDivisiForm({ ...divisiForm, is_active: e.currentTarget.value === "1" })}
+                value={divisiForm.is_active}
+                onChange={(e) => setDivisiForm({ ...divisiForm, is_active: Number(e.currentTarget.value) })}
               >
                 <option value={1}>Aktif</option>
                 <option value={0}>Non Aktif</option>

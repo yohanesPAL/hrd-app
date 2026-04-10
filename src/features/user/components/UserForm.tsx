@@ -1,7 +1,7 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Button, Form, Modal, Spinner, Stack } from 'react-bootstrap'
 import { FormType, OpenEmployeeState } from '../types/UserTypes'
-import { UserForm as UserFormType, UserId } from '@/modules/user/user.schema'
+import { UserForm as UserFormType } from '@/modules/user/user.schema'
 import { getUnaccountedEmployees } from '../UserAction'
 import { roleSelect } from '@/lib/roleList'
 import { toast } from 'react-toastify'
@@ -36,7 +36,7 @@ const UserForm = ({
       async function execute() {
         setUnaccountedEmpployees({ isLoading: true, data: [] });
         const employees = await getUnaccountedEmployees(updatingId);
-        setUnaccountedEmpployees({ isLoading: false, data: employees });
+        setUnaccountedEmpployees({ isLoading: false, data: employees.data ?? [] });
       }
 
       execute();

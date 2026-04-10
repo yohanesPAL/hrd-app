@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 export const BaseDivisionSchema = z.object({
-  id: z.string().min(1),
+  id: z.coerce.string().min(1),
   nama: z.string().min(1),
-  is_active: z.boolean().default(true),
-});
+  is_active: z.number().min(0).max(0).default(1),
+}).strict();
 
 export const DivisionTableSchema = BaseDivisionSchema.extend({
   no: z.number().min(1),
 });
 
 export const DivisionFormSchema = BaseDivisionSchema.extend({
-  id: z.string().optional(),
+  id: z.coerce.string().optional(),
 })
 
 export const ActiveDivisionSchema = BaseDivisionSchema.omit({

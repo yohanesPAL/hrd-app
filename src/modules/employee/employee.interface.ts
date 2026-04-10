@@ -24,12 +24,12 @@ export interface IEmployeeRepository {
 }
 
 export interface IEmployeeService {
-  getAllEmployees(): Promise<ServiceRes>;
-  getEmployeeById(id: BaseEmployee["id"]): Promise<ServiceRes>;
-  getEmployeeForUpdate(id: BaseEmployee["id"]): Promise<ServiceRes>;
-  getEmployeeAbsentDivCode(absentCode: string[]): Promise<ServiceRes>;
-  getUnaccountedEmployees(selectedId?: UserId): Promise<ServiceRes>;
-  createEmployee(data: EmployeeForm, conn: Connection): Promise<ServiceRes>;
+  getAllEmployees(): Promise<ServiceRes<EmployeeTable[]>>;
+  getEmployeeById(id: BaseEmployee["id"]): Promise<ServiceRes<BaseEmployee>>;
+  getEmployeeForUpdate(id: BaseEmployee["id"]): Promise<ServiceRes<EmployeeUpdate>>;
+  getEmployeeAbsentDivCode(absentCode: string[]): Promise<ServiceRes<Map<string, string>>>;
+  getUnaccountedEmployees(selectedId?: UserId): Promise<ServiceRes<OpenEmployee[]>>;
+  createEmployee(data: EmployeeForm, conn: Connection): Promise<ServiceRes<string>>;
   deleteEmployee(id: string, conn: Connection): Promise<ServiceRes>;
   updateEmployee(
     id: BaseEmployee["id"],

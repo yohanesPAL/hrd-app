@@ -5,5 +5,5 @@ export interface ILoginRepository {
 }
 
 export interface ILoginService {
-  userLogin(credential: Credential): Promise<Partial<Account> | null>;
+  userLogin(credential: Credential): Promise<Omit<Account, "password"> | null>;
 }

@@ -2,8 +2,9 @@ import { Connection, RowDataPacket } from "mysql2/promise";
 import { IAbsensiRepository } from "./absensi.interface";
 import { Err } from "@/lib/err";
 import pool from "@/lib/db";
-import { AbsensiTable, AbsensiTableSchema } from "./absensi.schema";
+import { AbsensiTable } from "./absensi.schema";
 import { ZodError } from "zod";
+import { AbsensiMapper } from "./absensi.mapper";
 
 export class AbsensiRepository implements IAbsensiRepository {
   async getAll(): Promise<AbsensiTable[]> {
@@ -14,13 +15,8 @@ export class AbsensiRepository implements IAbsensiRepository {
             JOIN divisi d ON (d.id = a.divisi)`
         )
 
-        const normalize = rows.map((item, index) => ({
-          ...item,
-          no: index + 1,
-        }))
-
-        return AbsensiTableSchema.array().parse(normalize);
-      } catch (error: unknown) {
+        return AbsensiMapper.toAbsensiTable(rows);
+      } catch (error) {
         console.error("AbsensiRepository.getAll error:", error);
 
         if(error instanceof ZodError) throw new Err("invalid absensi data", 400);
@@ -31,7 +27,7 @@ export class AbsensiRepository implements IAbsensiRepository {
 
   async create(conn: Connection): Promise<boolean> {
     try {
-      const [res] = await conn.query(
+      await conn.query(
         `INSERT INTO absen (kode_absen, nama_absen, divisi, hadir, absent, terlambat, lembur, jam_kerja)
           SELECT 
             ANY_VALUE(kode_absen) AS kode_absen,
@@ -47,7 +43,7 @@ export class AbsensiRepository implements IAbsensiRepository {
       );
 
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("AbsensiRepository.create error:", error);
 
       throw new Err("failed to import absen", 500);
@@ -56,10 +52,10 @@ export class AbsensiRepository implements IAbsensiRepository {
 
   async truncate() {
     try {
-      const [res] = await pool.query("TRUNCATE TABLE absen");
+      await pool.query("TRUNCATE TABLE absen");
 
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("AbsensiRepository.truncate error:", error);
 
       throw new Err("failed to truncate absen", 500);

@@ -1,19 +1,18 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
-import { createDivisionService } from "@/modules/master/divisi/division.factory";
+import { divisionService } from "@/modules/master/divisi/division.factory";
 import { BaseDivision, DivisionForm } from "@/modules/master/divisi/division.schema";
 import { revalidatePath } from "next/cache";
 
-const divisionServices = createDivisionService();
 const PATH = "master/divisi";
 
 export const getDivisionsAction = withAuth(async () => {
-  return await divisionServices.getAllDivisions();
+  return await divisionService.getAllDivisions();
 });
 
 export const createDivisionAction = withAuth(
   async (session, data: DivisionForm) => {
-    await divisionServices.createDivision(data);
+    await divisionService.createDivision(data);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },
   ["hrd"],
@@ -21,7 +20,7 @@ export const createDivisionAction = withAuth(
 
 export const updateDivisionAction = withAuth(
   async (session, data: BaseDivision) => {
-    await divisionServices.updateDivision(data);
+    await divisionService.updateDivision(data);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },
   ["hrd"],
@@ -29,7 +28,7 @@ export const updateDivisionAction = withAuth(
 
 export const deleteDivisionAction = withAuth(
   async (session, id: string) => {
-    await divisionServices.deleteDivision(id);
+    await divisionService.deleteDivision(id);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },
   ["hrd"],

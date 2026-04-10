@@ -1,18 +1,79 @@
 "use client";
 import Image from 'next/image'
-import { Button, Dropdown, DropdownDivider, DropdownMenu, DropdownToggle, Navbar, Stack } from 'react-bootstrap'
+import { Button, Dropdown, DropdownDivider, DropdownMenu, DropdownToggle, Navbar, Spinner, Stack } from 'react-bootstrap'
 import useNavbar from '@/stores/navbar/navbar.store'
 import Link from 'next/link';
 import { useLogout } from '@/hooks/useLogout';
+import { NotificationPopup } from '@/modules/notification/notification.schema';
+import { useEffect, useState } from 'react';
+import { getNotificationsPopup, markedNotificationsRead } from '@/features/notification/NotificationAction';
 
-const TopBar = ({ role, karyawanId, namaKaryawan }: { role: string, karyawanId: string, namaKaryawan: string }) => {
+const delay = (ms: any) => new Promise(resolve => setTimeout(resolve, ms));
+
+const calculateDaysDelta = (date: Date) => {
+  const today = new Date();
+
+  const utc1 = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const utc2 = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+
+  return (utc1 - utc2) / (1000 * 60 * 60 * 24);
+}
+
+const formatDaysDeltaToText = (days: number) => {
+  const sufix = days > 0 ? "kemudian" : "lalu"
+
+  if (days === 0) return "Hari ini";
+  else return `${Math.abs(days)} hari ${sufix}`
+}
+
+const borderColor = new Map([
+  [1, "green"],
+  [2, "gold"],
+  [3, "red"],
+]);
+
+const TopBar = ({
+  role,
+  karyawanId,
+  userId,
+  namaKaryawan,
+}: {
+  role: string,
+  karyawanId: string,
+  userId: string,
+  namaKaryawan: string,
+}) => {
   const showNavbar = useNavbar((state) => state.setShow);
   const navbarState = useNavbar((state) => state.isShow);
   const { onLogout, loading } = useLogout();
+  const [notifications, setNotificitaions] = useState<NotificationPopup[]>([]);
+  const [isFetchNotif, setIsFetchNotif] = useState<boolean>(false);
 
   const logoutHandler = async () => {
     await onLogout()
   }
+
+  const markNotificationsRead = async () => {
+    setNotificitaions([]);
+    setIsFetchNotif(true);
+    const notifId: string[] = notifications.map(notif => notif.notif_id);
+    await markedNotificationsRead(notifId);
+    await delay(2000)
+    setIsFetchNotif(false);
+  }
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setIsFetchNotif(true);
+
+      const res = await getNotificationsPopup(userId)
+      await delay(2000)
+      setNotificitaions(res.data ?? []);
+      setIsFetchNotif(false);
+    }
+
+    fetchNotifications()
+  }, [])
 
   return (
     <>
@@ -23,28 +84,104 @@ const TopBar = ({ role, karyawanId, namaKaryawan }: { role: string, karyawanId: 
           </div>
 
           <Stack className='h-100' direction='horizontal'>
-            <div className='d-flex flex-row align-items-center justify-content-center bg-transparent on-hover h-100 px-2'>
-              <i className="bi bi-bell-fill" style={{ fontSize: "18px" }}></i>
-            </div>
+            <Dropdown className='h-100' align={"end"}>
+              <DropdownToggle className='d-flex flex-row align-items-center justify-content-center h-100 px-3 py-0 bg-transparent border-0 on-hover rounded-0'>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <i className="bi bi-bell-fill" style={{ fontSize: "18px" }} />
+                  {notifications.length > 0 && (
+                    <span style={{
+                      position: "absolute",
+                      top: "-6px",
+                      right: "-8px",
+                      backgroundColor: "red",
+                      color: "white",
+                      borderRadius: "50%",
+                      fontSize: "10px",
+                      fontWeight: "bold",
+                      width: "16px",
+                      height: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      lineHeight: 1,
+                    }}>
+                      {notifications.length}
+                    </span>
+                  )}
+                </div>
+              </DropdownToggle>
+              <DropdownMenu style={{ width: "300px", boxShadow: "5px 5px 5px rgba(0, 0, 0, 0.2)" }} className='bg-white p-0'>
+                <>
+                  <div className='d-flex flex-row align-items-center justify-content-center w-100 py-2 mb-2' style={{ boxShadow: "0 0.5px 4px rgba(0, 0, 0, 0.1)" }}>
+                    <Link href={`/${role}/notification/${userId}`} target='_blank'>
+                      <Button variant='link'>
+                        <Stack direction='horizontal' gap={1}>
+                          <b>Notifikasi</b>
+                          <i className="bi bi-box-arrow-up-right"></i>
+                        </Stack>
+                      </Button>
+                    </Link>
+                  </div>
+                  {
+                    notifications.length === 0
+                      ? isFetchNotif
+                        ? (<div className='w-100 text-center py-4'><Spinner style={{ color: "rgba(0,0,0,0.5)" }} /></div>)
+                        : (<div className='w-100 text-center py-4'>Notifikasi Kosong</div>)
+                      : (
+                        <>
+                          <div className='py-2 px-1' style={{ maxHeight: "300px", overflowY: "auto" }}>
+                            {
+                              notifications.map((notification, index) => {
+                                return (
+                                  <div key={notification.judul + index}>
+                                    {index !== 0 && <DropdownDivider />}
+                                    <Button variant='outline-light' className='rounded-0 w-100 h-100 text-start text-black' style={{ borderTop: "0px", borderRight: "0px", borderBottom: "0px", borderLeft: `4px solid ${borderColor.get(notification.level)}`, paddingLeft: "4px" }}>
+                                      <Stack>
+                                        <b className='text-truncate'>{notification.judul}</b>
+                                        <small>{notification.teks}</small>
+                                        <small style={{ color: "rgba(0,0,0,0.5)" }}>{formatDaysDeltaToText(calculateDaysDelta(notification.created_at))}</small>
+                                      </Stack>
+                                    </Button>
+                                  </div>
+                                )
+                              })
+                            }
+                          </div>
+                          <Button onClick={markNotificationsRead} className='rounded-0 w-100 p-0' variant="outline-primary" style={{ border: "0px", marginTop: "8px", boxShadow: "0 -0.5px 4px rgba(0, 0, 0, 0.1)" }}>
+                            <div style={{ background: "rgba(0,0,0,0.05)" }} className='p-2'>
+                              Tandai sudah baca
+                            </div>
+                          </Button>
+                        </>
+                      )
+                  }
+                </>
+              </DropdownMenu>
+            </Dropdown>
 
             <Dropdown className='h-100' align={"end"}>
               <DropdownToggle className='d-flex flex-row align-items-center justify-content-center gap-2 h-100 px-3 py-0 bg-transparent border-0 on-hover rounded-0'>
                 <Image alt='profile-picture' width={40} height={40} src={'/images.jpg'} className="rounded-circle" style={{ objectFit: 'cover' }} />
               </DropdownToggle>
-              <DropdownMenu style={{ transform: "translateX(-10px)", width: "250px" }} className='p-2 text-end bg-white'>
-                <div className='d-flex flex-column justify-content-center align-items-start'>
-                  <span>{namaKaryawan} | {role.toUpperCase()}</span>
-                  <span>PT Perdana Adhi Lestari</span>
+              <DropdownMenu style={{ transform: "translateX(-10px)", width: "300px", boxShadow: "5px 5px 5px rgba(0, 0, 0, 0.2)" }} className='bg-white p-0'>
+                <div className='d-flex flex-row align-items-center justify-content-center w-100 py-2 mb-2' style={{ boxShadow: "0 0.5px 4px rgba(0, 0, 0, 0.1)" }}>
+                  <b>Profile</b>
                 </div>
-                <DropdownDivider />
-                <div className='d-flex flex-row justify-content-between align-items-center'>
-                  <Link href={`/${role}/profile/${karyawanId}`}>
-                    <Button type='button' variant='primary'>Profile</Button>
-                  </Link>
-                  <Button type='button' variant='danger' disabled={loading} onClick={logoutHandler}>
-                    <span hidden={!loading} className="spinner-border spinner-border-sm" style={{ marginRight: "4px" }}></span>
-                    <span hidden={loading}>Logout</span>
-                  </Button>
+                <div className='p-2'>
+                  <div className='d-flex flex-column justify-content-center align-items-start'>
+                    <span>{namaKaryawan} | {role.toUpperCase()}</span>
+                    <span>PT Perdana Adhi Lestari</span>
+                  </div>
+                  <DropdownDivider />
+                  <div className='d-flex flex-row justify-content-between align-items-center'>
+                    <Link href={`/${role}/profile/${karyawanId}`}>
+                      <Button type='button' variant='primary'>Profile</Button>
+                    </Link>
+                    <Button type='button' variant='danger' disabled={loading} onClick={logoutHandler}>
+                      <span hidden={!loading} className="spinner-border spinner-border-sm" style={{ marginRight: "4px" }}></span>
+                      <span hidden={loading}>Logout</span>
+                    </Button>
+                  </div>
                 </div>
               </DropdownMenu>
             </Dropdown>

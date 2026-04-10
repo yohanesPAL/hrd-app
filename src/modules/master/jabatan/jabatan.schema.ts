@@ -1,11 +1,11 @@
 import {z} from "zod"
 
 export const BasePositionSchema = z.object({
-  id: z.string().min(1),
-  id_divisi: z.string().min(1),
+  id: z.coerce.string().min(1),
+  id_divisi: z.coerce.string().min(1),
   nama: z.string().min(1),
-  is_active: z.boolean(),
-})
+  is_active: z.number().min(0).max(1),
+}).strict();
 
 export const PositionTableSchema = BasePositionSchema.extend({
   no: z.number().min(1),
@@ -13,7 +13,7 @@ export const PositionTableSchema = BasePositionSchema.extend({
 })
 
 export const PositionFormSchema = BasePositionSchema.extend({
-  id: z.string().optional(),
+  id: z.coerce.string().optional(),
 })
 
 export const ActivePositionSchema = BasePositionSchema.omit({

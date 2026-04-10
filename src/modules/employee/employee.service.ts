@@ -9,8 +9,10 @@ import {
   EmployeeKodeAbsenFormSchema,
   EmployeeSpForm,
   EmployeeSpFormSchema,
+  EmployeeTable,
   EmployeeUpdate,
   EmployeeUpdateSchema,
+  OpenEmployee,
 } from "./employee.schema";
 import { ZodError } from "zod";
 import { ServiceRes } from "@/types/ServiceTypes";
@@ -20,7 +22,7 @@ import { Connection } from "mysql2/promise";
 export class EmployeeService implements IEmployeeService {
   constructor(private employeeRepository: IEmployeeRepository) {}
 
-  async getAllEmployees() {
+  async getAllEmployees(): Promise<ServiceRes<EmployeeTable[]>> {
     try {
       const karyawan = await this.employeeRepository.getAll();
 
@@ -34,7 +36,9 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async getEmployeeById(id: BaseEmployee["id"]) {
+  async getEmployeeById(
+    id: BaseEmployee["id"],
+  ): Promise<ServiceRes<BaseEmployee>> {
     try {
       EmployeeIdSchema.parse(id);
 
@@ -51,7 +55,9 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async getEmployeeForUpdate(id: BaseEmployee["id"]) {
+  async getEmployeeForUpdate(
+    id: BaseEmployee["id"],
+  ): Promise<ServiceRes<EmployeeUpdate>> {
     try {
       EmployeeIdSchema.parse(id);
 
@@ -68,7 +74,9 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async getEmployeeAbsentDivCode(absentCode: string[]) {
+  async getEmployeeAbsentDivCode(
+    absentCode: string[],
+  ): Promise<ServiceRes<Map<string, string>>> {
     if (absentCode.length === 0) throw new Err("invalid request data", 400);
 
     try {
@@ -97,9 +105,12 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async getUnaccountedEmployees(selectedId: UserId): Promise<ServiceRes> {
+  async getUnaccountedEmployees(
+    selectedId: UserId,
+  ): Promise<ServiceRes<OpenEmployee[]>> {
     try {
-      const employees = this.employeeRepository.getUnaccountedEmployees(selectedId);
+      const employees =
+        await this.employeeRepository.getUnaccountedEmployees(selectedId);
 
       return { success: true, status: 200, data: employees };
     } catch (error) {
@@ -112,13 +123,16 @@ export class EmployeeService implements IEmployeeService {
   }
 
   // returning created employee id
-  async createEmployee(data: EmployeeForm, conn: Connection) {
+  async createEmployee(
+    data: EmployeeForm,
+    conn: Connection,
+  ): Promise<ServiceRes<string>> {
     try {
-      EmployeeFormSchema.parse(data);
+      const validated = EmployeeFormSchema.parse(data);
 
-      const insertedId = await this.employeeRepository.create(data, conn);
+      const insertedId = await this.employeeRepository.create(validated, conn);
 
-      return { success: true, status: 201, data: insertedId};
+      return { success: true, status: 201, data: insertedId };
     } catch (error: unknown) {
       console.error("EmployeeService.createEmployee error:", error);
 
@@ -129,7 +143,7 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async deleteEmployee(id: string, conn: Connection) {
+  async deleteEmployee(id: string, conn: Connection): Promise<ServiceRes> {
     if (!id || typeof id !== "string")
       throw new Err("invalid request data", 400);
 
@@ -146,7 +160,10 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async updateEmployee(id: BaseEmployee["id"], data: EmployeeUpdate) {
+  async updateEmployee(
+    id: BaseEmployee["id"],
+    data: EmployeeUpdate,
+  ): Promise<ServiceRes> {
     try {
       if (data.tgl_keluar === "") data.tgl_keluar = null;
 
@@ -164,7 +181,10 @@ export class EmployeeService implements IEmployeeService {
     }
   }
 
-  async updateEmployeeSP(id: BaseEmployee["id"], data: EmployeeSpForm) {
+  async updateEmployeeSP(
+    id: BaseEmployee["id"],
+    data: EmployeeSpForm,
+  ): Promise<ServiceRes> {
     try {
       EmployeeSpFormSchema.parse(data);
 
@@ -183,7 +203,7 @@ export class EmployeeService implements IEmployeeService {
   async updateEmployeeKodeAbsen(
     id: BaseEmployee["id"],
     data: EmployeeKodeAbsenForm,
-  ) {
+  ): Promise<ServiceRes> {
     try {
       EmployeeKodeAbsenFormSchema.parse(data);
 

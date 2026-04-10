@@ -13,7 +13,7 @@ const Jabatan = async () => {
     <>
       <PageTitle>Jabatan</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <ClientPage data={positions} divisiList={divisions}/>
+        <ClientPage data={positions.data ?? []} divisiList={divisions.data ?? []}/>
       </div>
     </>
   )

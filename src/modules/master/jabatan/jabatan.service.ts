@@ -1,22 +1,24 @@
 import { Err } from "@/lib/err";
-import { IPositionRepository } from "./jabatan.interface";
+import { IPositionRepository, IPositionService } from "./jabatan.interface";
 import {
+  ActivePosition,
   BasePosition,
+  BasePositionSchema,
   PositionForm,
   PositionFormSchema,
+  PositionTable,
 } from "./jabatan.schema";
-import pool from "@/lib/db";
 import { ZodError } from "zod";
-import { BaseDivisionSchema } from "../divisi/division.schema";
+import { ServiceRes } from "@/types/ServiceTypes";
 
-export class PositionService {
+export class PositionService implements IPositionService {
   constructor(private positionRepository: IPositionRepository) {}
 
-  async getAllPositions() {
+  async getAllPositions(): Promise<ServiceRes<PositionTable[]>> {
     try {
-      const positions = await this.positionRepository.getAll();
+      const res = await this.positionRepository.getAll();
 
-      return positions;
+      return {success: true, status: 200, data: res};
     } catch (error: unknown) {
       console.error("PositionService.getAllPositions error:", error);
 
@@ -26,11 +28,11 @@ export class PositionService {
     }
   }
 
-  async getActivePositions() {
+  async getActivePositions(): Promise<ServiceRes<ActivePosition[]>> {
     try {
-      const positions = await this.positionRepository.getActive();
+      const res = await this.positionRepository.getActive();
 
-      return positions;
+      return {success: true, status: 200, data: res};
     } catch (error: unknown) {
       console.error("PositionService.getAllPositions error:", error);
 
@@ -40,81 +42,54 @@ export class PositionService {
     }
   }
 
-  async createPosition(data: PositionForm) {
-    let conn;
+  async createPosition(data: PositionForm): Promise<ServiceRes> {
     try {
-      PositionFormSchema.parse(data);
+      const validated = PositionFormSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      await this.positionRepository.create(validated);
 
-      const res = await this.positionRepository.create(data, conn);
-
-      await conn.commit();
-
-      return { success: res, status: 201 };
+      return { success: true, status: 201 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
-
       console.error("PositionService.createPosition error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
       if (error instanceof Err) throw error;
 
       throw new Err("DivisionService unavailable", 500);
-    } finally {
-      if (conn) await conn.release();
     }
   }
 
-  async updatePosition(data: BasePosition) {
-    let conn;
+  async updatePosition(data: BasePosition): Promise<ServiceRes> {
     try {
-      BaseDivisionSchema.parse(data);
+      const validated = BasePositionSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      await this.positionRepository.update(validated);
 
-      const res = await this.positionRepository.update(data, conn);
-
-      await conn.commit();
-      return { success: res, status: 200 };
+      return { success: true, status: 200 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
-
       console.error("PositionService.updateDivision error:", error);
 
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
       if (error instanceof Err) throw error;
 
       throw new Err("DivisionService unvailable", 500);
-    } finally {
-      if (conn) await conn.release();
     }
   }
 
-  async deletePosition(id: string) {
+  async deletePosition(id: string): Promise<ServiceRes> {
     if (!id || typeof id !== "string")
       throw new Err("invalid request body", 400);
 
-    const conn = await pool.getConnection();
     try {
-      await conn.beginTransaction();
+      const res = await this.positionRepository.delete(id);
 
-      const res = await this.positionRepository.delete(id, conn);
-
-      await conn.commit();
       return { success: res, status: 200 };
     } catch (error: unknown) {
-      await conn.rollback();
-
       console.error("PositionService.deletePosition error:", error);
 
       if (error instanceof Err) throw error;
 
       throw new Err("PositionService unavailable", 500);
-    } finally {
-      await conn.release();
     }
   }
 }

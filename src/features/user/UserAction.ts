@@ -1,12 +1,10 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
-import { createUserService } from "@/modules/user/user.factory";
+import { employeeService } from "@/modules/employee/employee.factory";
+import { userService } from "@/modules/user/user.factory";
 import { UserForm, UserId } from "@/modules/user/user.schema";
-import { createGetUnaccountedEmployeesService } from "@/use-cases/user/getUnaccountedEmployees";
 import { revalidatePath } from "next/cache";
 
-const userService = createUserService();
-const getUnaccountedEmployeeService = createGetUnaccountedEmployeesService();
 const PATH = "user"
 
 export const getAllUsers = withAuth(async () => {
@@ -14,7 +12,7 @@ export const getAllUsers = withAuth(async () => {
 });
 
 export const getUnaccountedEmployees = withAuth(async (session, selectedId: UserId) => {
-  return await getUnaccountedEmployeeService.execute(selectedId);
+  return await employeeService.getUnaccountedEmployees(selectedId);
 });
 
 export const createUser = withAuth(

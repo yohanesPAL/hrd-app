@@ -19,6 +19,7 @@ export default async function HrdLayout({ children }: { children: React.ReactNod
           role={session.user.role}
           karyawanId={session.user.karyawanId}
           namaKaryawan={session.user.namaKaryawan}
+          userId={session.user.id}
         />
         <div className='flex-grow-1 d-flex justify-content-center align-items-start w-full'>
           <div className='my-2 p-2' style={{ width: "90%" }}>

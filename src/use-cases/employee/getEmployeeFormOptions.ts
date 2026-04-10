@@ -1,15 +1,8 @@
 import { Err } from "@/lib/err";
-import { createDivisionService } from "@/modules/master/divisi/division.factory";
+import { divisionService } from "@/modules/master/divisi/division.factory";
 import { DivisionService } from "@/modules/master/divisi/division.service";
-import { createPositionService } from "@/modules/master/jabatan/jabatan.factory";
+import { positionService } from "@/modules/master/jabatan/jabatan.factory";
 import { PositionService } from "@/modules/master/jabatan/jabatan.service";
-
-export function createGetEmployeeFormOptions() {
-  return new GetEmployeeFormOptions(
-    createDivisionService(),
-    createPositionService(),
-  );
-}
 
 class GetEmployeeFormOptions {
   constructor(
@@ -24,7 +17,10 @@ class GetEmployeeFormOptions {
         this.positionService.getActivePositions(),
       ]);
 
-      return { division, position };
+      const activeDivision = division.data ?? [];
+      const activePosition = position.data ?? [];
+
+      return { activeDivision, activePosition };
     } catch (error: unknown) {
       console.error("GetEmployeeFormOptions error:", error);
 
@@ -34,3 +30,5 @@ class GetEmployeeFormOptions {
     }
   }
 }
+
+export const getEmployeeFormOptions = new GetEmployeeFormOptions(divisionService, positionService);

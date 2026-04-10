@@ -1,6 +1,5 @@
 import pool from "@/lib/db";
 import {
-  DivisionTableSchema,
   DivisionTable,
   DivisionForm,
   BaseDivision,
@@ -12,6 +11,7 @@ import { IDivisionRepository } from "./division.interface";
 import { ZodError } from "zod";
 import { Err } from "@/lib/err";
 import { Connection } from "mysql2/promise";
+import { DivisionMapper } from "./division.mapper";
 
 export class DivisionRepository implements IDivisionRepository {
   async getAll(): Promise<DivisionTable[]> {
@@ -20,14 +20,7 @@ export class DivisionRepository implements IDivisionRepository {
         `SELECT id, nama, is_active FROM divisi`,
       );
 
-      const normalized = rows.map((row, index) => ({
-        no: index + 1,
-        id: String(row.id),
-        nama: row.nama,
-        is_active: row.is_active === 1,
-      }));
-
-      return DivisionTableSchema.array().parse(normalized);
+      return DivisionMapper.toTableRows(rows);
     } catch (error: unknown) {
       console.error("DivisionRepository.getAll error:", error);
 
@@ -39,7 +32,7 @@ export class DivisionRepository implements IDivisionRepository {
 
   async getActive(): Promise<ActiveDivision[]> {
       try {
-        const [rows] = await pool.query("SELECT CAST(id AS CHAR) AS id, nama FROM divisi WHERE is_active = 1");
+        const [rows] = await pool.query("SELECT id, nama FROM divisi WHERE is_active = 1");
 
         return ActiveDivisionSchema.array().parse(rows)
       } catch (error: unknown) {
@@ -51,9 +44,9 @@ export class DivisionRepository implements IDivisionRepository {
       }
   }
 
-  async create(data: DivisionForm, conn: Connection): Promise<boolean> {
+  async create(data: DivisionForm): Promise<boolean> {
     try {
-      const [res] = await conn.query(
+      await pool.query(
         `INSERT INTO divisi (nama, is_active) VALUES (?,?)`,
         [data.nama, data.is_active],
       );
@@ -61,13 +54,14 @@ export class DivisionRepository implements IDivisionRepository {
       return true;
     } catch (error: unknown) {
       console.error("DivisionRepository.create error:", error);
+
       throw new Err("failed to create division", 500);
     }
   }
 
-  async update(data: BaseDivision, conn: Connection): Promise<boolean> {
+  async update(data: BaseDivision): Promise<boolean> {
     try {
-      const [res] = await conn.query(
+      await pool.query(
         `UPDATE divisi SET nama = ?, is_active = ? WHERE id = ?`,
         [data.nama, data.is_active, data.id],
       );
@@ -79,13 +73,14 @@ export class DivisionRepository implements IDivisionRepository {
     }
   }
 
-  async delete(id: string, conn: Connection): Promise<boolean> {
+  async delete(id: string): Promise<boolean> {
     try {
-      const [res] = await conn.query(`DELETE FROM divisi WHERE id = ?`, [id]);
+      await pool.query(`DELETE FROM divisi WHERE id = ?`, [id]);
 
       return true;
     } catch (error: unknown) {
       console.error("DivisionRepository.delete error:", error);
+      
       throw new Err("failed to delete division", 500);
     }
   }

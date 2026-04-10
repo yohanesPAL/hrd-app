@@ -3,13 +3,13 @@ import KaryawanPage from '@/features/karyawan/components/KaryawanPage';
 import { getAllKaryawan } from '@/features/karyawan/KaryawanAction';
 
 const Karyawan = async () => {
-  const {data} = await getAllKaryawan();
+  const karyawan = await getAllKaryawan();
 
   return (
     <>
       <PageTitle>Karyawan</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <KaryawanPage data={data}/>
+        <KaryawanPage data={karyawan.data ?? []}/>
       </div>
     </>
   )

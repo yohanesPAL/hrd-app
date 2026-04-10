@@ -5,6 +5,7 @@ import {
   UserFormSchema,
   UserId,
   UserIdSchema,
+  UserTable,
   UserUpdateForm,
   UserUpdateFormSchema,
 } from "./user.schema";
@@ -18,7 +19,7 @@ import { Connection } from "mysql2/promise";
 export class UserService implements IUserService {
   constructor(private userRepository: UserRepository) {}
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<ServiceRes<UserTable[]>> {
     try {
       const users = await this.userRepository.getAll();
 
@@ -32,13 +33,19 @@ export class UserService implements IUserService {
     }
   }
 
-  async getUserIdByKaryawanId(karyawanId: string, conn: Connection): Promise<ServiceRes> {
+  async getUserIdByKaryawanId(
+    karyawanId: string,
+    conn: Connection,
+  ): Promise<ServiceRes<string | null>> {
     if (typeof karyawanId !== "string") throw new Err("invalid request data");
 
     try {
-      const userId = await this.userRepository.getIdByKaryawanId(karyawanId, conn);
+      const userId = await this.userRepository.getIdByKaryawanId(
+        karyawanId,
+        conn,
+      );
 
-      return {success: true, status: 200, data: userId};
+      return { success: true, status: 200, data: userId };
     } catch (error) {
       console.error("UserService.getUserIdByKaryawanId error:", error);
 

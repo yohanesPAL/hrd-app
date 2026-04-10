@@ -1,22 +1,24 @@
 import { Err } from "@/lib/err";
-import { IDivisionRepository } from "./division.interface";
+import { IDivisionRepository, IDivisionService } from "./division.interface";
 import {
+  ActiveDivision,
   BaseDivision,
   BaseDivisionSchema,
   DivisionForm,
   DivisionFormSchema,
+  DivisionTable,
 } from "./division.schema";
-import pool from "@/lib/db";
 import { ZodError } from "zod";
+import { ServiceRes } from "@/types/ServiceTypes";
 
-export class DivisionService {
+export class DivisionService implements IDivisionService {
   constructor(private divisionRepository: IDivisionRepository) {}
 
-  async getAllDivisions() {
+  async getAllDivisions(): Promise<ServiceRes<DivisionTable[]>> {
     try {
-      const divisions = await this.divisionRepository.getAll();
+      const res = await this.divisionRepository.getAll();
 
-      return divisions;
+      return {success: true, status: 200, data: res};
     } catch (error) {
       console.error("DivisionService.getAllDivisions error:", error);
 
@@ -26,11 +28,11 @@ export class DivisionService {
     }
   }
 
-  async getActiveDivisions() {
+  async getActiveDivisions(): Promise<ServiceRes<ActiveDivision[]>> {
     try {
-      const divisions = await this.divisionRepository.getActive();
+      const res = await this.divisionRepository.getActive();
 
-      return divisions;
+      return {success: true, status: 200, data: res};
     } catch (error: unknown) {
       console.error("DivisionService.getActiveDivision error:", error);
 
@@ -40,82 +42,53 @@ export class DivisionService {
     }
   }
 
-  async createDivision(data: DivisionForm) {
-    let conn;
+  async createDivision(data: DivisionForm): Promise<ServiceRes> {
     try {
-      DivisionFormSchema.parse(data);
+      const validated = DivisionFormSchema.parse(data);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      await this.divisionRepository.create(validated);
 
-      const res = await this.divisionRepository.create(data, conn);
-
-      await conn.commit();
-
-      return { success: res, status: 201 };
+      return { success: true, status: 201 };
     } catch (error) {
-      if (conn) await conn.rollback();
-
       console.error("DivisionService.createDivision error:", error);
 
       if (error instanceof ZodError) throw new Err(`invalid request data`, 400)
       if (error instanceof Err) throw error
 
       throw new Err("DivisionService unavailable", 500);
-    } finally {
-      if (conn) await conn.release();
     }
   }
 
-  async updateDivision(data: BaseDivision) {
-    let conn;
+  async updateDivision(data: BaseDivision): Promise<ServiceRes> {
     try {
-      BaseDivisionSchema.parse(data);
+      const validated = BaseDivisionSchema.parse(data);
 
-      conn = await pool.getConnection();
-      conn.beginTransaction();
+      await this.divisionRepository.update(validated);
 
-      const res = await this.divisionRepository.update(data, conn);
-
-      await conn.commit();
-
-      return { success: res, status: 200 };
+      return { success: true, status: 200 };
     } catch (error: unknown) {
-      if (conn) await conn.rollback();
-
       console.error("DivisionService.updateDivision error:", error);
 
       if (error instanceof ZodError) throw new Err(`invalid request data`, 400)
       if (error instanceof Err) throw error
 
       throw new Err("DivisionService unavailable", 500);
-    } finally {
-      if (conn) await conn.release();
     }
   }
 
-  async deleteDivision(id: string) {
+  async deleteDivision(id: string): Promise<ServiceRes> {
     if (!id || typeof id !== "string") throw new Err("invalid request data", 400);
 
-    const conn = await pool.getConnection();
     try {
-      await conn.beginTransaction();
+      await this.divisionRepository.delete(id);
 
-      const res = await this.divisionRepository.delete(id, conn);
-
-      await conn.commit();
-
-      return {success: res, status: 200}
+      return {success: true, status: 200}
     } catch (error: unknown) {
-      await conn.rollback();
-
       console.error("DivisionService.deleteDivision error:", error);
 
       if(error instanceof Err) throw error
 
       throw new Err("DivisionService unavailable", 500)
-    } finally {
-      await conn.release();
     }
   }
 }

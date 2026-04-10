@@ -8,13 +8,13 @@ const sleep = (ms: number) =>
 
 const Divisi = async () => {  
   await sleep(2000);
-  const division: DivisionTable[] = await getDivisionsAction()
+  const division = await getDivisionsAction()
 
   return (
     <>
       <PageTitle>Divisi</PageTitle>
       <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <DivisiPage data={division} />
+        <DivisiPage data={division.data ?? []} />
       </div>
     </>
   )
