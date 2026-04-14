@@ -1,11 +1,12 @@
 import { Err } from "@/lib/err";
 import { BaseUser, UserIdSchema } from "../user/user.schema";
 import { INotificationService } from "./notification.interface";
-import { BaseNotificationRecipient, BaseNotificationRecipientIdSchema, NotificationForm, NotificationFormSchmea, NotificationPopup, NotificationTable } from "./notification.schema";
+import { BaseNotification, BaseNotificationRecipient, BaseNotificationIdSchema, NotificationForm, NotificationFormSchema, NotificationPopup, NotificationTable } from "./notification.schema";
 import { ZodError } from "zod";
 import { ServiceRes } from "@/types/ServiceTypes";
 import pool from "@/lib/db";
 import { NotificationRepository } from "./notification.repository";
+import { Connection } from "mysql2/promise";
 
 export class NotificationService implements INotificationService {
   constructor(private notificationRepository: NotificationRepository) { }
@@ -16,7 +17,7 @@ export class NotificationService implements INotificationService {
 
       const res = await this.notificationRepository.getAllByUser(valId);
 
-      return {success: true, status: 200, data: res}
+      return { success: true, status: 200, data: res }
     } catch (error) {
       console.error("NotificationService.getAllNotificationByUser error:", error);
 
@@ -33,7 +34,7 @@ export class NotificationService implements INotificationService {
 
       const res = await this.notificationRepository.getNotificationsPopup(valId)
 
-      return {success: true, status: 200, data: res};
+      return { success: true, status: 200, data: res };
     } catch (error) {
       console.error("NotificationService.getNotificatiosPopup error:", error);
 
@@ -44,9 +45,24 @@ export class NotificationService implements INotificationService {
     }
   }
 
+  async getNewlyCreatedNotification(notificationType: BaseNotification["tipe"], conn: Connection): Promise<ServiceRes<BaseNotification["id"][]>> {
+    if (typeof notificationType !== "string" || !notificationType) throw new Err("invalid request data", 400);
+    try {
+      const res = await this.notificationRepository.getNewlyCreated(notificationType, conn);
+
+      return { success: true, status: 200, data: res }
+    } catch (error) {
+      console.error("NotificationService.getNewlyCreatedNotification error:", error);
+
+      if (error instanceof Err) throw error
+
+      throw new Err("internal server error", 500);
+    }
+  }
+
   async markedNotificationRead(idList: BaseNotificationRecipient["id"][]): Promise<ServiceRes> {
     try {
-      const valIdList = BaseNotificationRecipientIdSchema.array().parse(idList);
+      const valIdList = BaseNotificationIdSchema.array().parse(idList);
 
       await this.notificationRepository.markedIsRead(valIdList);
 
@@ -60,29 +76,38 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  async createNotification(notificationForm: NotificationForm, recipientId: BaseUser["id"][]): Promise<ServiceRes> {
-    let conn;
+  async createNotification(notificationForms: NotificationForm[], conn: Connection): Promise<ServiceRes<string[]>> {
     try {
-      const validatedNotificationForm = NotificationFormSchmea.parse(notificationForm);
-      const validatedRecipientId = UserIdSchema.array().parse(recipientId);
+      const validatedNotificationForm = NotificationFormSchema.array().parse(notificationForms);
 
-      conn = await pool.getConnection();
-      await conn.beginTransaction();
+      const res = await this.notificationRepository.create(validatedNotificationForm, conn);
 
-      const notifId = await this.notificationRepository.create(validatedNotificationForm, conn);
-      await this.notificationRepository.createRecipient(validatedRecipientId, notifId, conn);
-
-      return {success: true, status: 201};
+      return { success: true, status: 201, data: res };
     } catch (error) {
-      if (conn) await conn.rollback();
       console.error("NotificationService.createNotification error:", error);
 
-      if(error instanceof Err) throw error;
-      if(error instanceof ZodError) throw new Err("invalid request data", 400);
+      if (error instanceof Err) throw error;
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
 
       throw new Err("NotificationService.createNotification unavailable", 500);
-    } finally {
-      if (conn) conn.release();
+    }
+  }
+
+  async createNotificationRecipient(recipientIds: BaseUser["id"][], notificationIds: BaseNotification["id"][], conn: Connection): Promise<ServiceRes> {
+    try {
+      const validatedRecipientIds = UserIdSchema.array().parse(recipientIds);
+      const validatedNotificationIds = BaseNotificationIdSchema.array().parse(notificationIds);
+
+      await this.notificationRepository.createRecipient(validatedRecipientIds, validatedNotificationIds, conn);
+
+      return { success: true, status: 200 };
+    } catch (error) {
+      console.error("NotificationService.createNotificationRecipient error:", error);
+
+      if (error instanceof Err) throw error;
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
+
+      throw new Err("internal server error", 500);
     }
   }
 }

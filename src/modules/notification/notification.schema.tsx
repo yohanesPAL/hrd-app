@@ -10,7 +10,7 @@ export const BaseNotificationSchema = z.object({
   level: z.int().min(1).max(3),
 }).strict();
 
-export const BaseNotificationRecipientIdSchema = BaseNotificationSchema.shape.id
+export const BaseNotificationIdSchema = BaseNotificationSchema.shape.id
 
 export const BaseNotificationRecipientSchema = z.object({
   id: z.coerce.string().min(1),
@@ -33,7 +33,7 @@ export const NotificationTableSchema = NotificationPopupSchema.extend({
   tipe: z.string().min(1),
 })
 
-export const NotificationFormSchmea = BaseNotificationSchema.omit({
+export const NotificationFormSchema = BaseNotificationSchema.omit({
   id: true,
 })
 
@@ -41,4 +41,4 @@ export type BaseNotification = z.infer<typeof BaseNotificationSchema>;
 export type BaseNotificationRecipient = z.infer<typeof BaseNotificationRecipientSchema>
 export type NotificationPopup = z.infer<typeof NotificationPopupSchema>;
 export type NotificationTable = z.infer<typeof NotificationTableSchema>;
-export type NotificationForm = z.infer<typeof NotificationFormSchmea>
+export type NotificationForm = z.infer<typeof NotificationFormSchema>

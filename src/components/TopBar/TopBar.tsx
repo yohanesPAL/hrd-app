@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { useLogout } from '@/hooks/useLogout';
 import { NotificationPopup } from '@/modules/notification/notification.schema';
 import { useEffect, useState } from 'react';
-import { getNotificationsPopup, markedNotificationsRead } from '@/features/notification/NotificationAction';
+import { createContractNearExpirationNotification, getNotificationsPopup, markedNotificationsRead } from '@/features/notification/NotificationAction';
+import { toast } from 'react-toastify';
 
 const delay = (ms: any) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -62,6 +63,16 @@ const TopBar = ({
     setIsFetchNotif(false);
   }
 
+  const createNotif = async () => {
+    await toast.promise(
+      createContractNearExpirationNotification(), {
+      pending: "Create notif...",
+      success: "Berhasil create notif",
+      error: "Ooops... ada yang salah",
+    }
+    )
+  }
+
   useEffect(() => {
     const fetchNotifications = async () => {
       setIsFetchNotif(true);
@@ -84,6 +95,7 @@ const TopBar = ({
           </div>
 
           <Stack className='h-100' direction='horizontal'>
+            <Button type='button' onClick={createNotif}>test</Button>
             <Dropdown className='h-100' align={"end"}>
               <DropdownToggle className='d-flex flex-row align-items-center justify-content-center h-100 px-3 py-0 bg-transparent border-0 on-hover rounded-0'>
                 <div style={{ position: "relative", display: "inline-block" }}>

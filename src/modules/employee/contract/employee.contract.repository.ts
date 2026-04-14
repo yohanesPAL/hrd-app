@@ -113,9 +113,7 @@ export class EmployeeContractRepository implements IEmployeeContractRepository {
     }
   }
 
-  async getNearExpiration(
-    daysBefore: number,
-  ): Promise<EmployeeContractExpiration[]> {
+  async getNearExpiration(daysBefore: number): Promise<EmployeeContractExpiration[]> {
     try {
       let daysInterval = "";
       if (daysBefore > 0) daysInterval = ` + INTERVAL ${daysBefore} DAY`;

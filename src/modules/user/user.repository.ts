@@ -1,6 +1,6 @@
 import pool from "@/lib/db";
 import { IUserRepository } from "./user.interface";
-import { UserId, UserIdSchema, UserPersistence, UserTable } from "./user.schema";
+import { BaseUser, UserId, UserIdSchema, UserPersistence, UserTable } from "./user.schema";
 import { ZodError } from "zod";
 import { Err } from "@/lib/err";
 import { RowDataPacket } from "mysql2";
@@ -39,6 +39,21 @@ export class UserRepository implements IUserRepository {
         if(error instanceof ZodError) throw new Err("invalid user id", 400);
 
         throw new Err("failed to fetch user id", 500);
+      }
+  }
+
+  async getIdByRole(role: BaseUser["role"]): Promise<UserId[]> {
+      try {
+        const [rows] = await pool.query(`SELECT id FROM akun WHERE role = ? AND is_active = 1`, [role]);
+        const ids = (rows as any[]).map(row => row.id)
+
+        return UserIdSchema.array().parse(ids);
+      } catch (error) {
+        console.error("UserRepository.getIdByRole error:", error);
+
+        if(error instanceof ZodError) throw new Err("invalid id data", 400);
+
+        throw new Err("failed to get id by role", 500);
       }
   }
 

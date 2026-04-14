@@ -48,9 +48,7 @@ export class EmployeeContractService implements IEmployeeContractService {
     }
   }
 
-  async getContractNearExpiration(
-    daysBefore: number,
-  ): Promise<ServiceRes<EmployeeContractExpiration[]>> {
+  async getContractNearExpiration(daysBefore: number): Promise<ServiceRes<EmployeeContractExpiration[]>> {
     try {
       if (typeof daysBefore !== "number")
         throw new Err("days interval must be number");

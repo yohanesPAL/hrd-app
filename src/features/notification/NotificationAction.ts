@@ -3,6 +3,7 @@ import { withAuth } from "@/lib/withAuth";
 import { notificationService } from "@/modules/notification/notification.factory";
 import { BaseNotificationRecipient } from "@/modules/notification/notification.schema";
 import { BaseUser } from "@/modules/user/user.schema";
+import { contractNotificationUseCase } from "@/use-cases/notificationFactory/notification.contract";
 
 export const getNotificaionsByUser = withAuth(
   async (session, userId: BaseUser["id"]) => {
@@ -21,3 +22,7 @@ export const markedNotificationsRead = withAuth(
     await notificationService.markedNotificationRead(notifIdList);
   },
 );
+
+export const createContractNearExpirationNotification = withAuth(async () => {
+  await contractNotificationUseCase.contractExpiration();
+});

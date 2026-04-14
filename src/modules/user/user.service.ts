@@ -1,6 +1,7 @@
 import { Err } from "@/lib/err";
 import { UserRepository } from "./user.repository";
 import {
+  BaseUser,
   UserForm,
   UserFormSchema,
   UserId,
@@ -52,6 +53,22 @@ export class UserService implements IUserService {
       if (error instanceof Err) throw error;
 
       throw new Err("UserService.getUserIdByKaryawanId unavailable", 500);
+    }
+  }
+
+  async getUserIdByRole(role: BaseUser["role"]): Promise<ServiceRes<UserId[]>> {
+    if (!role || typeof role !== "string")
+      throw new Err("invalid request data", 400);
+    try {
+      const res = await this.userRepository.getIdByRole(role);
+
+      return { success: true, status: 200, data: res };
+    } catch (error) {
+      console.error("UserService.getUserIdByRole error:", error);
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("internal server error", 500);
     }
   }
 
