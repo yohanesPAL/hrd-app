@@ -27,9 +27,13 @@ export const EmployeeContractExpirationSchema = BaseEmployeeContractSchema.pick(
 }).extend({
   tgl_berakhir: z.date(),
   nama: z.string().min(1),
+  days_diff: z.number().min(0).max(7),
+  notified_7_day: z.date().nullable(),
+  notified_3_day: z.date().nullable(),
+  notified_today: z.date().nullable(),
 })
 
-export type BaseEmployeeContrat = z.infer<typeof BaseEmployeeContractSchema>;
+export type BaseEmployeeContract = z.infer<typeof BaseEmployeeContractSchema>;
 export type EmployeeContractTable = z.infer<typeof EmployeeContractTableSchema>;
 export type EmployeeContractForm = z.infer<typeof EmployeeContractFormSchema>;
 export type EmployeeContractExpiration = z.infer<typeof EmployeeContractExpirationSchema>;

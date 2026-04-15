@@ -5,6 +5,7 @@ import {
   EmployeeContractForm,
   EmployeeContractExpiration,
   EmployeeContractExpirationSchema,
+  BaseEmployeeContract,
 } from "./employee.contract.schema";
 import { BaseEmployee } from "../employee.schema";
 import { EmployeeContractMapper } from "./employee.contract.mapper";
@@ -113,15 +114,13 @@ export class EmployeeContractRepository implements IEmployeeContractRepository {
     }
   }
 
-  async getNearExpiration(daysBefore: number): Promise<EmployeeContractExpiration[]> {
+  async getNearExpiration(): Promise<EmployeeContractExpiration[]> {
     try {
-      let daysInterval = "";
-      if (daysBefore > 0) daysInterval = ` + INTERVAL ${daysBefore} DAY`;
-
       const sql = `
-        SELECT kk.id, tgl_berakhir, k.nama FROM kontrak_karyawan kk
+        SELECT kk.id, tgl_berakhir, k.nama, DATEDIFF(DATE(tgl_berakhir), CURRENT_DATE) AS days_diff, notified_7_day, notified_3_day, notified_today FROM kontrak_karyawan kk
           JOIN karyawan k ON (k.id = kk.karyawan_id)
-          WHERE jenis = 'kontrak' AND tgl_berakhir = CURRENT_DATE${daysInterval}
+          WHERE jenis = 'kontrak' AND tgl_berakhir BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL 7 DAY
+          ORDER BY days_diff DESC
       `;
 
       const [rows] = await pool.query(sql);
@@ -137,6 +136,81 @@ export class EmployeeContractRepository implements IEmployeeContractRepository {
         throw new Err("invalid contract data", 400);
 
       throw new Err("failed to get near expiration contract", 500);
+    }
+  }
+
+  async update7d(
+    contractIds: BaseEmployeeContract["id"][],
+    conn: Connection,
+  ): Promise<boolean> {
+    try {
+      const placeholder: string[] = [],
+        args: any[] = [];
+      contractIds.forEach((item) => {
+        placeholder.push("?");
+        args.push(item);
+      });
+
+      await conn.query(
+        `UPDATE kontrak_karyawan SET notified_7_day = NOW() WHERE id IN (${placeholder.join(",")})`,
+        args,
+      );
+
+      return true;
+    } catch (error) {
+      console.error("EmployeeContractRepository.update7d error:", error);
+
+      throw new Err("failed to update notified_7_day", 500, error);
+    }
+  }
+
+  async update3d(
+    contractIds: BaseEmployeeContract["id"][],
+    conn: Connection,
+  ): Promise<boolean> {
+    try {
+      const placeholder: string[] = [],
+        args: any[] = [];
+      contractIds.forEach((item) => {
+        placeholder.push("?");
+        args.push(item);
+      });
+
+      await conn.query(
+        `UPDATE kontrak_karyawan SET notified_3_day = NOW() WHERE id IN (${placeholder.join(",")})`,
+        args,
+      );
+
+      return true;
+    } catch (error) {
+      console.error("EmployeeContractRepository.update3d error:", error);
+
+      throw new Err("failed to update notified_3_day", 500, error);
+    }
+  }
+
+  async updateToday(
+    contractIds: BaseEmployeeContract["id"][],
+    conn: Connection,
+  ): Promise<boolean> {
+    try {
+      const placeholder: string[] = [],
+        args: any[] = [];
+      contractIds.forEach((item) => {
+        placeholder.push("?");
+        args.push(item);
+      });
+
+      await conn.query(
+        `UPDATE kontrak_karyawan SET notified_today = NOW() WHERE id IN (${placeholder.join(",")})`,
+        args,
+      );
+
+      return true;
+    } catch (error) {
+      console.error("EmployeeContractRepository.updateToday error:", error);
+
+      throw new Err("failed to update notified_today", 500, error);
     }
   }
 }

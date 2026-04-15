@@ -1,27 +1,12 @@
 import pool from "@/lib/db";
 import { Err } from "@/lib/err";
 import { employeeContractService } from "@/modules/employee/contract/employee.contract.factory";
-import { EmployeeContractExpiration } from "@/modules/employee/contract/employee.contract.schema";
 import { EmployeeContractService } from "@/modules/employee/contract/employee.contract.service";
 import { notificationService } from "@/modules/notification/notification.factory";
-import { NotificationForm } from "@/modules/notification/notification.schema";
 import { NotificationService } from "@/modules/notification/notification.service";
 import { userService } from "@/modules/user/user.factory";
 import { UserService } from "@/modules/user/user.service";
 import { ServiceRes } from "@/types/ServiceTypes";
-import { formatDateDDMMYYYY } from "@/utils/dateFormatting";
-import { DAYS_BEFORE_EXPIRATION, PRIORITY_LEVEL } from "./lib/var";
-
-const GenerateContractForm = (contracts: EmployeeContractExpiration[]): NotificationForm[] => {
-  return contracts.map((item) => ({
-    ref: item.id,
-    ref_table: "kontrak_karyawan",
-    tipe: "contract_expiration",
-    judul: "Kontrak Hampir Habis",
-    teks: `kontrak karyawan ${item.nama} akan berakhir pada tanggal ${formatDateDDMMYYYY(item.tgl_berakhir)}`,
-    level: PRIORITY_LEVEL.medium,
-  }))
-}
 
 class ContractNotificationUseCase {
   constructor(
@@ -31,35 +16,38 @@ class ContractNotificationUseCase {
   ) { }
 
   async contractExpiration(): Promise<ServiceRes<string>> {
-    const conn = await pool.getConnection();
+    let conn;
     try {
-      const contracts = await this.contractService.getContractNearExpiration(DAYS_BEFORE_EXPIRATION.sevenDays);
-      if(!contracts.data?.length) return {success: true, status: 200, data: "No near expiration contract found"}
-
-      const contractsForm: NotificationForm[] = GenerateContractForm(contracts.data);
+      const contracts = await this.contractService.getContractNearExpiration();
+      if(!contracts.data?.form.length) return {success: true, status: 204, data: "No near expiration contract found"}
 
       const recipientIds = await this.userService.getUserIdByRole("hrd");
-      if(!recipientIds.data?.length) return {success: true, status: 200, data: "No recipient id found"}
+      if(!recipientIds.data?.length) return {success: true, status: 204, data: "No recipient id found"}
 
+      conn = await pool.getConnection();
       await conn.beginTransaction();
 
-      const notificationIds =  await this.notificationService.createNotification(contractsForm, conn);
-      if(!notificationIds.data?.length) throw new Err("no notification id returned", 400);
+      const notificationIds =  await this.notificationService.createNotification(contracts.data.form, conn);
+      if(!notificationIds.data?.length) throw new Err("no notification id returned", 500);
+
+      if(contracts.data.day7.length > 0) await this.contractService.updateNotified7d(contracts.data.day7, conn);
+      if(contracts.data.day3.length > 0) await this.contractService.updateNotified3d(contracts.data.day3, conn);
+      if(contracts.data.today.length > 0) await this.contractService.updateNotifiedToday(contracts.data.today, conn);
 
       await this.notificationService.createNotificationRecipient(recipientIds.data, notificationIds.data, conn);
 
       await conn.commit();
 
-      return { success: true, status: 200 }
+      return { success: true, status: 200, data: "ok" }
     } catch (error) {
-      await conn.rollback();
+      if(conn) await conn.rollback();
       console.error("ContractNotificationUseCase.contractExpiration error:", error);
 
       if (error instanceof Err) throw error
 
-      throw new Err("failed to execute contract expiration notification", 500)
+      throw new Err("failed to execute contract expiration notification", 500, error)
     } finally {
-      conn.release();
+      if (conn) conn.release();
     }
   }
 }

@@ -89,7 +89,7 @@ export class NotificationService implements INotificationService {
       if (error instanceof Err) throw error;
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
 
-      throw new Err("NotificationService.createNotification unavailable", 500);
+      throw new Err("internal server error", 500, error);
     }
   }
 

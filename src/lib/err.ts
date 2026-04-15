@@ -14,12 +14,20 @@ export class Err extends Error {
    * @param message - Human-readable error message.
    * @param status - HTTP status code (defaults to 500).
    */
-  constructor(message: string, status = 500) {
-    super(message);
+  constructor(message: string, status = 500, cause?: unknown) {
+    super(message, { cause });
     this.name = this.constructor.name;
     this.status = status;
 
     // Maintains proper stack trace (only available in V8 engines like Node.js)
     Error.captureStackTrace?.(this, this.constructor);
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      status: this.status,
+    };
   }
 }

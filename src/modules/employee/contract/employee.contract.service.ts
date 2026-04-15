@@ -7,12 +7,15 @@ import {
   EmployeeContractForm,
   EmployeeContractExpiration,
   EmployeeContractTable,
+  BaseEmployeeContract,
 } from "./employee.contract.schema";
 import { Err } from "@/lib/err";
 import { EmployeeContractRepository } from "./employee.contract.repository";
 import { Connection } from "mysql2/promise";
 import pool from "@/lib/db";
 import { ZodError } from "zod";
+import { EmployeeContractMapper } from "./employee.contract.mapper";
+import { NotificationForm } from "@/modules/notification/notification.schema";
 
 function calculateContractDuration(
   tglKontrak: Date,
@@ -48,15 +51,19 @@ export class EmployeeContractService implements IEmployeeContractService {
     }
   }
 
-  async getContractNearExpiration(daysBefore: number): Promise<ServiceRes<EmployeeContractExpiration[]>> {
+  async getContractNearExpiration(): Promise<
+    ServiceRes<{
+      form: NotificationForm[];
+      day7: string[];
+      day3: string[];
+      today: string[];
+    }>
+  > {
     try {
-      if (typeof daysBefore !== "number")
-        throw new Err("days interval must be number");
+      const res = await this.employeeContractRepository.getNearExpiration();
+      const contractForms = EmployeeContractMapper.toContractForm(res);
 
-      const res =
-        await this.employeeContractRepository.getNearExpiration(daysBefore);
-
-      return {success: true, status: 200, data: res};
+      return { success: true, status: 200, data: contractForms };
     } catch (error) {
       console.error(
         "EmployeeContractService.getContractNearExpiration error:",
@@ -183,6 +190,65 @@ export class EmployeeContractService implements IEmployeeContractService {
         "EmployeeContractService.deleteContractByKaryawanId unavailable",
         500,
       );
+    }
+  }
+
+  async updateNotified7d(
+    contractIds: BaseEmployeeContract["id"][],
+    conn: Connection,
+  ): Promise<ServiceRes> {
+    try {
+      const validatedIds = EmployeeContractIdSchema.array().parse(contractIds);
+
+      await this.employeeContractRepository.update7d(validatedIds, conn);
+
+      return { success: true, status: 200 };
+    } catch (error) {
+      console.error("EmployeeContractService.updateNotified7d error:", error);
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("internal server error", 500, error);
+    }
+  }
+
+  async updateNotified3d(
+    contractIds: BaseEmployeeContract["id"][],
+    conn: Connection,
+  ): Promise<ServiceRes> {
+    try {
+      const validatedIds = EmployeeContractIdSchema.array().parse(contractIds);
+
+      await this.employeeContractRepository.update3d(validatedIds, conn);
+
+      return { success: true, status: 200 };
+    } catch (error) {
+      console.error("EmployeeContractService.updateNotified3d error:", error);
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("internal server error", 500, error);
+    }
+  }
+  async updateNotifiedToday(
+    contractIds: BaseEmployeeContract["id"][],
+    conn: Connection,
+  ): Promise<ServiceRes> {
+    try {
+      const validatedIds = EmployeeContractIdSchema.array().parse(contractIds);
+
+      await this.employeeContractRepository.updateToday(validatedIds, conn);
+
+      return { success: true, status: 200 };
+    } catch (error) {
+      console.error(
+        "EmployeeContractService.updateNotifiedToday error:",
+        error,
+      );
+
+      if (error instanceof Err) throw error;
+
+      throw new Err("internal server error", 500, error);
     }
   }
 }
