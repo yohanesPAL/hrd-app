@@ -88,7 +88,7 @@ const TopBar = ({
 
     setNotificitaions(prev => prev.filter(item => item.notif_id !== notificationId))
 
-    const idInArray: string[] = ["notificationId"];
+    const idInArray: string[] = [notificationId];
     const res = await markNotificationRead(idInArray);
 
     if(!res) setNotificitaions(prev => [notification, ...prev].sort((a, b) => Number(a.notif_id) - Number(b.notif_id)));
