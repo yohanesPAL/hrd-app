@@ -35,15 +35,21 @@ export class EmployeeContractMapper {
         else continue;
       }
 
-      const priorityLevel =
-        item.days_diff === 0 ? PRIORITY_LEVEL.high : PRIORITY_LEVEL.medium;
+      let priorityLevel, teks;
+      if(item.days_diff === 0) {
+        priorityLevel = PRIORITY_LEVEL.high;
+        teks = `kontrak karyawan ${item.nama} akan berakhir hari ini !!`
+      } else {
+        priorityLevel = PRIORITY_LEVEL.medium;
+        teks = `kontrak karyawan ${item.nama} akan berakhir pada tanggal ${formatDateDDMMYYYY(item.tgl_berakhir)}`
+      }
 
       contractForms.push({
         ref: item.id,
         ref_table: "kontrak_karyawan",
         tipe: "contract_expiration",
         judul: "Kontrak Hampir Habis",
-        teks: `kontrak karyawan ${item.nama} akan berakhir pada tanggal ${formatDateDDMMYYYY(item.tgl_berakhir)}`,
+        teks: teks,
         level: priorityLevel,
       });
     }

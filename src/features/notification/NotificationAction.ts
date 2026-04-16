@@ -17,7 +17,7 @@ export const getNotificationsPopup = withAuth(
   },
 );
 
-export const markedNotificationsRead = withAuth(
+export const markedNotificationsReadAction = withAuth(
   async (session, notifIdList: BaseNotificationRecipient["id"][]) => {
     await notificationService.markedNotificationRead(notifIdList);
   },

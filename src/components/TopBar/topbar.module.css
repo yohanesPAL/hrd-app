@@ -1,0 +1,17 @@
+.notificationCard {
+  background: transparent;
+  transition: background 0.2s ease;
+  padding: 6px 0 6px 4px
+}
+
+.notificationCard:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+.closeBtn {
+  color: black;
+}
+
+.closeBtn:hover {
+  color: red;
+}

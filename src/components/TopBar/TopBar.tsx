@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useLogout } from '@/hooks/useLogout';
 import { NotificationPopup } from '@/modules/notification/notification.schema';
 import { useEffect, useState } from 'react';
-import { createContractNearExpirationNotification, getNotificationsPopup, markedNotificationsRead } from '@/features/notification/NotificationAction';
+import { createContractNearExpirationNotification, getNotificationsPopup, markedNotificationsReadAction } from '@/features/notification/NotificationAction';
 import { toast } from 'react-toastify';
+import styles from './topbar.module.css'
 
 const delay = (ms: any) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -54,13 +55,43 @@ const TopBar = ({
     await onLogout()
   }
 
-  const markNotificationsRead = async () => {
+  const markNotificationRead = async (notificationIds: string[]) => {
+    try {
+      await toast.promise(
+        markedNotificationsReadAction(notificationIds), {
+        pending: "Memproses...",
+        success: "Sukses",
+        error: "Ooops... ada yang salah",
+      })
+
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  const readAllNotifications = async () => {
+    const lastNotifications = notifications;
+    if(!lastNotifications.length || lastNotifications.length === 0) return;
+
     setNotificitaions([]);
-    setIsFetchNotif(true);
+
     const notifId: string[] = notifications.map(notif => notif.notif_id);
-    await markedNotificationsRead(notifId);
-    await delay(2000)
-    setIsFetchNotif(false);
+    const res = await markNotificationRead(notifId);
+
+    if(!res) setNotificitaions(lastNotifications.sort((a,b) => Number(a.notif_id) - Number(b.notif_id)));
+  }
+
+  const readOneNotification = async (notificationId: string) => {
+    const notification: NotificationPopup | undefined = notifications.find(item => item.notif_id === notificationId);
+    if(!notification) return;
+
+    setNotificitaions(prev => prev.filter(item => item.notif_id !== notificationId))
+
+    const idInArray: string[] = ["notificationId"];
+    const res = await markNotificationRead(idInArray);
+
+    if(!res) setNotificitaions(prev => [notification, ...prev].sort((a, b) => Number(a.notif_id) - Number(b.notif_id)));
   }
 
   const createNotif = async () => {
@@ -69,8 +100,7 @@ const TopBar = ({
       pending: "Create notif...",
       success: "Berhasil create notif",
       error: "Ooops... ada yang salah",
-    }
-    )
+    })
   }
 
   useEffect(() => {
@@ -147,19 +177,22 @@ const TopBar = ({
                                 return (
                                   <div key={notification.judul + index}>
                                     {index !== 0 && <DropdownDivider />}
-                                    <Button variant='outline-light' className='rounded-0 w-100 h-100 text-start text-black' style={{ borderTop: "0px", borderRight: "0px", borderBottom: "0px", borderLeft: `4px solid ${borderColor.get(notification.level)}`, paddingLeft: "4px" }}>
+                                    <div className={`rounded-0 w-100 h-100 text-start text-black ${styles.notificationCard}`} style={{ borderTop: "0px", borderRight: "0px", borderBottom: "0px", borderLeft: `4px solid ${borderColor.get(notification.level)}`, position: "relative" }}>
                                       <Stack>
-                                        <b className='text-truncate'>{notification.judul}</b>
+                                        <b className='text-truncate' style={{ maxWidth: "225px" }}>{notification.judul}</b>
                                         <small>{notification.teks}</small>
                                         <small style={{ color: "rgba(0,0,0,0.5)" }}>{formatDaysDeltaToText(calculateDaysDelta(notification.created_at))}</small>
                                       </Stack>
-                                    </Button>
+                                      <Button onClick={() => readOneNotification(notification.notif_id)} variant='outline-light' style={{ top: 0, right: 0, position: "absolute", padding: "2px" }}>
+                                        <i className={`bi bi-x-lg ${styles.closeBtn}`}></i>
+                                      </Button>
+                                    </div>
                                   </div>
                                 )
                               })
                             }
                           </div>
-                          <Button onClick={markNotificationsRead} className='rounded-0 w-100 p-0' variant="outline-primary" style={{ border: "0px", marginTop: "8px", boxShadow: "0 -0.5px 4px rgba(0, 0, 0, 0.1)" }}>
+                          <Button onClick={readAllNotifications} className='rounded-0 w-100 p-0' variant="outline-primary" style={{ border: "0px", marginTop: "8px", boxShadow: "0 -0.5px 4px rgba(0, 0, 0, 0.1)" }}>
                             <div style={{ background: "rgba(0,0,0,0.05)" }} className='p-2'>
                               Tandai sudah baca
                             </div>

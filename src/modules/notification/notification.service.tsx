@@ -62,7 +62,7 @@ export class NotificationService implements INotificationService {
 
   async markedNotificationRead(idList: BaseNotificationRecipient["id"][]): Promise<ServiceRes> {
     try {
-      const valIdList = BaseNotificationIdSchema.array().parse(idList);
+      const valIdList = BaseNotificationIdSchema.array().min(1).parse(idList);
 
       await this.notificationRepository.markedIsRead(valIdList);
 
