@@ -18,7 +18,7 @@ export const HrdMenu: MenuInterface[] = [
   { nama: "Kalender Acara", href: "kalender", icon: "bi-calendar-event"},
   { nama: "Karyawan", href: "karyawan", icon: "bi-people-fill" },
   { nama: "Absensi", href: "absensi", icon: "bi-calendar-check" },
-  { nama: "Mobil", href: "mobil", icon: "bi-truck" },
+  { nama: "Kendaraan", href: "kendaraan", icon: "bi-truck" },
   { nama: "Dokumen", href: "dokumen", icon: "bi-file-earmark-medical-fill", children: DokumenChildren },
   { nama: "User", href: "user", icon: "bi-person-fill" },
 ]

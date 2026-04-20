@@ -1,7 +1,6 @@
 'use client'
 import PageTitle from '@/components/PageTitle';
 import { Table } from 'react-bootstrap';
-import styles from '../css/profile.module.css';
 import { BaseEmployee } from '@/modules/employee/employee.schema';
 import { formatDateDDMMYYYY } from '@/utils/dateFormatting';
 import { EmployeeContractTable } from '@/modules/employee/contract/employee.contract.schema';
@@ -14,8 +13,8 @@ const KaryawanProfile = ({ profile, contracts }: { profile: BaseEmployee, contra
   return (
     <>
       <PageTitle>Profile</PageTitle>
-      <div className='page-container-border bg-white rounded p-2 pt-4'>
-        <Table className={`w-100 table-bordered ${styles.tableBg}`} style={{ marginBottom: "48px" }}>
+      <div className='page-container-border bg-white table-bg rounded p-2 pt-4'>
+        <Table className={`w-100`} style={{ marginBottom: "48px" }}>
           <tbody>
             <tr>
               <td style={{ width: "15%" }}>NIK</td>

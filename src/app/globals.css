@@ -110,3 +110,12 @@ a {
 .navbar-nav .nav-link.active:hover {
   color: #fff;
 }
+
+.table-bg td {
+  background: white;
+}
+
+.table-bg tr > td:nth-child(1),
+.table-bg tr > td:nth-child(4) {
+  font-weight: Bold
+}
