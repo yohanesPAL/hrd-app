@@ -4,19 +4,19 @@ export const CAR_STATUS = ["baik", "rusak", "perbaikan"];
 
 export const BaseCarSchema = z
   .object({
-    id: z.coerce.string().min(1),
-    nama: z.string().min(1),
-    jenis: z.string().min(1),
-    merk: z.string().min(1),
-    nopol: z.string().min(1),
-    depo: z.string().min(1),
-    tahun: z.coerce.string().min(1),
+    id: z.number().transform(val => val.toString().trim()),
+    nama: z.string().min(1).trim(),
+    jenis: z.string().min(1).trim(),
+    merk: z.string().min(1).trim(),
+    nopol: z.string().min(1).trim(),
+    depo: z.string().min(1).trim(),
+    tahun: z.coerce.string().min(1).trim(),
     jumlah_roda: z.number().nonnegative(),
     status: z.enum(CAR_STATUS),
   })
   .strict();
 
-export const CarIdSchema = BaseCarSchema.shape.id;
+export const CarIdSchema = z.string().min(1).trim();
 
 export const CarFormSchema = BaseCarSchema.omit({
   id: true,

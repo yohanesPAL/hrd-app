@@ -32,10 +32,9 @@ export class CarMaintenanceService implements ICarMaintenanceService {
       );
 
       if (error instanceof Err) throw error;
-      if (error instanceof ZodError)
-        throw new Err("invalid request data", 400, error);
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -52,10 +51,9 @@ export class CarMaintenanceService implements ICarMaintenanceService {
       console.error("CarMaintenanceService.createMaintenance error:", error);
 
       if (error instanceof Err) throw error;
-      if (error instanceof ZodError)
-        throw new Err("invalid request data", 400, error);
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -74,10 +72,9 @@ export class CarMaintenanceService implements ICarMaintenanceService {
       console.error("CarMaintenanceService.updateMaintenance error:", error);
 
       if (error instanceof Err) throw error;
-      if (error instanceof ZodError)
-        throw new Err("invalid request data", 400, error);
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -94,10 +91,9 @@ export class CarMaintenanceService implements ICarMaintenanceService {
       console.error("CarMaintenanceService.deleteMaintenance error:", error);
 
       if (error instanceof Err) throw error;
-      if (error instanceof ZodError)
-        throw new Err("invalid request data", 400, error);
+      if (error instanceof ZodError) throw new Err("invalid request data", 400);
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -117,7 +113,7 @@ export class CarMaintenanceService implements ICarMaintenanceService {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 }

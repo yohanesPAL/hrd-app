@@ -18,7 +18,7 @@ export class CarRepository implements ICarRepository {
       console.error("CarRepository.getAll error:", error);
 
       if (error instanceof ZodError)
-        throw new Err("invalid car data", 400, error);
+        throw new Err("invalid car data", 400);
 
       throw new Err("failed to get car data", 500);
     }

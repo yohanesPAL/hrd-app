@@ -27,6 +27,7 @@ const KendaraanPage = ({ data }: { data: CarTable[] }) => {
         </Button>
         {/* <ExportToExcel onExport={onExport} /> */}
       </Stack>
+
       <DefaultTable<CarTable>
         data={data ?? []}
         columns={kendaraanColumns({

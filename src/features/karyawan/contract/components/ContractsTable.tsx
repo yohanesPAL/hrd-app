@@ -1,6 +1,6 @@
 "use client";
 import DefaultTable from '@/components/Table/DefaulteTable'
-import { BaseEmployeeContrat, EmployeeContractForm, EmployeeContractTable } from '@/modules/employee/contract/employee.contract.schema';
+import { BaseEmployeeContract, EmployeeContractForm, EmployeeContractTable } from '@/modules/employee/contract/employee.contract.schema';
 import { Button } from 'react-bootstrap'
 import { karyawanContractColumns } from '../../columns/KaryawanContractColumn';
 import ContractAddForm from './ContractAddForm';
@@ -62,7 +62,7 @@ const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) =
     })
   }
 
-  const patchContract = async (id: BaseEmployeeContrat["id"], data: EmployeeContractForm) => {
+  const patchContract = async (id: BaseEmployeeContract["id"], data: EmployeeContractForm) => {
     data.karyawan_id = id;
     await toast.promise(
       executeAction(updateKaryawanContractAction, id, data), {
@@ -86,7 +86,7 @@ const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) =
     onCloseModal();
   }
 
-  const onDelete = async (id: BaseEmployeeContrat["id"]) => {
+  const onDelete = async (id: BaseEmployeeContract["id"]) => {
     if (!id) return toast.error("id tidak boleh kosong");
 
     await toast.promise(

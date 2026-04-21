@@ -24,7 +24,7 @@ export class CarService implements ICarService {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -56,7 +56,7 @@ export class CarService implements ICarService {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -73,7 +73,7 @@ export class CarService implements ICarService {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -89,7 +89,7 @@ export class CarService implements ICarService {
 
       if(error instanceof Err) throw error;
 
-      throw new Err("internal server error", 500, error);
+      throw new Err("internal server error", 500);
     }
   }
 }

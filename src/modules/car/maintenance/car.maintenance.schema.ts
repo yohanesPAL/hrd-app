@@ -2,14 +2,14 @@ import { z } from "zod";
 
 export const BaseCarMaintenanceSchema = z
   .object({
-    id: z.coerce.string().min(1),
-    id_mobil: z.coerce.string().min(1),
-    ket: z.string(),
-    tanggal: z.date(),
+    id: z.number().transform(val => val.toString().trim()),
+    id_kendaraan: z.number().transform(val => val.toString().trim()),
+    ket: z.string().trim(),
+    tanggal: z.date().min(1),
   })
   .strict();
 
-export const CarMaintenanceIdSchema = BaseCarMaintenanceSchema.shape.id;
+export const CarMaintenanceIdSchema = z.string().min(1).trim();
 
 export const CarMaintenanceTableSchema = BaseCarMaintenanceSchema.extend({
   no: z.number().nonnegative(),
@@ -17,6 +17,9 @@ export const CarMaintenanceTableSchema = BaseCarMaintenanceSchema.extend({
 
 export const CarMaintenanceFormSchema = BaseCarMaintenanceSchema.omit({
   id: true,
+}).extend({
+  tanggal: z.string().min(1).trim(),
+  id_kendaraan: z.string().min(1).trim(),
 })
 
 export type BaseCarMaintenance = z.infer<typeof BaseCarMaintenanceSchema>;

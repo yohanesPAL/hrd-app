@@ -1,4 +1,6 @@
+import PageTitle from "@/components/PageTitle";
 import KaryawanProfile from "@/features/karyawan/components/KaryawanProfile";
+import ContractsTable from "@/features/karyawan/contract/components/ContractsTable";
 import { getKaryawanContractAction } from "@/features/karyawan/contract/ContractAction";
 import { getKaryawanById } from "@/features/karyawan/KaryawanAction";
 import { Err } from "@/lib/err";
@@ -10,5 +12,13 @@ export default async function Profile({ params }: { params: { id: string } }) {
 
   if (!profile.data) throw new Err("invalid profile data", 500);
 
-  return <KaryawanProfile profile={profile.data} contracts={contracts.data ?? []} />;
+  return (
+    <>
+      <PageTitle>Profile</PageTitle>
+      <div className='page-container-border bg-white table-bg rounded p-2 pt-4'>
+        <KaryawanProfile profile={profile.data} />
+        <ContractsTable contracts={contracts.data ?? []} />
+      </div>
+    </>
+  )
 }
