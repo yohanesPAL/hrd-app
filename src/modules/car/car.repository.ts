@@ -91,7 +91,7 @@ export class CarRepository implements ICarRepository {
 
   async delete(carId: BaseCar["id"], conn: Connection): Promise<boolean> {
       try {
-        await conn.query(`DELETE FROM kendaraan WHERE id = ?`);
+        await conn.query(`DELETE FROM kendaraan WHERE id = ?`, [carId]);
 
         return true;
       } catch (error) {

@@ -40,9 +40,9 @@ export class EmployeeService implements IEmployeeService {
     id: BaseEmployee["id"],
   ): Promise<ServiceRes<BaseEmployee>> {
     try {
-      EmployeeIdSchema.parse(id);
+      const validatedId = EmployeeIdSchema.parse(id);
 
-      const details = await this.employeeRepository.getById(id);
+      const details = await this.employeeRepository.getById(validatedId);
 
       return { success: true, status: 200, data: details };
     } catch (error) {

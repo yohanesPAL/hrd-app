@@ -2,14 +2,14 @@ import { z } from "zod";
 
 export const BaseCarMaintenanceSchema = z
   .object({
-    id: z.number().transform(val => val.toString().trim()),
+    id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
     id_kendaraan: z.number().transform(val => val.toString().trim()),
     ket: z.string().trim(),
     tanggal: z.date().min(1),
   })
   .strict();
 
-export const CarMaintenanceIdSchema = z.string().min(1).trim();
+export const CarMaintenanceIdSchema = BaseCarMaintenanceSchema.shape.id;
 
 export const CarMaintenanceTableSchema = BaseCarMaintenanceSchema.extend({
   no: z.number().nonnegative(),

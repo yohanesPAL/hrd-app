@@ -2,7 +2,7 @@ import { nonnegative, z } from "zod";
 
 export const BaseAbsensiSchema = z
   .object({
-    id: z.coerce.string().min(1),
+    id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
     kode_absen: z.string().min(1),
     nama_absen: z.string().min(1),
     divisi: z.coerce.string().min(1),

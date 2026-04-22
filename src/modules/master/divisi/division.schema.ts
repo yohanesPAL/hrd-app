@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const BaseDivisionSchema = z.object({
-  id: z.coerce.string().min(1),
+  id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   nama: z.string().min(1),
   is_active: z.number().min(0).max(1).default(1),
 }).strict();
@@ -11,7 +11,7 @@ export const DivisionTableSchema = BaseDivisionSchema.extend({
 });
 
 export const DivisionFormSchema = BaseDivisionSchema.extend({
-  id: z.coerce.string().optional(),
+  id: z.string().optional(),
 })
 
 export const ActiveDivisionSchema = BaseDivisionSchema.omit({

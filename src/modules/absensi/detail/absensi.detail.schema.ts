@@ -2,14 +2,14 @@ import { z } from "zod";
 
 export const BaseAbsensiDetailSchema = z
   .object({
-    id: z.coerce.string().min(1),
-    kode_absen: z.string().min(1),
-    nama_absen: z.string().min(1),
-    divisi: z.string().min(1),
-    tanggal: z.string().min(1).nullable(),
+    id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
+    kode_absen: z.string().min(1).trim(),
+    nama_absen: z.string().min(1).trim(),
+    divisi: z.string().min(1).trim(),
+    tanggal: z.string().min(1).trim().nullable(),
     absent: z.coerce.boolean(),
-    scan_masuk: z.string().nullable(),
-    scan_keluar: z.string().nullable(),
+    scan_masuk: z.string().trim().nullable(),
+    scan_keluar: z.string().trim().nullable(),
     terlambat: z.number().nonnegative(),
     lembur: z.number().nonnegative(),
     jam_kerja: z.number().nonnegative(),

@@ -12,15 +12,18 @@ import {
 import { IAbsensiDetailRepository } from "./detail/absensi.detail.interface";
 import { ZodError } from "zod";
 import { IJamAbsenService } from "../master/jamAbsen/jamAbsen.interface";
-import { AbsensiMapper } from "./absensi.mapper";
+import { AbsensiMapper, JamAbsen } from "./absensi.mapper";
 import { IEmployeeService } from "../employee/employee.interface";
 import { ServiceRes } from "@/types/ServiceTypes";
 import { AbsensiTable } from "./absensi.schema";
 
-const parseTimeStringToMinutes = (timeStr: string) => {
-  if (!timeStr) return 0;
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  return hours * 60 + minutes;
+const loadExcelWorksheet = async (file: File): Promise<ExcelJS.Worksheet> => {
+  const arrayBuffer = await file.arrayBuffer();
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(arrayBuffer);
+
+  return workbook.worksheets[0];
 };
 
 export class AbsensiService implements IAbsenService {
@@ -66,95 +69,19 @@ export class AbsensiService implements IAbsenService {
 
   async importAbsen(file: File): Promise<ServiceRes> {
     const jamAbsenDivisi = await this.jamAbsenService.getJamAbsenDivisi();
-    if (!jamAbsenDivisi.data)
-      throw new Err("failed to get jam absen divisi", 500);
+    if (!jamAbsenDivisi.data || jamAbsenDivisi.data.length === 0) throw new Err("failed to get jam absen divisi", 500);
 
     const jamAbsenMap = AbsensiMapper.toJamAbsenDivisiMap(jamAbsenDivisi.data);
+    const worksheet = await loadExcelWorksheet(file);
 
-    const arrayBuffer = await file.arrayBuffer();
-
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(arrayBuffer);
-
-    const worksheet = workbook.worksheets[0];
-
-    const rows: RawExcelRowData[] = [];
-    const employeesAbsentCodes = new Map<string, boolean>();
-    for (const [rowNumber, row] of worksheet
-      .getRows(1, worksheet.rowCount)!
-      .entries()) {
-      if (rowNumber === 0) continue;
-
-      const kodeAbsen: string = row.getCell(1).value as string;
-      const namaKaryawan: string = row.getCell(4).value as string;
-      const tanggal: string = row.getCell(6).value as string;
-      const absent: boolean = (row.getCell(16).value as string) === "True";
-      const scanMasuk: string = row.getCell(10).value as string;
-      const scanKeluar: string = row.getCell(11).value as string;
-
-      if (!employeesAbsentCodes.has(kodeAbsen)) {
-        employeesAbsentCodes.set(kodeAbsen, true);
-      }
-
-      rows.push({
-        kode_absen: kodeAbsen,
-        nama_absen: namaKaryawan,
-        tanggal: tanggal,
-        absent: absent,
-        scan_masuk: scanMasuk,
-        scan_keluar: scanKeluar,
-      });
-    }
+    const { rows, employeesAbsentCodes } = AbsensiMapper.extractWorksheetRow(worksheet);
 
     const divCodeMap = await this.employeeService.getEmployeeAbsentDivCode([
       ...employeesAbsentCodes.keys(),
     ]);
     if (!divCodeMap.data) throw new Err("failed to get employee divisi code");
 
-    const absentData: ExcelRowData[] = [];
-
-    rows.forEach((item) => {
-      const kodeDiv = divCodeMap.data!.get(item.kode_absen);
-      if (!kodeDiv)
-        throw new Err("divisi untuk kode absen tidak ditemukan", 400);
-
-      const jamAbsen = jamAbsenMap.get(kodeDiv);
-      if (!jamAbsen)
-        throw new Err("jam absen untuk divisi tidak ditemukan", 400);
-
-      const scanMasukMinutes: number = parseTimeStringToMinutes(
-        item.scan_masuk!,
-      );
-      const scanKeluarMinutes: number = parseTimeStringToMinutes(
-        item.scan_keluar!,
-      );
-
-      const isSabtu = new Date(item.tanggal!).getDay() === 6;
-      const jamMasuk = jamAbsen.masuk;
-      const jamKeluar = isSabtu ? jamAbsen.keluar_sabtu : jamAbsen.keluar;
-      const keterlambatan = Math.max(0, scanMasukMinutes - jamMasuk);
-      const lembur: number = Math.max(0, scanKeluarMinutes - jamKeluar);
-      const totalJamKerja: number = item.scan_masuk
-        ? item.scan_keluar
-          ? scanKeluarMinutes - jamMasuk
-          : jamKeluar - jamMasuk
-        : 0;
-      const tglParts: string[] = item.tanggal!.split("/");
-      const formattedTgl: string = `${tglParts[2]}-${tglParts[0].padStart(2, "0")}-${tglParts[1].padStart(2, "0")}`;
-
-      absentData.push({
-        kode_absen: item.kode_absen,
-        nama_absen: item.nama_absen,
-        divisi: kodeDiv,
-        tanggal: formattedTgl,
-        absent: item.absent,
-        scan_masuk: item.scan_masuk,
-        scan_keluar: item.scan_keluar,
-        terlambat: keterlambatan <= 2 ? 0 : keterlambatan,
-        lembur: lembur,
-        jam_kerja: totalJamKerja,
-      });
-    });
+    const absentData = AbsensiMapper.toExcelRowData(divCodeMap.data, jamAbsenMap, rows);
 
     let conn;
     try {

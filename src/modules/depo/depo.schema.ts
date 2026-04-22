@@ -1,7 +1,7 @@
 import {z} from "zod"
 
 export const BaseDepoSchema = z.object({
-  id: z.coerce.string().min(1),
+  id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   nama: z.string().min(1),
 })
 

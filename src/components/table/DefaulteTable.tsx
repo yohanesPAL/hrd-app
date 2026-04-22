@@ -80,7 +80,7 @@ function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", load
             {table.getHeaderGroups().map(hg => (
               <tr key={hg.id}>
                 {hg.headers.map(h => (
-                  <th key={h.id} onClick={h.column.getToggleSortingHandler()} style={{ cursor: h.column.getCanSort() ? 'pointer' : 'default' }}>
+                  <th key={h.id}  onClick={h.column.getToggleSortingHandler()} style={{ cursor: h.column.getCanSort() ? 'pointer' : 'default', width: `${h.getSize()}px` }}>
                     <div className="d-flex align-items-end justify-content-between">
                       {flexRender(h.column.columnDef.header, h.getContext())}
 
@@ -126,7 +126,7 @@ function DefaultTable<T>({ data, columns, defaultSort, tableWidth = "100%", load
               return (
                 <tr key={row.id} className={rowClassName}>
                   {row.getVisibleCells().map(cell => (
-                    <td key={cell.id}>
+                    <td key={cell.id} style={{width: `${cell.column.getSize()}px`}}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

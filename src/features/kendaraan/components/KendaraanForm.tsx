@@ -130,7 +130,7 @@ const KendaraanForm = ({ depoOptions }: { depoOptions: DepoTable[] }) => {
                 required
                 value={form.tahun}
                 onChange={(e) => setForm(prev => ({ ...prev, tahun: e.target.value }))}
-                min={1900}
+                min={1901}
                 max={2100}
               />
             </Form.Group>

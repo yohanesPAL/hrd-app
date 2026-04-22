@@ -1,7 +1,7 @@
 import {z} from "zod"
 
 export const BaseEmployeeContractSchema = z.object({
-  id: z.coerce.string().min(1),
+  id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   karyawan_id: z.coerce.string().min(1),
   jenis: z.enum(["kontrak", "tetap"]),
   tgl_kontrak: z.date(),

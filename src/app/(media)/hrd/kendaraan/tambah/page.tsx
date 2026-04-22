@@ -1,5 +1,5 @@
 import PageTitle from '@/components/PageTitle'
-import { getAllDepoAction } from '@/features/depo/DepoActions'
+import { getAllDepoAction } from '@/features/master/depo/DepoActions'
 import KendaraanForm from '@/features/kendaraan/components/KendaraanForm'
 
 const TambahKendaraan = async () => {

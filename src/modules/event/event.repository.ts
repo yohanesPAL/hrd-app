@@ -31,7 +31,7 @@ export class EventRepository implements IEventRepository {
 
       if (error instanceof ZodError) throw new Err("invalid event data", 400);
 
-      throw new Err("failed to fetch event", 400);
+      throw new Err("failed to fetch event", 500);
     }
   }
 

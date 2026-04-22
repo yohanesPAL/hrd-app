@@ -1,8 +1,8 @@
 import {z} from "zod"
 
 export const BaseJamAbsenSchema = z.object({
-  id: z.coerce.string().min(1),
-  divisi: z.coerce.string().min(1),
+  id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
+  divisi: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   masuk: z.number().min(1),
   keluar: z.number().min(1),
   keluar_sabtu: z.number().min(1),

@@ -45,21 +45,6 @@ export class NotificationService implements INotificationService {
     }
   }
 
-  async getNewlyCreatedNotification(notificationType: BaseNotification["tipe"], conn: Connection): Promise<ServiceRes<BaseNotification["id"][]>> {
-    if (typeof notificationType !== "string" || !notificationType) throw new Err("invalid request data", 400);
-    try {
-      const res = await this.notificationRepository.getNewlyCreated(notificationType, conn);
-
-      return { success: true, status: 200, data: res }
-    } catch (error) {
-      console.error("NotificationService.getNewlyCreatedNotification error:", error);
-
-      if (error instanceof Err) throw error
-
-      throw new Err("internal server error", 500);
-    }
-  }
-
   async markedNotificationRead(idList: BaseNotificationRecipient["id"][]): Promise<ServiceRes> {
     try {
       const valIdList = BaseNotificationIdSchema.array().min(1).parse(idList);

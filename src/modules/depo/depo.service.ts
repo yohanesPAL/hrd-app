@@ -20,7 +20,7 @@ export class DepoService implements IDepoService {
 
         if(error instanceof Err) throw error;
 
-        throw new Err("internal server error", 500, error);
+        throw new Err("internal server error", 500);
       }
   }
 
@@ -35,9 +35,9 @@ export class DepoService implements IDepoService {
         console.error("DepoService.createDepo error:", error);
 
         if(error instanceof Err) throw error;
-        if(error instanceof ZodError) throw new Err("invalid request data", 500, error);
+        if(error instanceof ZodError) throw new Err("invalid request data", 500);
 
-        throw new Err("internal server error", 500, error);
+        throw new Err("internal server error", 500);
       }
   }
 
@@ -53,9 +53,9 @@ export class DepoService implements IDepoService {
         console.error("DepoService.updateDepo erroe:", error);
 
         if(error instanceof Err) throw error;
-        if(error instanceof ZodError) throw new Err("invalid request data", 500, error);
+        if(error instanceof ZodError) throw new Err("invalid request data", 500);
 
-        throw new Err("internal server error", 500, error)
+        throw new Err("internal server error", 500)
       }
   }
 
@@ -70,9 +70,9 @@ export class DepoService implements IDepoService {
         console.error("DepoService.deleteDepo erroe:", error);
 
         if(error instanceof Err) throw error;
-        if(error instanceof ZodError) throw new Err("invalid request data", 500, error);
+        if(error instanceof ZodError) throw new Err("invalid request data", 500);
 
-        throw new Err("internal server error", 500, error)
+        throw new Err("internal server error", 500)
       }
   }
 }

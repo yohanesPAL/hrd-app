@@ -15,9 +15,9 @@ export class DepoRepository implements IDepoRepository {
       console.error("DepoRepository.getAll error:", error);
 
       if (error instanceof ZodError)
-        throw new Err("invalid depo data", 400, error);
+        throw new Err("invalid depo data", 400);
 
-      throw new Err("failed to fetch depo", 500, error);
+      throw new Err("failed to fetch depo", 500);
     }
   }
 
@@ -29,7 +29,7 @@ export class DepoRepository implements IDepoRepository {
       } catch (error) {
         console.error("DepoRepository.create error:", error);
 
-        throw new Err("failed to create depo", 500, error)
+        throw new Err("failed to create depo", 500)
       }
   }
 
@@ -41,7 +41,7 @@ export class DepoRepository implements IDepoRepository {
       } catch (error) {
         console.error("DepoRepository.update error:", error);
 
-        throw new Err("failed to update depo", 500, error);
+        throw new Err("failed to update depo", 500);
       }
   }
 
@@ -53,7 +53,7 @@ export class DepoRepository implements IDepoRepository {
       } catch (error) {
         console.error("DepoRepository.delete error:", error);
 
-        throw new Err("failed to delete depo", 500, error);
+        throw new Err("failed to delete depo", 500);
       }
   }
 }

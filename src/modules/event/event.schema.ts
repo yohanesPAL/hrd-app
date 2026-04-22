@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const BaseEventSchema = z.object({
-  id: z.coerce.string().min(1),
-  akun_id: z.coerce.string().min(1),
+  id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
+  akun_id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   title: z.string().min(1),
   start: z.date().min(1),
   end: z.date().min(1),

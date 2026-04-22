@@ -4,7 +4,7 @@ export const CAR_STATUS = ["baik", "rusak", "perbaikan"];
 
 export const BaseCarSchema = z
   .object({
-    id: z.number().transform(val => val.toString().trim()),
+    id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
     nama: z.string().min(1).trim(),
     jenis: z.string().min(1).trim(),
     merk: z.string().min(1).trim(),
@@ -16,7 +16,7 @@ export const BaseCarSchema = z
   })
   .strict();
 
-export const CarIdSchema = z.string().min(1).trim();
+export const CarIdSchema = BaseCarSchema.shape.id;
 
 export const CarFormSchema = BaseCarSchema.omit({
   id: true,

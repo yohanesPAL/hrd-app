@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export const BaseEmployeeSchema = z
   .object({
-    id: z.coerce.string().min(1),
-    nik: z.string().min(1).regex(/^\d+$/, "nik tidak valid").max(16),
-    nama: z.string().min(1),
+    id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
+    nik: z.string().min(1).trim().regex(/^\d+$/, "nik tidak valid").max(16),
+    nama: z.string().min(1).trim(),
     jk: z.enum(["Pria", "Wanita"]),
-    alamat: z.string().min(1),
-    hp: z.string().refine((val) => val === "" || /^\+?\d+$/.test(val), {
+    alamat: z.string().min(1).trim(),
+    hp: z.string().trim().refine((val) => val === "" || /^\+?\d+$/.test(val), {
       message: "hp tidak valid",
     }),
     divisi: z.coerce.string().min(1),
@@ -17,7 +17,7 @@ export const BaseEmployeeSchema = z
     cuti_sekarang: z.number().nonnegative(),
     tgl_masuk: z.date().nullable(),
     tgl_keluar: z.date().nullable(),
-    kode_absensi: z.string().nullable(),
+    kode_absensi: z.string().trim().nullable(),
     is_active: z.number().transform((val) => val === 1),
   })
   .strict();

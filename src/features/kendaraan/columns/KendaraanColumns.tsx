@@ -1,4 +1,5 @@
 import { CarTable } from "@/modules/car/car.schema";
+import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { Button, Stack } from "react-bootstrap";
@@ -6,9 +7,16 @@ import { Button, Stack } from "react-bootstrap";
 export const kendaraanColumns = ({
   role,
   router,
+  deleteKendaraan,
+  isPosting,
 }:{
   role: string | undefined,
-  router: any
+  router: any,
+  deleteKendaraan: {
+    openConFirmDelete:(props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void,
+    onDelete: (id: string) => void,
+  },
+  isPosting: boolean
 }): ColumnDef<CarTable>[] => [
   { accessorKey: "no", header: "No" },
   { accessorFn: (row) => `${row.nama}-${row.id}`, header: "Nama", cell:({row})  => {
@@ -26,8 +34,10 @@ export const kendaraanColumns = ({
     const kode = row.original.id;
     return(
       <Stack direction="horizontal" gap={2}>
-        <Button type="button" variant="warning" className="text-white" onClick={() => router.push(`kendaraan/${kode}/edit`)}><i className="bi bi-pencil-fill"></i></Button>
-        <Button type="button" variant="danger" className="text-white"><i className="bi bi-trash-fill"></i></Button>
+        <Button type="button" variant="warning" disabled={isPosting} className="text-white" onClick={() => router.push(`kendaraan/${kode}/edit`)}><i className="bi bi-pencil-fill"></i></Button>
+        <Button type="button" variant="danger" disabled={isPosting} className="text-white" onClick={() => {
+          deleteKendaraan.openConFirmDelete({nama: row.original.nama, id: kode}, (id: string) => deleteKendaraan.onDelete(id))
+        }}><i className="bi bi-trash-fill"></i></Button>
       </Stack>
     )
   }}

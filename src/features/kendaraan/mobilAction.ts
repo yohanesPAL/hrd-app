@@ -3,6 +3,9 @@ import { withAuth } from "@/lib/withAuth";
 import { carService } from "@/modules/car/car.factory";
 import { BaseCar, CarForm } from "@/modules/car/car.schema";
 import { deleteCarAndMaintenance } from "@/use-cases/car/deleteCarAndMaintenance";
+import { revalidatePath } from "next/cache";
+
+const PATH = "kendaraan";
 
 export const getAllCarsAction = withAuth(async () => {
   return await carService.getAllCars();
@@ -25,5 +28,6 @@ export const updateCarAction = withAuth(
 export const deleteCarAndMaintenanceAction = withAuth(
   async (session, carId: BaseCar["id"]) => {
     await deleteCarAndMaintenance.execute(carId);
+    revalidatePath(`${session.user.role}/${PATH}`)
   },
 );

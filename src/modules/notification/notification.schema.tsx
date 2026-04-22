@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const BaseNotificationSchema = z.object({
-  id: z.coerce.string().min(1),
+  id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   ref: z.string().min(1),
   ref_table: z.string().min(1),
   tipe: z.string().min(1),
@@ -13,9 +13,9 @@ export const BaseNotificationSchema = z.object({
 export const BaseNotificationIdSchema = BaseNotificationSchema.shape.id
 
 export const BaseNotificationRecipientSchema = z.object({
-  id: z.coerce.string().min(1),
-  id_penerima: z.coerce.string().min(1),
-  id_notifikasi: z.coerce.string().min(1),
+  id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
+  id_penerima: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
+  id_notifikasi: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   is_read: z.number().min(0).max(1),
 }).strict();
 
@@ -24,7 +24,7 @@ export const NotificationPopupSchema = BaseNotificationSchema.pick({
   teks: true,
   level: true,
 }).extend({
-  notif_id: z.coerce.string().min(1),
+  notif_id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   created_at: z.date(),
 })
 

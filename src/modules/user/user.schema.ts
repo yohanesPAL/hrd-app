@@ -3,11 +3,11 @@ import { z } from "zod";
 
 export const BaseUserSchema = z
   .object({
-    id: z.coerce.string().min(1),
+    id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
     username: z.string().min(1),
     password: z.string().min(1),
     role: z.enum(roleList),
-    karyawan_id: z.coerce.string().min(1),
+    karyawan_id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
   })
   .strict();
 

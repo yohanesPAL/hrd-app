@@ -44,31 +44,12 @@ export class NotificationRepository implements INotificationRepository {
     }
   }
 
-  async getNewlyCreated(notificationType: BaseNotification["tipe"], conn: Connection): Promise<string[]> {
-    try {
-      const [res] = await conn.query(`SELECT id FROM notifikasi WHERE tipe = ? AND DATE(created_at) = CURRENT_DATE()`, [notificationType])
-      const newlyCreatedIds = (res as any[]).map(row => row.id)
-
-      return BaseNotificationIdSchema.array().parse(newlyCreatedIds);
-    } catch (error) {
-      console.error("NotificationRepository.getNewlyCreted error:", error);
-
-      if (error instanceof ZodError) throw new Err("invalid id data", 400);
-
-      throw new Err("failed to get id notifikasi", 500);
-    }
-  }
-
   async markedIsRead(idList: BaseNotificationRecipient["id"][]): Promise<boolean> {
     try {
-      let placeholder: string[] = [], args: any[] = [];
-      idList.forEach((item) => {
-        placeholder.push("?")
-        args.push(item)
-      })
+      const placeholder = idList.map(item => '?').join(",")
 
-      const query = `UPDATE penerima_notifikasi SET is_read = 1 WHERE id IN (${placeholder.join(",")})`
-      await pool.query(query, args)
+      const query = `UPDATE penerima_notifikasi SET is_read = 1 WHERE id IN (${placeholder})`
+      await pool.query(query, idList)
 
       return true;
     } catch (error) {
@@ -80,22 +61,18 @@ export class NotificationRepository implements INotificationRepository {
 
   async create(notificationForm: NotificationForm[], conn: Connection): Promise<string[]> {
     try {
-      let placeholder: string[] = [], args: any[] = [];
-      notificationForm.forEach(item => {
-        placeholder.push("(?,?,?,?,?,?)");
-        args.push(
+      const args = notificationForm.map(item => {
+        return [
           item.ref,
           item.ref_table,
           item.tipe,
           item.judul,
           item.teks,
           item.level,
-        )
+        ]
       })
 
-      const query = `INSERT INTO notifikasi (ref, ref_table, tipe, judul, teks, level)
-            VALUES ${placeholder.join(",")}`;
-      const [res] = await conn.query<ResultSetHeader>(query, args);
+      const [res] = await conn.query<ResultSetHeader>(`INSERT INTO notifikasi (ref, ref_table, tipe, judul, teks, level) VALUES ?`, [args]);
 
       const firstId = res.insertId;
       const count = res.affectedRows;
@@ -134,8 +111,7 @@ export class NotificationRepository implements INotificationRepository {
     } catch (error) {
       console.error("NotificationRepository.createRecipient error:", error);
 
-      // throw new Err("failed to create notification recipient", 500)
-      throw new Err(recipientIds[0] as string, 500)
+      throw new Err("failed to create notification recipient", 500)
     }
   }
 }

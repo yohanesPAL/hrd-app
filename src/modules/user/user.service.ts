@@ -30,7 +30,7 @@ export class UserService implements IUserService {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("UserService unavailable", 500);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -52,7 +52,7 @@ export class UserService implements IUserService {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("UserService.getUserIdByKaryawanId unavailable", 500);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -88,7 +88,7 @@ export class UserService implements IUserService {
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
       if (error instanceof Err) throw error;
 
-      throw new Err("UserService.createUser unavailable", 500);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -109,7 +109,7 @@ export class UserService implements IUserService {
       if (error instanceof ZodError) throw new Err("invalid request data", 400);
       if (error instanceof Err) throw error;
 
-      throw new Err("UserService.updateUser unavailable", 500);
+      throw new Err("internal server error", 500);
     }
   }
 
@@ -125,7 +125,7 @@ export class UserService implements IUserService {
 
       if (error instanceof Err) throw error;
 
-      throw new Err("UserService.deleteUser unavailable", 500);
+      throw new Err("internal server error", 500);
     }
   }
 }
