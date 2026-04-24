@@ -1,7 +1,10 @@
 "use server";
 import { withAuth } from "@/lib/withAuth";
 import { positionService } from "@/modules/master/jabatan/jabatan.factory";
-import { BasePosition, PositionForm } from "@/modules/master/jabatan/jabatan.schema";
+import {
+  BasePosition,
+  PositionForm,
+} from "@/modules/master/jabatan/jabatan.schema";
 import { revalidatePath } from "next/cache";
 
 const PATH = "master/jabatan";
@@ -19,8 +22,8 @@ export const createPositionAction = withAuth(
 );
 
 export const updatePositionAction = withAuth(
-  async (session, data: BasePosition) => {
-    await positionService.updatePosition(data);
+  async (session, data: PositionForm, id: BasePosition["id"]) => {
+    await positionService.updatePosition(data, id);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },
   ["hrd"],

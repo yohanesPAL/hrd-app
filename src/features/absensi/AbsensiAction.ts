@@ -3,22 +3,22 @@ import { withAuth } from "@/lib/withAuth";
 import { absensiService } from "@/modules/absensi/absensi.factory";
 import { KodeAbsen } from "@/modules/absensi/detail/absensi.detail.schema";
 
-export const getAllAbsen = withAuth(async () => {
+export const getAllAbsenAction = withAuth(async () => {
   return await absensiService.getAllAbsensi();
 });
 
-export const getAbsenDetails = withAuth(
+export const getAbsenDetailsAction = withAuth(
   async (session, kodeAbsen: KodeAbsen) => {
     return await absensiService.getAbsensiByKodeAbsen(kodeAbsen);
 })
 
-export const importAbsen = withAuth(
+export const importAbsenAction = withAuth(
   async (session, file: File) => {
     await absensiService.importAbsen(file);
   },
   ["hrd"],
 );
 
-export const truncateAbsen = withAuth(async () => {
+export const truncateAbsenAction = withAuth(async () => {
   await absensiService.truncateAbsen();
 }, ["hrd"]);

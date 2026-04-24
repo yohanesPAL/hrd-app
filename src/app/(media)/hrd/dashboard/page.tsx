@@ -10,7 +10,7 @@ import { Stack } from 'react-bootstrap'
 import { Card } from '@/features/dashboard/components/Card'
 import { Err } from '@/lib/err'
 import InternalServerError from '@/app/500/page'
-import { getUpcomingEvents } from '@/features/dashboard/DashboardAction'
+import { getUpcomingEventsAction } from '@/features/dashboard/DashboardAction'
 
 const DivisiChartMemo = React.memo(() => { return <DivisiChart /> })
 
@@ -22,7 +22,7 @@ async function Dashboard() {
   let upcomingEvents: UpcomingEventType[] = [];
   let onGoingEvents: UpcomingEventType[] = [];
   try {
-    const events = await getUpcomingEvents(id);
+    const events = await getUpcomingEventsAction(id);
     upcomingEvents = events.data?.upcoming ?? [];
     onGoingEvents = events.data?.onGoing ?? [];
   } catch (err) {

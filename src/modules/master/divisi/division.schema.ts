@@ -6,12 +6,14 @@ export const BaseDivisionSchema = z.object({
   is_active: z.number().min(0).max(1).default(1),
 }).strict();
 
+export const DivisionIdSchema = BaseDivisionSchema.shape.id;
+
 export const DivisionTableSchema = BaseDivisionSchema.extend({
   no: z.number().min(1),
 });
 
-export const DivisionFormSchema = BaseDivisionSchema.extend({
-  id: z.string().optional(),
+export const DivisionFormSchema = BaseDivisionSchema.omit({
+  id: true,
 })
 
 export const ActiveDivisionSchema = BaseDivisionSchema.omit({

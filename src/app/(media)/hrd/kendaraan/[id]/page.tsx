@@ -14,8 +14,7 @@ const DetailKendaraan = async ({ params }: { params: Promise<{ id: string }> }) 
       <PageTitle>Kendaraan</PageTitle>
       <div className='page-container-border bg-white table-bg rounded p-2 pt-4'>
         <KendaraanDetail data={kendaraan.data} />
-
-        <KendaraanMaintenance data={maintenance.data ?? []} idKendaraan={id} />
+        <KendaraanMaintenance maintenanceTable={maintenance.data ?? []} carId={id} />
       </div>
     </>
   )

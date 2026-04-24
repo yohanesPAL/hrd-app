@@ -1,6 +1,6 @@
 import pool from "@/lib/db";
 import { ICarRepository } from "./car.interface";
-import { BaseCar, BaseCarSchema, CarForm, CarTable } from "./car.schema";
+import { BaseCar, BaseCarSchema, CarForm, CarFormSchema, CarTable } from "./car.schema";
 import { CarMapper } from "./car.mapper";
 import { ZodError } from "zod";
 import { Err } from "@/lib/err";
@@ -24,11 +24,11 @@ export class CarRepository implements ICarRepository {
     }
   }
 
-  async getById(carId: BaseCar["id"]): Promise<BaseCar> {
+  async getById(carId: BaseCar["id"]): Promise<CarForm> {
       try {
-        const [res]: any[] = await pool.query("SELECT id, nama, jenis, merk, nopol, depo, tahun, jumlah_roda, status FROM kendaraan WHERE id = ?", [carId]);
+        const [res]: any[] = await pool.query("SELECT nama, jenis, merk, nopol, depo, tahun, jumlah_roda, status FROM kendaraan WHERE id = ?", [carId]);
 
-        return BaseCarSchema.parse(res[0]);
+        return CarFormSchema.parse(res[0]);
       } catch (error) {
         console.error("CarRepository.getById error:", error);
 

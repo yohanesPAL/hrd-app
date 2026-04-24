@@ -4,30 +4,31 @@ import { Button, Form, Modal, Stack } from 'react-bootstrap';
 import { KaryawanOnEdit } from '../types/KaryawanTypes';
 
 const KaryawanKodeAbsenModal = ({
-  showModalAbsen,
-  onCloseModalAbsen,
-  onUpdateKodeAbsen,
-  karyawanOnEdit,
-  kodeAbsenForm,
-  setKodeAbsenForm,
-  isPosting,
+  modal,
+  absentCode,
+  employeeOnEdit,
+  isPending,
 }: {
-  showModalAbsen: boolean,
-  onCloseModalAbsen: () => void,
-  onUpdateKodeAbsen: (data: EmployeeKodeAbsenForm) => void,
-  karyawanOnEdit: KaryawanOnEdit,
-  kodeAbsenForm: EmployeeKodeAbsenForm,
-  setKodeAbsenForm: Dispatch<SetStateAction<EmployeeKodeAbsenForm>>,
-  isPosting: boolean,
+  modal: {
+    show: boolean,
+    onClosed: () => void,
+  },
+  absentCode: {
+    onUpdate: (data: EmployeeKodeAbsenForm) => void,
+    form: EmployeeKodeAbsenForm,
+    setForm: Dispatch<SetStateAction<EmployeeKodeAbsenForm>>,
+  }
+  employeeOnEdit: KaryawanOnEdit,
+  isPending: boolean,
 }) => {
   return (
-    <Modal show={showModalAbsen} onHide={onCloseModalAbsen}>
+    <Modal show={modal.show} onHide={modal.onClosed}>
       <Modal.Header>
         <Modal.Title>Ubah Kode Absensi</Modal.Title>
       </Modal.Header>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onUpdateKodeAbsen(kodeAbsenForm);
+        absentCode.onUpdate(absentCode.form);
       }}>
         <Modal.Body>
           <Stack gap={2}>
@@ -37,7 +38,7 @@ const KaryawanKodeAbsenModal = ({
                 type='text'
                 required
                 disabled
-                value={karyawanOnEdit.nama}
+                value={employeeOnEdit.nama}
               />
             </Form.Group>
             <Form.Group>
@@ -45,15 +46,15 @@ const KaryawanKodeAbsenModal = ({
               <Form.Control
                 type='text'
                 required
-                value={kodeAbsenForm.kode_absensi ?? ""}
-                onChange={(e) => setKodeAbsenForm({ kode_absensi: e.currentTarget.value })}
+                value={absentCode.form.kode_absensi ?? ""}
+                onChange={(e) => absentCode.setForm({ kode_absensi: e.currentTarget.value })}
               />
             </Form.Group>
           </Stack>
         </Modal.Body>
         <Modal.Footer>
-          <Button type='button' variant='danger' disabled={isPosting} onClick={onCloseModalAbsen}>Batal</Button>
-          <Button type='submit' variant='primary' disabled={isPosting}>Update</Button>
+          <Button type='button' variant='danger' disabled={isPending} onClick={modal.onClosed}>Batal</Button>
+          <Button type='submit' variant='primary' disabled={isPending}>Update</Button>
         </Modal.Footer>
       </Form>
     </Modal>

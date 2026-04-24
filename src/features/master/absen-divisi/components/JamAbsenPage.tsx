@@ -1,15 +1,13 @@
 "use client";
 import DefaultTable from "@/components/Table/DefaulteTable";
-import { useExecuteAction } from "@/hooks/useExecuteAction";
 import { JamAbsenForm, JamAbsenTable } from "@/modules/master/jamAbsen/jamAbsen.schema";
-import useConfirmDelete from "@/stores/confirmDelete/confirmDelete.store";
 import { SortingState } from "@tanstack/react-table";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { useShallow } from "zustand/shallow";
 import { jamAbsenColumns } from "../columns/JamAbsenColumns";
 import JamAbsenFormModal from "./JamAbsenFormModal";
 import { resetJamAbsenAction, updateJamAbsenAction } from "../jamAbsenAction";
+import { useActionHandler } from "@/hooks/useActionHandler";
 
 const defaultSort: SortingState = [{ id: "no", desc: false }]
 const defaultEditFormValue: JamAbsenForm = {
@@ -21,47 +19,39 @@ const defaultEditFormValue: JamAbsenForm = {
 }
 
 const JamAbsenPage = ({ data }: { data: JamAbsenTable[] }) => {
-  const {
-    isPosting,
-  } = useConfirmDelete(
-    useShallow((state) => ({
-      isPosting: state.isPosting,
-    }))
-  )
+  const { run, isPending } = useActionHandler();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [form, setForm] = useState<JamAbsenForm>(defaultEditFormValue)
 
-  const [show, setShow] = useState<boolean>(false);
-  const [editForm, setEditForm] = useState<JamAbsenForm>(defaultEditFormValue)
-  const { executeAction, isSuspense } = useExecuteAction();
-
-  const onModalClose = () => {
-    setShow(false);
-    setEditForm(defaultEditFormValue);
+  const onModalClosed = () => {
+    setShowModal(false);
+    setForm(defaultEditFormValue);
   }
 
-  const onSubmit = async(payload: JamAbsenForm) => {
-    if (!payload) toast.error("data tidak boleh kosong");
-
-    await toast.promise(
-      executeAction(updateJamAbsenAction, payload), {
+  const onSubmit = async () => {
+    await run(updateJamAbsenAction, [form], {
+      toast: {
         pending: "Update jam absen...",
         success: "Berhasil update jam absen",
         error: "Ooops... ada yang salah",
-      }
-    )
+      },
+      refresh: true,
+    })
 
-    onModalClose();
+    onModalClosed()
   }
 
-  const onReset = async(id: string) => {
+  const onReset = async (id: string) => {
     if (!id) toast.error("id tidak boleh kosong");
-    
-    await toast.promise(
-      executeAction(resetJamAbsenAction, id), {
+
+    await run(resetJamAbsenAction, [id], {
+      toast: {
         pending: "Reset jam absen...",
         success: "Berhasil reset jam absen",
         error: "Ooops... ada yang salah",
-      }
-    )
+      },
+      refresh: true,
+    })
   }
 
   return (
@@ -69,21 +59,18 @@ const JamAbsenPage = ({ data }: { data: JamAbsenTable[] }) => {
       <DefaultTable<JamAbsenTable>
         data={data}
         columns={jamAbsenColumns({
-          setEditForm,
-          setShow,
+          setForm,
+          setShowModal,
           onReset,
         })}
         defaultSort={defaultSort}
-        loading={isSuspense}
+        loading={isPending}
       />
 
       <JamAbsenFormModal
-        show={show}
-        isPosting={isPosting}
-        onModalClose={onModalClose}
-        onSubmit={onSubmit}
-        editForm={editForm}
-        setEditForm={setEditForm}
+        modal={{ show: showModal, onClosed: onModalClosed }}
+        jamAbsen={{ onSubmit, form, setForm }}
+        isPending={isPending}
       />
     </>
   )

@@ -1,6 +1,6 @@
 import PageTitle from '@/components/PageTitle'
 import { auth } from '@/auth'
-import { getEventsByAccount } from '@/features/kalender/KalendarAction';
+import { getEventsByAccountAction } from '@/features/kalender/KalendarAction';
 import KalenderPage from '@/features/kalender/components/KalenderPage';
 
 const Kalender = async ({ searchParams }: { searchParams: { month: string } }) => {
@@ -12,7 +12,7 @@ const Kalender = async ({ searchParams }: { searchParams: { month: string } }) =
 
   if (!id) return null;
 
-  const events = await getEventsByAccount(id, date);
+  const events = await getEventsByAccountAction(id, date);
   return (
     <>
       <PageTitle>Kalender Acara</PageTitle>

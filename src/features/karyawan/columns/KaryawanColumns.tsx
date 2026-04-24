@@ -1,5 +1,4 @@
 import { EmployeeKodeAbsenForm, EmployeeSpForm, EmployeeTable } from "@/modules/employee/employee.schema"
-import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
 import { Dispatch, SetStateAction } from "react"
@@ -10,30 +9,28 @@ import { formatDateDDMMYYYY } from "@/utils/dateFormatting"
 export const karyawanColumns = ({
   role,
   router,
-  setKaryawanOnEdit,
-  setKodeAbsenForm,
-  setShowModalAbsen,
-  setSpForm,
-  setShowModalSp,
-  openConfirmDelete,
-  onDelete,
+  employee,
+  modal,
 }: {
   role: string | undefined,
   router: any,
-  setKaryawanOnEdit: Dispatch<SetStateAction<KaryawanOnEdit>>,
-  setKodeAbsenForm: Dispatch<SetStateAction<EmployeeKodeAbsenForm>>,
-  setShowModalAbsen: Dispatch<SetStateAction<boolean>>,
-  setSpForm: Dispatch<SetStateAction<EmployeeSpForm>>,
-  setShowModalSp: Dispatch<SetStateAction<boolean>>,
-  openConfirmDelete: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void,
-  onDelete: (id: string) => void,
+  employee: {
+    setOnEdit: Dispatch<SetStateAction<KaryawanOnEdit>>,
+    setAbsentCodeForm: Dispatch<SetStateAction<EmployeeKodeAbsenForm>>,
+    setSpForm: Dispatch<SetStateAction<EmployeeSpForm>>,
+    onDelete: (id: string, nama: string) => void,
+  },
+  modal: {
+    setShowAbsen: Dispatch<SetStateAction<boolean>>,
+    setShowSp: Dispatch<SetStateAction<boolean>>,
+  }
 }): ColumnDef<EmployeeTable>[] => [
-    { accessorKey: "no", header: "No", sortingFn: "alphanumeric" },
+    { accessorKey: "no", header: "No", sortingFn: "alphanumeric",size: 80 },
     {
-      accessorKey: "nama", header: "Nama", cell: ({ row }) => {
+      accessorKey: "nama", header: "Nama", size: 300, cell: ({ row }) => {
         return (
           <Link href={`/${role}/profile/${row.original.id}`}>
-            <Button type='button' variant='success' className='px-2 py-1'>{row.original.nama}</Button>
+            <Button type='button' variant='success' className='px-2 py-1' style={{textAlign: "start"}}>{row.original.nama}</Button>
           </Link>
         )
       }
@@ -60,35 +57,53 @@ export const karyawanColumns = ({
       }
     },
     {
-      accessorKey: "jenis_kontrak", header: "Status Karyawan", cell: ({getValue}) => {
+      accessorKey: "jenis_kontrak", header: "Status Karyawan", cell: ({ getValue }) => {
         const kontrak = getValue() as string | null;
         return kontrak ? kontrak.charAt(0).toUpperCase() + kontrak.slice(1) : "-"
       }
     },
     {
-      accessorKey: "tgl_berakhir", header: "Tgl Akhir Kontrak", cell: ({getValue}) => {
+      accessorKey: "tgl_berakhir", header: "Tgl Akhir Kontrak", cell: ({ getValue }) => {
         return !getValue() ? "-" : formatDateDDMMYYYY(getValue() as Date)
       }
     },
     { accessorKey: "kode_absensi", header: "Kode Absen" },
     {
       id: "aksi", header: "Aksi", cell: ({ row }) => {
-        const kode = row.original.id
+        const id = row.original.id
         const nama = row.original.nama
         return (
           <Stack direction='horizontal' gap={2}>
-            <Button type='button' onClick={() => {
-              setKaryawanOnEdit({id: kode, nama: nama})
-              setKodeAbsenForm({ kode_absensi: row.original.kode_absensi })
-              setShowModalAbsen(true);
-            }}><i className="bi bi-fingerprint"></i></Button>
-            <Button type='button' variant='success' onClick={() => router.push(`karyawan/${kode}/edit`)}><i className="bi bi-pencil-fill"></i></Button>
-            <Button type='button' variant='warning' className='text-white' onClick={() => {
-              setKaryawanOnEdit({id: kode, nama: nama})
-              setSpForm({ sp: row.original.sp })
-              setShowModalSp(true);
-            }}>SP</Button>
-            <Button type="button" variant='danger' onClick={() => openConfirmDelete({ nama: nama, id: kode }, (id: string) => onDelete(id))}><i className="bi bi-trash-fill"></i></Button>
+            <Button type='button'
+              onClick={() => {
+                employee.setOnEdit({ id: id, nama: nama })
+                employee.setAbsentCodeForm({ kode_absensi: row.original.kode_absensi })
+                modal.setShowAbsen(true);
+              }}><i className="bi bi-fingerprint"></i>
+            </Button>
+
+            <Button type='button' variant='success'
+              onClick={() =>
+                router.push(`karyawan/${id}/edit`)
+              }>
+              <i className="bi bi-pencil-fill"></i>
+            </Button>
+
+            <Button type='button' variant='warning' className='text-white'
+              onClick={() => {
+                employee.setOnEdit({ id: id, nama: nama })
+                employee.setSpForm({ sp: row.original.sp })
+                modal.setShowSp(true);
+              }}>
+              SP
+            </Button>
+
+            <Button type="button" variant='danger'
+              onClick={() =>
+                employee.onDelete(id, nama)
+              }>
+              <i className="bi bi-trash-fill"></i>
+            </Button>
           </Stack>
         )
       }

@@ -7,13 +7,15 @@ export const BasePositionSchema = z.object({
   is_active: z.number().min(0).max(1),
 }).strict();
 
+export const PositionIdSchema = BasePositionSchema.shape.id;
+
 export const PositionTableSchema = BasePositionSchema.extend({
   no: z.number().min(1),
   nama_divisi: z.string().min(1),
 })
 
-export const PositionFormSchema = BasePositionSchema.extend({
-  id: z.string().optional(),
+export const PositionFormSchema = BasePositionSchema.omit({
+  id: true,
 })
 
 export const ActivePositionSchema = BasePositionSchema.omit({

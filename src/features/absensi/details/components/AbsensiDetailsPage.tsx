@@ -7,14 +7,14 @@ import { SortingState } from '@tanstack/react-table'
 const defaultSort: SortingState = [{ id: "no", desc: false }]
 
 const AbsensiDetailsPage = ({
-  absensi
+  absensiDetailsTable
 }: {
-  absensi: AbsensiDetailTable[]
+  absensiDetailsTable: AbsensiDetailTable[]
 }) => {
   return (
     <>
       <DefaultTable<AbsensiDetailTable>
-        data={absensi}
+        data={absensiDetailsTable}
         columns={absensiDetailsColumn()}
         defaultSort={defaultSort}
       />

@@ -11,11 +11,11 @@ const loginFormDefault: Credential = {
 }
 
 const LoginForm = ({ loading, loginHandler }: { loading: boolean, loginHandler: (username: string, password: string) => void }) => {
-  const {resetStore} = useConfirmDelete()
+  const { resetStore } = useConfirmDelete()
   const [loginForm, setLoginForm] = useState<Credential>(loginFormDefault);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  useEffect(() => {resetStore()}, [])
+  useEffect(() => resetStore(), [])
   return (
     <Form className="w-50" style={{ maxWidth: '500px' }}
       onSubmit={(e) => {
@@ -33,7 +33,7 @@ const LoginForm = ({ loading, loginHandler }: { loading: boolean, loginHandler: 
             type="text"
             placeholder="Username"
             value={loginForm.username}
-            onChange={(e) => setLoginForm({ ...loginForm, username: e.currentTarget.value })}
+            onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
             required
           />
         </FloatingLabel>
@@ -44,7 +44,7 @@ const LoginForm = ({ loading, loginHandler }: { loading: boolean, loginHandler: 
               placeholder='Password'
               type={showPassword ? "text" : "password"}
               value={loginForm.password}
-              onChange={(e) => setLoginForm({ ...loginForm, password: e.currentTarget.value })}
+              onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
               required
             />
             <span
@@ -55,8 +55,8 @@ const LoginForm = ({ loading, loginHandler }: { loading: boolean, loginHandler: 
             </span>
           </FloatingLabel>
         </Form.Group>
-        <Button type="submit" variant="primary" className={`align-self-start`} style={{width: "100px"}} disabled={loading}>
-          <span hidden={!loading} className="spinner-border spinner-border-sm" style={{marginRight: "4px"}}></span>
+        <Button type="submit" variant="primary" className={`align-self-start`} style={{ width: "100px" }} disabled={loading}>
+          <span hidden={!loading} className="spinner-border spinner-border-sm" style={{ marginRight: "4px" }}></span>
           <span hidden={loading}>Login</span>
         </Button>
       </Stack>

@@ -1,49 +1,58 @@
 'use client';
-import { importAbsen, truncateAbsen } from "@/features/absensi/AbsensiAction";
-import { useExecuteAction } from "@/hooks/useExecuteAction";
+import { importAbsenAction, truncateAbsenAction } from "@/features/absensi/AbsensiAction";
+import { useActionHandler } from "@/hooks/useActionHandler";
 import useConfirmDelete from "@/stores/confirmDelete/confirmDelete.store";
+import { useState } from "react";
 import { Button, Form, Stack } from "react-bootstrap";
-import { toast } from "react-toastify";
-import { useShallow } from "zustand/shallow";
 
 const ImportPage = () => {
-  const {
-    setOpen: openConfirmDelete,
-    isPosting,
-  } = useConfirmDelete(
-    useShallow((state) => ({
-      setOpen: state.setOpen,
-      isPosting: state.isPosting,
-    }))
-  )
+  const { openConfirmDelete } = useConfirmDelete()
+  const { run } = useActionHandler();
 
-  const { executeAction } = useExecuteAction();
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const onSubmit = async (formData: FormData) => {
     const file = formData.get("absen") as File;
 
-    await toast.promise(
-      executeAction(importAbsen, file), {
-      pending: "Import absen...",
-      success: "Berhasil import absen",
-      error: "Ooops... ada yang salah",
-    })
+    setSubmitting(true);
+
+    try {
+      await run(importAbsenAction, [file], {
+        toast: {
+          pending: "Import absen...",
+          success: "Berhasil import absen",
+          error: "Ooops... ada yang salah",
+        }
+      })
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const onClear = async () => {
-    await toast.promise(
-      executeAction(truncateAbsen), {
-      pending: "Menghapus absen...",
-      success: "Berhasil hapus absen",
-      error: "Ooops... ada yang salah",
-    })
+    setSubmitting(true);
+
+    try {
+      await run(truncateAbsenAction, [], {
+        toast: {
+          pending: "Menghapus absen...",
+          success: "Berhasil hapus absen",
+          error: "Ooops... ada yang salah",
+        }
+      })
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <div className='page-container-border bg-white rounded p-2 pt-4'>
       <Stack direction="horizontal" gap={4} className="mb-4">
         <h4>Import Excel</h4>
-        <Button type="button" variant="danger" disabled={isPosting} onClick={() => openConfirmDelete({ nama: "Data absen", id: "" }, () => onClear())}><i className="bi bi-trash-fill"></i></Button>
+        <Button type="button" variant="danger" disabled={submitting} onClick={() =>
+          openConfirmDelete({ nama: "Data absen", id: "" }, () => onClear())}>
+          <i className="bi bi-trash-fill"></i>
+        </Button>
       </Stack>
       <Form onSubmit={(e) => {
         e.preventDefault();
@@ -54,7 +63,7 @@ const ImportPage = () => {
             <Form.Label>Upload absensi (.xlsx)</Form.Label>
             <Form.Control type="file" name="absen" accept=".xlsx" required />
           </Form.Group>
-          <Button type="submit" style={{ width: "100px" }} disabled={isPosting}>Submit</Button>
+          <Button type="submit" style={{ width: "100px" }} disabled={submitting}>Submit</Button>
         </Stack>
       </Form>
     </div>

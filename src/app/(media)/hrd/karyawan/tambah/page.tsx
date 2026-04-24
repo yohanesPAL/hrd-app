@@ -1,9 +1,9 @@
 import PageTitle from '@/components/PageTitle'
 import KaryawanForm from '@/features/karyawan/components/KaryawanAddForm';
-import { getKaryawanFormOptions } from '@/features/karyawan/KaryawanAction'
+import { getKaryawanFormOptionsAction } from '@/features/karyawan/KaryawanAction'
 
 const TambahKaryawan = async () => {
-  const formOptions = await getKaryawanFormOptions();
+  const formOptions = await getKaryawanFormOptionsAction();
 
   return (
     <>

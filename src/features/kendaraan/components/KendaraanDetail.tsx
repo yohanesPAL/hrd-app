@@ -1,7 +1,7 @@
-import { BaseCar } from '@/modules/car/car.schema'
+import { CarForm } from '@/modules/car/car.schema'
 import { Table } from 'react-bootstrap'
 
-const KendaraanDetail = ({ data }: { data: BaseCar | undefined }) => {
+const KendaraanDetail = ({ data }: { data: CarForm | undefined }) => {
   return (
 
     <Table className={`w-100`} style={{ marginBottom: "48px" }}>

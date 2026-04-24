@@ -3,17 +3,16 @@ import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { id } from "date-fns/locale/id";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Stack } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "@/components/LoadingScreen/LoadingScreen";
 import useProfile from "@/stores/profile/profile.store";
-import { AccountId, BaseEvent, EventForm } from "@/modules/event/event.schema";
-import { EventModal } from "../types/KalenderTypes";
+import { BaseEvent, EventForm } from "@/modules/event/event.schema";
 import KalenderForm from "./KalenderForm";
-import { useExecuteAction } from "@/hooks/useExecuteAction";
-import { createEvent, deleteEvent, updateEvent } from "../KalendarAction";
+import { createEventAction, deleteEventAction, updateEventAction } from "../KalendarAction";
+import { useActionHandler } from "@/hooks/useActionHandler";
 
 const locales = {
   "id-ID": id,
@@ -33,96 +32,85 @@ const KalenderPage = ({ events }: { events: BaseEvent[] }) => {
   const router = useRouter()
   const today = new Date();
   const userId: string = useProfile((state) => state.profile?.id)!
-  const [showModal, setShowModal] = useState<EventModal>({ show: false, type: "add" });
+
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [eventForm, setEventForm] = useState<EventForm>(eventDefault)
-  const [editingId, setEditingId] = useState<string>("");
-  const [isPosting, setIsPosting] = useState<boolean>(false);
+  const [selectedEvent, setSelectedEvent] = useState<string>("");
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [currentView, setCurrentView] = useState<View>("month");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { executeAction } = useExecuteAction();
 
-  const onModalClose = () => {
-    setShowModal({ show: false, type: "add" });
+  const { run, isPending } = useActionHandler()
+
+  const onModalClosed = () => {
+    setShowModal(false);
     setEventForm(eventDefault);
-    setEditingId("");
+    setSelectedEvent("");
   }
 
   const getAcara = async (date: Date) => {
-    setIsLoading(true);
-
     const month = `${date.getFullYear()}-${date.getMonth() + 1}`;
     router.push(`?month=${month}`);
     setCurrentDate(date);
   }
 
-  const postEvent = async (data: EventForm) => {
-    await toast.promise(
-      executeAction(createEvent, data), {
-      pending: "Membuat acara...",
-      success: "Berhasil buat acara",
-      error: "Ooops... ada yang salah",
-    }
-    )
+  const createEvent = async () => {
+    await run(createEventAction, [eventForm], {
+      toast: {
+        pending: "Membuat acara...",
+        success: "Berhasil buat acara",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
+    })
   }
 
-  const patchEvent = async (id: string, data: EventForm) => {
-    await toast.promise(
-      executeAction(updateEvent, data, id), {
-      pending: "Update acara...",
-      success: "Berhasil update acara",
-      error: "Ooops... ada yang salah",
-    }
-    )
+  const updateEvent = async () => {
+    await run(updateEventAction, [eventForm, selectedEvent], {
+      toast: {
+        pending: "Update acara...",
+        success: "Berhasil update acara",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
+    })
   }
 
-  const onSubmit = async (payload: EventForm) => {
-    if (!payload) return toast.error("data tidak boleh kosong");
-    setIsPosting(true);
+  const onSubmit = async () => {
+    if (selectedEvent === "") await createEvent();
+    else await updateEvent();
 
-    if (showModal.type === "add") {
-      await postEvent(payload);
-    } else if (showModal.type === "edit") {
-      await patchEvent(editingId, payload);
-    }
-
-    setIsPosting(false);
-    onModalClose();
+    onModalClosed();
   }
 
-  const onDeleteAcara = async(id: string) => {
-    if (!id) return toast.error("id tidak boleh kosong")
-    setIsPosting(true);
+  const deleteEvent = async (id: string) => {
+    if (!id) return toast.error("id tidak boleh kosong");
 
-    await toast.promise(
-      executeAction(deleteEvent, id), {
-      pending: "Menghapus acara...",
-      success: "Berhasil hapus acara",
-      error: "Ooops... ada yang salah",
+    await run(deleteEventAction, [id], {
+      toast: {
+        pending: "Menghapus acara...",
+        success: "Berhasil hapus acara",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
     })
 
-    setIsPosting(false);
-    onModalClose();
+    onModalClosed();
   }
 
   const handleSelectSlot = (start: any, end: any) => {
     setEventForm({ akun_id: userId, title: "", start: start, end: end });
-    setShowModal({ show: true, type: "add" });
+    setShowModal(true);
   };
 
   const handleSelectEvent = (event: BaseEvent) => {
-    setEditingId(event.id)
+    setSelectedEvent(event.id)
     setEventForm({ akun_id: userId, title: event.title, start: event.start, end: event.end })
-    setShowModal({ show: true, type: "edit" });
+    setShowModal(true);
   }
-
-  useEffect(() => {
-    setIsLoading(false);
-  }, [events])
 
   return (
     <>
-      <LoadingScreen show={isLoading} />
+      <LoadingScreen show={isPending} />
       <div style={{ height: "80vh" }}>
         <Calendar
           date={currentDate}
@@ -175,14 +163,15 @@ const KalenderPage = ({ events }: { events: BaseEvent[] }) => {
       </Stack>
 
       <KalenderForm
-        showModal={showModal}
-        onModalClose={onModalClose}
-        onSubmit={onSubmit}
-        eventForm={eventForm}
-        setEventForm={setEventForm}
-        isPosting={isPosting}
-        onDeleteAcara={onDeleteAcara}
-        eventId={editingId}
+        modal={{ show: showModal, onClosed: onModalClosed }}
+        event={{
+          selected: selectedEvent,
+          form: eventForm,
+          setForm: setEventForm,
+          onSubmit: onSubmit,
+          onDelete: deleteEvent
+        }}
+        isPending={isPending}
       />
     </>
   )

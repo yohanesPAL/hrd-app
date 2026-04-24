@@ -6,13 +6,13 @@ import { revalidatePath } from "next/cache";
 
 const PATH = "kalender";
 
-export const getEventsByAccount = withAuth(
+export const getEventsByAccountAction = withAuth(
   async (session, id: AccountId, date: Date) => {
     return await eventService.getEventsByAccount(id, date);
   },
 );
 
-export const createEvent = withAuth(
+export const createEventAction = withAuth(
   async (session, data: EventForm) => {
     await eventService.createEvent(data);
     revalidatePath(`${session.user.role}/${PATH}`);
@@ -20,7 +20,7 @@ export const createEvent = withAuth(
   ["hrd"],
 );
 
-export const updateEvent = withAuth(
+export const updateEventAction = withAuth(
   async (session, data: EventForm, id: AccountId) => {
     await eventService.updateEvent(id, data);
     revalidatePath(`${session.user.role}/${PATH}`);
@@ -28,7 +28,7 @@ export const updateEvent = withAuth(
   ["hrd"],
 );
 
-export const deleteEvent = withAuth(
+export const deleteEventAction = withAuth(
   async (session, id: AccountId) => {
     await eventService.deleteEvent(id);
     revalidatePath(`${session.user.role}/${PATH}`);

@@ -11,7 +11,7 @@ export const BaseCarSchema = z
     nopol: z.string().min(1).trim(),
     depo: z.string().min(1).trim(),
     tahun: z.coerce.string().min(1).trim(),
-    jumlah_roda: z.number().nonnegative(),
+    jumlah_roda: z.number().min(1),
     status: z.enum(CAR_STATUS),
   })
   .strict();

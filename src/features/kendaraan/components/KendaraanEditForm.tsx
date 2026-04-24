@@ -1,38 +1,38 @@
-"use client"
-import { BaseCar, CAR_STATUS, CarForm } from "@/modules/car/car.schema"
-import { DepoTable } from "@/modules/depo/depo.schema"
-import { useState } from "react"
-import { Button, Col, Form, InputGroup, Row, Stack } from "react-bootstrap"
-import { toast } from "react-toastify"
-import { createCarAction } from "../mobilAction"
-import { useRouter } from "next/navigation"
-import useProfile from "@/stores/profile/profile.store"
-import { Nopol } from "../types/NopolTypes"
-import { kodeNopol } from "../lib/kodeNopol"
-import { useActionHandler } from "@/hooks/useActionHandler"
+'use client';
+import { CAR_STATUS, CarForm } from '@/modules/car/car.schema'
+import { DepoTable } from '@/modules/depo/depo.schema';
+import { useState } from 'react';
+import { Button, Col, Form, InputGroup, Row, Stack } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import { updateCarAction } from '../mobilAction';
+import { useRouter } from 'next/navigation';
+import useProfile from '@/stores/profile/profile.store';
+import { Nopol } from '../types/NopolTypes';
+import { kodeNopol } from '../lib/kodeNopol';
+import { useActionHandler } from '@/hooks/useActionHandler';
 
-const defaultForm: CarForm = {
-  nama: "",
-  jenis: "",
-  merk: "",
-  nopol: "",
-  depo: "",
-  tahun: "",
-  jumlah_roda: 0,
-  status: "baik" as BaseCar["status"],
-}
-
-const KendaraanForm = ({ depoOptions }: { depoOptions: DepoTable[] }) => {
+const KendaraanEditForm = ({
+  id,
+  data,
+  depoOptions,
+}: {
+  id: string,
+  data: CarForm,
+  depoOptions: DepoTable[]
+}) => {
   const router = useRouter();
   const role = useProfile((state) => state.profile?.role)
-
-  const [form, setForm] = useState<CarForm>(defaultForm);
-  const [nopol, setNopol] = useState<Nopol>({ prefix: "BE", id: "", sufix: "" });
-  const [submitting, setSubmitting] = useState<boolean>(false);
-
   const { run } = useActionHandler()
 
+  const [form, setForm] = useState<CarForm>(data);
+  const [nopol, setNopol] = useState<Nopol>(() => {
+    const [prefix = "", id = "", sufix = ""] = data.nopol.split(" ");
+    return { prefix, id, sufix };
+  });
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
   const onSubmit = async () => {
+    if (submitting || !id) return;
     if (!form) return toast.error("data tidak boleh kosong");
     if (form.jumlah_roda < 1) return toast.error("jumlah roda harus > 0")
 
@@ -43,13 +43,13 @@ const KendaraanForm = ({ depoOptions }: { depoOptions: DepoTable[] }) => {
         nopol: `${nopol.prefix} ${nopol.id} ${nopol.sufix}`
       }
 
-      await run(createCarAction, [payload], {
+      await run(updateCarAction, [payload, id], {
         toast: {
-          pending: "Membuat kendaraan...",
-          success: "Berhasil buat kendaraan",
+          pending: "Update kendaraan...",
+          success: "Berhasil update kendaraan",
           error: "Ooops... ada yang salah",
         },
-        refresh: false,
+        refresh: false
       })
 
       router.push(`/${role}/kendaraan`)
@@ -63,7 +63,7 @@ const KendaraanForm = ({ depoOptions }: { depoOptions: DepoTable[] }) => {
       <h2 className='mb-4'>Form Kendaraan</h2>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onSubmit();
+        onSubmit()
       }}>
         <Stack gap={4}>
           <Row>
@@ -73,7 +73,7 @@ const KendaraanForm = ({ depoOptions }: { depoOptions: DepoTable[] }) => {
                 type='text'
                 placeholder='Ex: Mitsubishi Fuso'
                 required
-                value={form.nama}
+                value={form?.nama}
                 onChange={(e) => setForm(prev => ({ ...prev, nama: e.target.value }))}
               />
             </Form.Group>
@@ -155,7 +155,7 @@ const KendaraanForm = ({ depoOptions }: { depoOptions: DepoTable[] }) => {
               <Form.Label>Tahun</Form.Label>
               <Form.Control
                 type='number'
-                placeholder='Ex: 2015'
+                placeholder='YYYY'
                 required
                 value={form.tahun}
                 onChange={(e) => setForm(prev => ({ ...prev, tahun: e.target.value }))}
@@ -199,4 +199,4 @@ const KendaraanForm = ({ depoOptions }: { depoOptions: DepoTable[] }) => {
   )
 }
 
-export default KendaraanForm
+export default KendaraanEditForm

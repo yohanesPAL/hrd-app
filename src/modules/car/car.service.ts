@@ -28,7 +28,7 @@ export class CarService implements ICarService {
     }
   }
 
-  async getCarById(carId: BaseCar["id"]): Promise<ServiceRes<BaseCar>> {
+  async getCarById(carId: BaseCar["id"]): Promise<ServiceRes<CarForm>> {
       try {
         const validatedCarId = CarIdSchema.parse(carId);
 

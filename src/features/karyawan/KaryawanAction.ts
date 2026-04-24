@@ -16,37 +16,37 @@ import { revalidatePath } from "next/cache";
 
 const PATH = "karyawan";
 
-export const getAllKaryawan = withAuth(async () => {
+export const getAllKaryawanAction = withAuth(async () => {
   return await employeeService.getAllEmployees();
 });
 
-export const getKaryawanById = withAuth(async (session, id: BaseEmployee["id"]) => {
+export const getKaryawanByIdAction = withAuth(async (session, id: BaseEmployee["id"]) => {
   return await employeeService.getEmployeeById(id);
 });
 
-export const getKaryawanForUpdate = withAuth(async (session, id: BaseEmployee["id"]) => {
+export const getKaryawanForUpdateAction = withAuth(async (session, id: BaseEmployee["id"]) => {
   return await employeeService.getEmployeeForUpdate(id);
 });
 
-export const getKaryawanFormOptions = withAuth(async () => {
+export const getKaryawanFormOptionsAction = withAuth(async () => {
   return await getEmployeeFormOptions.execute();
 }, ["hrd"]);
 
-export const createKaryawan = withAuth(
+export const createKaryawanAction = withAuth(
   async (session, employee: EmployeeForm, contract: EmployeeContractForm) => {
     await createEmployeeWithContract.execute(employee, contract);
   },
   ["hrd"],
 );
 
-export const updateKaryawan = withAuth(
+export const updateKaryawanAction = withAuth(
   async (session, id: BaseEmployee["id"], data: EmployeeUpdate) => {
     await employeeService.updateEmployee(id, data);
   },
   ["hrd"],
 );
 
-export const updateKaryawanSP = withAuth(
+export const updateKaryawanSpAction = withAuth(
   async (session, id: BaseEmployee["id"], data: EmployeeSpForm) => {
     await employeeService.updateEmployeeSP(id, data);
     revalidatePath(`/${session.user.role}/${PATH}`);
@@ -54,7 +54,7 @@ export const updateKaryawanSP = withAuth(
   ["hrd"],
 );
 
-export const updateKaryawanKodeAbsen = withAuth(
+export const updateKaryawanKodeAbsenAction = withAuth(
   async (session, id: BaseEmployee["id"], data: EmployeeKodeAbsenForm) => {
     await employeeService.updateEmployeeKodeAbsen(id, data);
     revalidatePath(`/${session.user.role}/${PATH}`);
@@ -62,7 +62,7 @@ export const updateKaryawanKodeAbsen = withAuth(
   ["hrd"],
 );
 
-export const deleteKaryawan = withAuth(
+export const deleteKaryawanAction = withAuth(
   async (session, id: string) => {
     await deleteEmployeeAndUser.execute(id);
     revalidatePath(`/${session.user.role}/${PATH}`);

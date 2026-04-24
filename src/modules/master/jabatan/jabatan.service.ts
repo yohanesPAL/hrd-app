@@ -6,6 +6,7 @@ import {
   BasePositionSchema,
   PositionForm,
   PositionFormSchema,
+  PositionIdSchema,
   PositionTable,
 } from "./jabatan.schema";
 import { ZodError } from "zod";
@@ -59,11 +60,12 @@ export class PositionService implements IPositionService {
     }
   }
 
-  async updatePosition(data: BasePosition): Promise<ServiceRes> {
+  async updatePosition(data: PositionForm, id: BasePosition["id"]): Promise<ServiceRes> {
     try {
-      const validated = BasePositionSchema.parse(data);
+      const validatedForm = PositionFormSchema.parse(data);
+      const validatedId = PositionIdSchema.parse(id)
 
-      await this.positionRepository.update(validated);
+      await this.positionRepository.update(validatedForm, validatedId);
 
       return { success: true, status: 200 };
     } catch (error: unknown) {
@@ -76,7 +78,7 @@ export class PositionService implements IPositionService {
     }
   }
 
-  async deletePosition(id: string): Promise<ServiceRes> {
+  async deletePosition(id: BasePosition["id"]): Promise<ServiceRes> {
     if (!id || typeof id !== "string")
       throw new Err("invalid request body", 400);
 

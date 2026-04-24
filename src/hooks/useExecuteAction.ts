@@ -1,29 +1,33 @@
 "use client";
-import { useCallback, useTransition } from "react";
 import useConfirmDelete from "@/stores/confirmDelete/confirmDelete.store";
+import { useCallback, useRef } from "react";
 
 export function useExecuteAction() {
-  const { setIsPosting, setClose } = useConfirmDelete();
-  const [isSuspense, startTransition] = useTransition();
+  const promiseRef = useRef<Promise<any> | null>(null);
+  const {setIsSubmitting} = useConfirmDelete();
 
   const executeAction = useCallback(
     async <T extends (...args: any[]) => Promise<any>>(
       action: T,
       ...args: Parameters<T>
     ): Promise<Awaited<ReturnType<T>>> => {
-      setIsPosting(true);
+      if (promiseRef.current) {
+        return promiseRef.current;
+      }
+
+      setIsSubmitting(true);
+      const promise = action(...args);
+      promiseRef.current = promise;
 
       try {
-        return await action(...args);
+        return await promise;
       } finally {
-        startTransition(() => {
-          setIsPosting(false);
-          setClose();
-        })
+        promiseRef.current = null;
+        setIsSubmitting(false);
       }
     },
-    [setIsPosting]
+    [],
   );
 
-  return { executeAction, isSuspense };
+  return { executeAction, isLocked: promiseRef.current };
 }

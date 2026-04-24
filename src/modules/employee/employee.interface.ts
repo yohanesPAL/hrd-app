@@ -8,6 +8,7 @@ import {
   EmployeeTable,
   EmployeeUpdate,
   OpenEmployee,
+  SelectOptions,
 } from "./employee.schema";
 import { ServiceRes } from "@/types/ServiceTypes";
 import { UserId } from "../user/user.schema";
@@ -28,7 +29,7 @@ export interface IEmployeeService {
   getEmployeeById(id: BaseEmployee["id"]): Promise<ServiceRes<BaseEmployee>>;
   getEmployeeForUpdate(id: BaseEmployee["id"]): Promise<ServiceRes<EmployeeUpdate>>;
   getEmployeeAbsentDivCode(absentCode: string[]): Promise<ServiceRes<Map<string, string>>>;
-  getUnaccountedEmployees(selectedId?: UserId): Promise<ServiceRes<OpenEmployee[]>>;
+  getUnaccountedEmployees(selectedId?: UserId): Promise<ServiceRes<SelectOptions[]>>;
   createEmployee(data: EmployeeForm, conn: Connection): Promise<ServiceRes<string>>;
   deleteEmployee(id: string, conn: Connection): Promise<ServiceRes>;
   updateEmployee(

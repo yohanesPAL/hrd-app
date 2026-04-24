@@ -11,6 +11,7 @@ import { useShallow } from "zustand/shallow";
 import { useExecuteAction } from "@/hooks/useExecuteAction";
 import { toast } from "react-toastify";
 import { createDepoAction, deleteDepoAction, updateDepoAction } from "../DepoActions";
+import { useActionHandler } from "@/hooks/useActionHandler";
 
 const defaultSort: SortingState = [{ id: "no", desc: false }];
 const depoFormDefault: DepoForm = {
@@ -18,15 +19,12 @@ const depoFormDefault: DepoForm = {
 }
 
 const DepoPage = ({ depoData }: { depoData: DepoTable[] }) => {
-  const { setOpen: openConfirmDelete, isPosting } = useConfirmDelete(useShallow((state) => ({
-    setOpen: state.setOpen,
-    isPosting: state.isPosting,
-  })));
+  const { openConfirmDelete } = useConfirmDelete();
+  const { run, isPending } = useActionHandler();
 
   const [depoForm, setDepoForm] = useState<DepoForm>(depoFormDefault);
   const [depoOnEdit, setDepoOnEdit] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
-  const { executeAction, isSuspense } = useExecuteAction();
 
   const onModalClose = () => {
     setDepoForm(depoFormDefault);
@@ -34,40 +32,43 @@ const DepoPage = ({ depoData }: { depoData: DepoTable[] }) => {
     setDepoOnEdit("");
   }
 
-  const createDepo = async (data: DepoForm) => {
-    await toast.promise(
-      executeAction(createDepoAction, data), {
-      pending: "Membuat depo...",
-      success: "Berhasil buat depo",
-      error: "Ooops... ada yang salah",
+  const createDepo = async () => {
+    await run(createDepoAction, [depoForm], {
+      toast: {
+        pending: "Membuat depo...",
+        success: "Berhasil buat depo",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
     })
   }
 
-  const updateDepo = async (data: DepoForm, id: BaseDepo["id"]) => {
-    await toast.promise(
-      executeAction(updateDepoAction, data, id), {
-      pending: "Update depo...",
-      success: "Berhasil update depo",
-      error: "Ooops... ada yang salah",
+  const updateDepo = async () => {
+    await run(updateDepoAction, [depoForm, depoOnEdit], {
+      toast: {
+        pending: "Update depo...",
+        success: "Berhasil update depo",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
     })
   }
 
-  const onSubmit = () => {
-    if (depoOnEdit === "") {
-      createDepo(depoForm);
-    } else {
-      updateDepo(depoForm, depoOnEdit);
-    }
+  const onSubmit = async () => {
+    if (depoOnEdit === "") await createDepo();
+    else await updateDepo();
 
     onModalClose();
   }
 
   const onDelete = async (id: BaseDepo["id"]) => {
-    await toast.promise(
-      executeAction(deleteDepoAction, id), {
-      pending: "Menghapus depo...",
-      success: "Berhasil hapus depo",
-      error: "Ooops... ada yang salah",
+    await run(deleteDepoAction, [id], {
+      toast: {
+        pending: "Menghapus depo...",
+        success: "Berhasil hapus depo",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
     })
   }
 
@@ -89,11 +90,11 @@ const DepoPage = ({ depoData }: { depoData: DepoTable[] }) => {
             openConfirmDelete: openConfirmDelete,
             onDelete: onDelete,
           },
-          isPosting: isPosting,
+          isPosting: isPending,
         })}
         data={depoData}
         defaultSort={defaultSort}
-        loading={isSuspense}
+        loading={isPending}
       />
 
       <Modal show={showModal} onHide={onModalClose}>
@@ -118,7 +119,7 @@ const DepoPage = ({ depoData }: { depoData: DepoTable[] }) => {
           </Modal.Body>
           <Modal.Footer>
             <Button type="button" variant="danger" onClick={onModalClose}>Cancel</Button>
-            <Button type="submit" variant="primary" disabled={isPosting}>Submit</Button>
+            <Button type="submit" variant="primary" disabled={isPending}>Submit</Button>
           </Modal.Footer>
         </Form>
       </Modal>

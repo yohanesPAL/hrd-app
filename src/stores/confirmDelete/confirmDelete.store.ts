@@ -9,12 +9,12 @@ const getDefaultProps = (): ConfirmDeleteProps => ({
 
 const useConfirmDelete = create<ConfirmDelete>((set) => ({
   props: getDefaultProps(),
-  setOpen: (props, onConfirm) => set({ props: { ...props, show: true }, onConfirm }),
-  setClose: () => set({ props: getDefaultProps(), onConfirm: undefined}),  
-  isPosting: false,
-  setIsPosting: (state: boolean) => set({isPosting: state}),
+  isSubmitting: false,
+  setIsSubmitting: (state: boolean) => set({isSubmitting: state}),
+  openConfirmDelete: (props, onConfirm) => set({ props: { ...props, show: true }, onConfirm }),
+  closeConfirmDelete: () => set({ props: getDefaultProps(), onConfirm: undefined}),  
   onConfirm: undefined,
-  resetStore: () => set({props: getDefaultProps(), isPosting: false}),
+  resetStore: () => set({props: getDefaultProps()}),
 }));
 
 export default useConfirmDelete;

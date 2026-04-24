@@ -13,11 +13,14 @@ import {
   EmployeeUpdate,
   EmployeeUpdateSchema,
   OpenEmployee,
+  OpenEmployeeSchema,
+  SelectOptions,
 } from "./employee.schema";
 import { ZodError } from "zod";
 import { ServiceRes } from "@/types/ServiceTypes";
 import { UserId } from "../user/user.schema";
 import { Connection } from "mysql2/promise";
+import { EmployeeMapper } from "./employee.mapper";
 
 export class EmployeeService implements IEmployeeService {
   constructor(private employeeRepository: IEmployeeRepository) {}
@@ -107,12 +110,14 @@ export class EmployeeService implements IEmployeeService {
 
   async getUnaccountedEmployees(
     selectedId: UserId,
-  ): Promise<ServiceRes<OpenEmployee[]>> {
+  ): Promise<ServiceRes<SelectOptions[]>> {
     try {
       const employees =
         await this.employeeRepository.getUnaccountedEmployees(selectedId);
 
-      return { success: true, status: 200, data: employees };
+      const validatedEmployees = OpenEmployeeSchema.array().parse(employees);
+
+      return { success: true, status: 200, data: EmployeeMapper.toSelectOptions(validatedEmployees) };
     } catch (error) {
       console.error("EmployeeService.getUnaccountedEmployees error:", error);
 

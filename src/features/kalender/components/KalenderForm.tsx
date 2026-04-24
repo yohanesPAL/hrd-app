@@ -1,6 +1,5 @@
 "use client";
 import { Button, Form, Modal, Stack } from 'react-bootstrap'
-import { EventModal } from '../types/KalenderTypes';
 import { EventForm } from '@/modules/event/event.schema';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -13,32 +12,31 @@ function toDatetimeLocal(date: Date) {
 }
 
 const KalenderForm = ({
-  showModal,
-  onModalClose,
-  onSubmit,
-  eventForm,
-  setEventForm,
-  isPosting,
-  onDeleteAcara,
-  eventId,
+  modal,
+  event,
+  isPending,
 }: {
-  showModal: EventModal,
-  onModalClose: () => void,
-  onSubmit: (payload: EventForm) => void,
-  eventForm: EventForm,
-  setEventForm: Dispatch<SetStateAction<EventForm>>,
-  isPosting: boolean,
-  onDeleteAcara: (id: string) => void,
-  eventId: string,
+  modal: {
+    show: boolean,
+    onClosed: () => void,
+  }
+  event: {
+    selected: string,
+    form: EventForm,
+    setForm: Dispatch<SetStateAction<EventForm>>,
+    onSubmit: (payload: EventForm) => void,
+    onDelete: (id: string) => void,
+  }
+  isPending: boolean,
 }) => {
   return (
-    <Modal show={showModal.show} onHide={onModalClose} className="p-0">
+    <Modal show={modal.show} onHide={modal.onClosed} className="p-0">
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(eventForm);
+        event.onSubmit(event.form);
       }}>
         <Modal.Header>
-          <Modal.Title>{showModal.type === "add" ? "Tambah" : "Edit"} Acara</Modal.Title>
+          <Modal.Title>{event.selected === "" ? "Tambah" : "Edit"} Acara</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
@@ -46,8 +44,8 @@ const KalenderForm = ({
             <Form.Control
               required
               type="text"
-              value={eventForm.title}
-              onChange={(e) => setEventForm({ ...eventForm, title: e.currentTarget.value })}
+              value={event.form.title}
+              onChange={(e) => event.setForm({ ...event.form, title: e.currentTarget.value })}
             />
           </Form.Group>
           <Form.Group>
@@ -55,8 +53,8 @@ const KalenderForm = ({
             <Form.Control
               required
               type="datetime-local"
-              value={toDatetimeLocal(eventForm.start)}
-              onChange={(e) => setEventForm({ ...eventForm, start: new Date(e.currentTarget.value) })}
+              value={toDatetimeLocal(event.form.start)}
+              onChange={(e) => event.setForm({ ...event.form, start: new Date(e.currentTarget.value) })}
             />
           </Form.Group>
           <Form.Group>
@@ -64,17 +62,17 @@ const KalenderForm = ({
             <Form.Control
               required
               type="datetime-local"
-              value={toDatetimeLocal(eventForm.end)}
-              onChange={(e) => setEventForm({ ...eventForm, end: new Date(e.currentTarget.value) })}
+              value={toDatetimeLocal(event.form.end)}
+              onChange={(e) => event.setForm({ ...event.form, end: new Date(e.currentTarget.value) })}
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <div className="d-flex flex-row align-items-center justify-content-between w-100">
-            {showModal.type === "edit" ? <Button type="button" variant="danger" onClick={() => onDeleteAcara(eventId)} disabled={isPosting}>Hapus</Button> : <div></div>}
+            {event.selected !== "" ? <Button type="button" variant="danger" onClick={() => event.onDelete(event.selected)} disabled={isPending}>Hapus</Button> : <div></div>}
             <Stack direction="horizontal" gap={2}>
-              <Button type="button" variant="warning" disabled={isPosting} onClick={onModalClose}>Batal</Button>
-              <Button type="submit" variant="primary" disabled={isPosting}>{showModal.type === "edit" ? "Update" : "Submit"}</Button>
+              <Button type="button" variant="warning" disabled={isPending} onClick={modal.onClosed}>Batal</Button>
+              <Button type="submit" variant="primary" disabled={isPending}>{event.selected !== "" ? "Update" : "Submit"}</Button>
             </Stack>
           </div>
         </Modal.Footer>

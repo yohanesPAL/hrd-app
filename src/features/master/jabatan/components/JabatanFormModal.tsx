@@ -5,30 +5,32 @@ import { Dispatch, SetStateAction } from 'react';
 import { Button, Form, Modal, Stack } from 'react-bootstrap';
 
 const JabatanFormModal = ({
-  show,
-  onCloseModal,
-  onSubmit,
-  jabatanForm,
-  setJabatanForm,
-  divisiList,
-  isPosting,
+ modal,
+ jabatan,
+ divisiList,
+ isPending,
 }:{
-  show: boolean,
-  onCloseModal: () => void,
-  onSubmit: (payload: PositionForm) => void,
-  jabatanForm: PositionForm,
-  setJabatanForm: Dispatch<SetStateAction<PositionForm>>,
+  modal: {
+    show: boolean,
+    onClosed: () => void,
+  },
+  jabatan: {
+    onSubmit: (data: PositionForm) => void,
+    form: PositionForm,
+    setForm: Dispatch<SetStateAction<PositionForm>>,
+    onEdit: string,
+  }
   divisiList: DivisionTable[],
-  isPosting: boolean,
+  isPending: boolean,
 }) => {
   return (
-    <Modal show={show} onHide={onCloseModal}>
+    <Modal show={modal.show} onHide={modal.onClosed}>
         <Form onSubmit={(e) => {
           e.preventDefault();
-          onSubmit(jabatanForm);
+          jabatan.onSubmit(jabatan.form);
         }}>
           <Modal.Header closeButton>
-            <Modal.Title>{!jabatanForm.id ? "Tambah" : "Edit"} Jabatan</Modal.Title>
+            <Modal.Title>{jabatan.onEdit === "" ? "Tambah" : "Edit"} Jabatan</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Stack gap={3}>
@@ -38,16 +40,16 @@ const JabatanFormModal = ({
                   type='text'
                   placeholder='Ex: Admin'
                   required
-                  value={jabatanForm.nama}
-                  onChange={(e) => setJabatanForm({ ...jabatanForm, nama: e.currentTarget.value })}
+                  value={jabatan.form.nama}
+                  onChange={(e) => jabatan.setForm(prev => ({ ...prev, nama: e.target.value }))}
                 />
               </Form.Group>
               <Form.Group>
                 <Form.Label>Status</Form.Label>
                 <Form.Select
                   required
-                  value={jabatanForm.is_active}
-                  onChange={(e) => setJabatanForm({ ...jabatanForm, is_active: Number(e.currentTarget.value) })}
+                  value={jabatan.form.is_active}
+                  onChange={(e) => jabatan.setForm(prev => ({ ...prev, is_active: Number(e.target.value) }))}
                 >
                   <option value={1}>Aktif</option>
                   <option value={0}>Non Aktif</option>
@@ -57,8 +59,8 @@ const JabatanFormModal = ({
                 <Form.Label>Divisi</Form.Label>
                 <Form.Select
                   required
-                  value={jabatanForm.id_divisi}
-                  onChange={(e) => setJabatanForm({ ...jabatanForm, id_divisi: e.currentTarget.value })}
+                  value={jabatan.form.id_divisi}
+                  onChange={(e) => jabatan.setForm(prev => ({ ...prev, id_divisi: e.target.value }))}
                 >
                   <option value={""}>--Pilih Divisi--</option>
                   {
@@ -71,8 +73,8 @@ const JabatanFormModal = ({
             </Stack>
           </Modal.Body>
           <Modal.Footer>
-            <Button type='button' variant='danger' disabled={isPosting} onClick={onCloseModal}>Batal</Button>
-            <Button type='submit' variant='primary' disabled={isPosting}>{!jabatanForm.id ? "Submit" : "Update"}</Button>
+            <Button type='button' variant='danger' disabled={isPending} onClick={modal.onClosed}>Batal</Button>
+            <Button type='submit' variant='primary' disabled={isPending}>Submit</Button>
           </Modal.Footer>
         </Form>
       </Modal >

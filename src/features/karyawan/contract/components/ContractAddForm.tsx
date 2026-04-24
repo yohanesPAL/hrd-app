@@ -4,30 +4,30 @@ import { Dispatch, SetStateAction } from 'react'
 import { Button, Form, Modal, Stack } from 'react-bootstrap'
 
 const ContractAddForm = ({
-  showModal,
-  onCloseModal,
-  contractOnEdit,
-  contractForm,
-  setContractForm,
-  isPosting,
-  onSubmit,
+  modal,
+  contract,
+  isPending,
 }: {
-  showModal: boolean,
-  onCloseModal: () => void,
-  contractOnEdit: string,
-  contractForm: EmployeeContractForm,
-  setContractForm: Dispatch<SetStateAction<EmployeeContractForm>>,
-  isPosting: boolean,
-  onSubmit: (data: EmployeeContractForm) => void,
+  modal: {
+    show: boolean,
+    onClose: () => void,
+  }
+  contract: {
+    onEdit: string,
+    form: EmployeeContractForm,
+    setForm: Dispatch<SetStateAction<EmployeeContractForm>>,
+    onSubmit: (data: EmployeeContractForm) => void,
+  }
+  isPending: boolean,
 }) => {
   return (
-    <Modal show={showModal} onHide={onCloseModal}>
+    <Modal show={modal.show} onHide={modal.onClose}>
       <Modal.Header>
-        <Modal.Title>{contractOnEdit === "" ? "Tambah" : "Edit"} Kontrak</Modal.Title>
+        <Modal.Title>{contract.onEdit === "" ? "Tambah" : "Edit"} Kontrak</Modal.Title>
       </Modal.Header>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(contractForm);
+        contract.onSubmit(contract.form);
       }}>
         <Modal.Body>
           <Stack gap={2}>
@@ -35,14 +35,14 @@ const ContractAddForm = ({
               <Form.Label>Jenis</Form.Label>
               <Form.Select
                 required
-                value={contractForm.jenis}
+                value={contract.form.jenis}
                 onChange={(e) => {
                   if (e.currentTarget.value === "tetap") {
-                    setContractForm({ ...contractForm, tgl_berakhir: null })
+                    contract.setForm(prev => ({ ...prev, tgl_berakhir: null }))
                   } else {
-                    setContractForm({ ...contractForm, tgl_berakhir: new Date() })
+                    contract.setForm(prev => ({ ...prev, tgl_berakhir: new Date() }))
                   }
-                  setContractForm({ ...contractForm, jenis: e.currentTarget.value as EmployeeContractForm["jenis"] })
+                  contract.setForm(prev => ({ ...prev, jenis: e.target.value as EmployeeContractForm["jenis"] }))
                 }}
               >
                 <option value={"tetap"}>Tetap</option>
@@ -54,19 +54,19 @@ const ContractAddForm = ({
               <Form.Control
                 type='date'
                 required
-                value={formatDateYYYYMMDD(contractForm.tgl_kontrak)}
-                onChange={(e) => setContractForm({ ...contractForm, tgl_kontrak: new Date(e.currentTarget.value) })}
+                value={formatDateYYYYMMDD(contract.form.tgl_kontrak)}
+                onChange={(e) => contract.setForm(prev => ({ ...prev, tgl_kontrak: new Date(e.target.value) }))}
               />
             </Form.Group>
             {
-              contractForm.jenis === "kontrak" && (
+              contract.form.jenis === "kontrak" && (
                 <Form.Group>
                   <Form.Label>Tanggal Berakhir</Form.Label>
                   <Form.Control
                     type='date'
                     required
-                    value={contractForm.tgl_berakhir ? formatDateYYYYMMDD(contractForm.tgl_berakhir) : ""}
-                    onChange={(e) => setContractForm({ ...contractForm, tgl_berakhir: new Date(e.currentTarget.value) })}
+                    value={contract.form.tgl_berakhir ? formatDateYYYYMMDD(contract.form.tgl_berakhir) : ""}
+                    onChange={(e) => contract.setForm(prev => ({ ...prev, tgl_berakhir: new Date(e.target.value) }))}
                   />
                 </Form.Group>
               )
@@ -74,8 +74,8 @@ const ContractAddForm = ({
           </Stack>
         </Modal.Body>
         <Modal.Footer>
-          <Button type="button" variant='danger' onClick={onCloseModal}>Cancel</Button>
-          <Button type="submit" variant='primary' disabled={isPosting}>Submit</Button>
+          <Button type="button" variant='danger' onClick={modal.onClose}>Cancel</Button>
+          <Button type="submit" variant='primary' disabled={isPending}>Submit</Button>
         </Modal.Footer>
       </Form>
     </Modal>

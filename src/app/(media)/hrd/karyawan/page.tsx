@@ -1,9 +1,9 @@
 import PageTitle from '@/components/PageTitle';
 import KaryawanPage from '@/features/karyawan/components/KaryawanPage';
-import { getAllKaryawan } from '@/features/karyawan/KaryawanAction';
+import { getAllKaryawanAction } from '@/features/karyawan/KaryawanAction';
 
 const Karyawan = async () => {
-  const karyawan = await getAllKaryawan();
+  const karyawan = await getAllKaryawanAction();
 
   return (
     <>

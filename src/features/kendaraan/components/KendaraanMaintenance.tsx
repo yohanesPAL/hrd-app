@@ -6,11 +6,9 @@ import { kendaraanMaintenanceColumns } from "../columns/KendaraanMaintenanceColu
 import { Button, Form, Modal, Stack } from "react-bootstrap";
 import { useState } from "react";
 import useConfirmDelete from "@/stores/confirmDelete/confirmDelete.store";
-import { useShallow } from "zustand/shallow";
 import { getTodayYYYYMMDD } from "@/utils/getToday";
-import { useExecuteAction } from "@/hooks/useExecuteAction";
-import { toast } from "react-toastify";
 import { createCarMaintenanceAction, deleteCarMaintenanceAction, updateCarMaintenanceAction } from "../maintenance/mobilMaintenanceAction";
+import { useActionHandler } from "@/hooks/useActionHandler";
 
 const defaultSort: SortingState = [{ id: "no", desc: false }];
 const perawatanFormDefault: CarMaintenanceForm = {
@@ -20,71 +18,70 @@ const perawatanFormDefault: CarMaintenanceForm = {
 }
 
 const KendaraanMaintenance = ({
-  data,
-  idKendaraan,
+  maintenanceTable,
+  carId,
 }: {
-  data: CarMaintenanceTable[],
-  idKendaraan: string
+  maintenanceTable: CarMaintenanceTable[],
+  carId: string
 }) => {
-  const { setOpen: openConfirmDelete, isPosting } = useConfirmDelete(
-    useShallow((state) => ({
-      setOpen: state.setOpen,
-      isPosting: state.isPosting,
-    }))
-  )
+  const { openConfirmDelete } = useConfirmDelete()
 
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [maintenanceForm, setMaintenanceForm] = useState<CarMaintenanceForm>({ ...perawatanFormDefault, id_kendaraan: idKendaraan });
+  const [maintenanceForm, setMaintenanceForm] = useState<CarMaintenanceForm>({ ...perawatanFormDefault, id_kendaraan: carId });
   const [maintenanceOnEdit, setMaintenanceOnEdit] = useState<string>("");
+  const { run, isPending } = useActionHandler();
 
-  const { executeAction, isSuspense } = useExecuteAction();
-
-  const onCloseModal = () => {
+  const onModalClosed = () => {
     setShowModal(false);
-    setMaintenanceForm({ ...perawatanFormDefault, id_kendaraan: idKendaraan });
+    setMaintenanceForm({ ...perawatanFormDefault, id_kendaraan: carId });
     setMaintenanceOnEdit("");
   }
 
-  const createMaintenance = async (data: CarMaintenanceForm) => {
-    await toast.promise(
-      executeAction(createCarMaintenanceAction, data), {
-      pending: "Membuat perawatan...",
-      success: "Berhasil buat perawatan...",
-      error: "Ooops... ada yang salah",
+  const createMaintenance = async () => {
+    await run(createCarMaintenanceAction, [maintenanceForm], {
+      toast: {
+        pending: "Membuat perawatan...",
+        success: "Berhasil membuat perawatan",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true,
     })
   }
 
-  const updateMaintenance = async (data: CarMaintenanceForm, id: BaseCarMaintenance["id"]) => {
-    await toast.promise(
-      executeAction(updateCarMaintenanceAction, data, id), {
-      pending: "Update perawatan...",
-      success: "Berhasil update perawatan...",
-      error: "Ooops... ada yang salah",
+  const updateMaintenance = async () => {
+    await run(updateCarMaintenanceAction, [maintenanceForm, maintenanceOnEdit], {
+      toast: {
+        pending: "Update perawatan...",
+        success: "Berhasil update perawatan...",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
     })
   }
 
-  const onSubmit = async (payload: CarMaintenanceForm) => {
-    if (maintenanceOnEdit === "") {
-      await createMaintenance(payload);
-    } else {
-      await updateMaintenance(payload, maintenanceOnEdit);
+  const onSubmit = async () => {
+    try {
+      if (maintenanceOnEdit === "") await createMaintenance();
+      else await updateMaintenance();
+    } finally {
+      onModalClosed();
     }
-
-    onCloseModal();
   }
 
-  const onUpdate = (id: BaseCarMaintenance["id"], data: CarMaintenanceForm) => {
+  const onEdit = (id: BaseCarMaintenance["id"], data: CarMaintenanceForm) => {
     setMaintenanceOnEdit(id);
     setMaintenanceForm(data);
     setShowModal(true);
   }
 
-  const onDelete = async (carMaintenanceId: BaseCarMaintenance["id"]) => {
-    await toast.promise(
-      executeAction(deleteCarMaintenanceAction, carMaintenanceId), {
-      pending: "Menghapus perawatan...",
-      success: "Berhasil hapus perawatan...",
-      error: "Ooops... ada yang salah",
+  const deleteMaintenance = async (maintenanceId: BaseCarMaintenance["id"]) => {
+    await run(deleteCarMaintenanceAction, [maintenanceId], {
+      toast: {
+        pending: "Menghapus perawatan...",
+        success: "Berhasil hapus perawatan...",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true
     })
   }
 
@@ -99,25 +96,23 @@ const KendaraanMaintenance = ({
       </div>
 
       <DefaultTable<CarMaintenanceTable>
+        data={maintenanceTable}
         columns={kendaraanMaintenanceColumns({
-          deleteMaintenance: {
-            openConfirmDelete: openConfirmDelete,
-            onDelete: onDelete,
-          },
-          onUpdateMaintenance: onUpdate
+          onDelete: (id, nama) => openConfirmDelete({ id, nama }, (id) => deleteMaintenance(id)),
+          onEdit,
+          isPending,
         })}
-        data={data}
         defaultSort={defaultSort}
-        loading={isSuspense}
+        loading={isPending}
       />
 
-      <Modal show={showModal} onHide={onCloseModal}>
+      <Modal show={showModal} onHide={onModalClosed}>
         <Modal.Header>
           <Modal.Title>{maintenanceOnEdit === "" ? "Tambah" : "Edit"} Perawatan</Modal.Title>
         </Modal.Header>
         <Form onSubmit={(e) => {
           e.preventDefault();
-          onSubmit(maintenanceForm);
+          onSubmit();
         }}>
           <Modal.Body>
             <Stack gap={2}>
@@ -143,8 +138,8 @@ const KendaraanMaintenance = ({
             </Stack>
           </Modal.Body>
           <Modal.Footer>
-            <Button type="button" variant='danger' onClick={onCloseModal}>Cancel</Button>
-            <Button type="submit" variant='primary' disabled={isPosting}>Submit</Button>
+            <Button type="button" variant='danger' onClick={onModalClosed}>Cancel</Button>
+            <Button type="submit" variant='primary' disabled={isPending}>Submit</Button>
           </Modal.Footer>
         </Form>
       </Modal>

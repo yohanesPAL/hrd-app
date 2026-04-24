@@ -60,11 +60,11 @@ export class PositionRepository implements IPositionRepository {
     }
   }
 
-  async update(data: BasePosition): Promise<boolean> {
+  async update(data: PositionForm, id: BasePosition["id"]): Promise<boolean> {
     try {
       await pool.query(
         `UPDATE jabatan SET id_divisi = ?, nama = ?, is_active = ? WHERE id = ?`,
-        [data.id_divisi, data.nama, data.is_active, data.id],
+        [data.id_divisi, data.nama, data.is_active, id],
       );
 
       return true;
@@ -75,7 +75,7 @@ export class PositionRepository implements IPositionRepository {
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: BasePosition["id"]): Promise<boolean> {
     try {
       await pool.query(`DELETE FROM jabatan WHERE id = ?`, [id]);
 

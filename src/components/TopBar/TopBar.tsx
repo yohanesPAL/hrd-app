@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { useLogout } from '@/hooks/useLogout';
 import { NotificationPopup } from '@/modules/notification/notification.schema';
 import { useEffect, useState } from 'react';
-import { createContractNearExpirationNotification, getNotificationsPopup, markedNotificationsReadAction } from '@/features/notification/NotificationAction';
-import { toast } from 'react-toastify';
+import { createContractNearExpirationNotification, getNotificationsPopupAction, markedNotificationsReadActionAction } from '@/features/notification/NotificationAction';
 import styles from './topbar.module.css'
+import { useActionHandler } from '@/hooks/useActionHandler';
 
 const delay = (ms: any) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -48,6 +48,7 @@ const TopBar = ({
   const showNavbar = useNavbar((state) => state.setShow);
   const navbarState = useNavbar((state) => state.isShow);
   const { onLogout, loading } = useLogout();
+  const { run, isPending } = useActionHandler();
   const [notifications, setNotificitaions] = useState<NotificationPopup[]>([]);
   const [isFetchNotif, setIsFetchNotif] = useState<boolean>(false);
 
@@ -57,11 +58,13 @@ const TopBar = ({
 
   const markNotificationRead = async (notificationIds: string[]) => {
     try {
-      await toast.promise(
-        markedNotificationsReadAction(notificationIds), {
-        pending: "Memproses...",
-        success: "Sukses",
-        error: "Ooops... ada yang salah",
+      await run(markedNotificationsReadActionAction, [notificationIds], {
+        toast: {
+          pending: "Memproses...",
+          success: "Sukses",
+          error: "Ooops... ada yang salah",
+        },
+        refresh: true,
       })
 
       return true;
@@ -72,34 +75,35 @@ const TopBar = ({
 
   const readAllNotifications = async () => {
     const lastNotifications = notifications;
-    if(!lastNotifications.length || lastNotifications.length === 0) return;
+    if (!lastNotifications.length || lastNotifications.length === 0) return;
 
     setNotificitaions([]);
 
     const notifId: string[] = notifications.map(notif => notif.notif_id);
     const res = await markNotificationRead(notifId);
 
-    if(!res) setNotificitaions(lastNotifications.sort((a,b) => Number(a.notif_id) - Number(b.notif_id)));
+    if (!res) setNotificitaions(lastNotifications.sort((a, b) => Number(a.notif_id) - Number(b.notif_id)));
   }
 
   const readOneNotification = async (notificationId: string) => {
     const notification: NotificationPopup | undefined = notifications.find(item => item.notif_id === notificationId);
-    if(!notification) return;
+    if (!notification) return;
 
     setNotificitaions(prev => prev.filter(item => item.notif_id !== notificationId))
 
     const idInArray: string[] = [notificationId];
     const res = await markNotificationRead(idInArray);
 
-    if(!res) setNotificitaions(prev => [notification, ...prev].sort((a, b) => Number(a.notif_id) - Number(b.notif_id)));
+    if (!res) setNotificitaions(prev => [notification, ...prev].sort((a, b) => Number(a.notif_id) - Number(b.notif_id)));
   }
 
   const createNotif = async () => {
-    await toast.promise(
-      createContractNearExpirationNotification(), {
-      pending: "Create notif...",
-      success: "Berhasil create notif",
-      error: "Ooops... ada yang salah",
+    await run(createContractNearExpirationNotification, [], {
+      toast: {
+        pending: "Create notif...",
+        success: "Berhasil create notif",
+        error: "Ooops... ada yang salah",
+      }
     })
   }
 
@@ -107,7 +111,7 @@ const TopBar = ({
     const fetchNotifications = async () => {
       setIsFetchNotif(true);
 
-      const res = await getNotificationsPopup(userId)
+      const res = await getNotificationsPopupAction(userId)
       await delay(2000)
       setNotificitaions(res.data ?? []);
       setIsFetchNotif(false);

@@ -1,10 +1,10 @@
 import PageTitle from '@/components/PageTitle';
 import NotificationPage from '@/features/notification/components/NotificationPage';
-import { getNotificaionsByUser } from '@/features/notification/NotificationAction';
+import { getNotificaionsByUserAction } from '@/features/notification/NotificationAction';
 
 export default async function Notification({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const notifications = await getNotificaionsByUser(id);
+  const notifications = await getNotificaionsByUserAction(id);
 
   return (
     <>

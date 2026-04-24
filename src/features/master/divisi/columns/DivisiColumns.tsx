@@ -1,25 +1,18 @@
 import { Stack, Button } from "react-bootstrap"
 import { ColumnDef } from "@tanstack/react-table"
-import { Dispatch, SetStateAction } from "react"
-import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
-import { DivisionForm, DivisionTable } from "@/modules/master/divisi/division.schema"
+import { BaseDivision, DivisionForm, DivisionTable } from "@/modules/master/divisi/division.schema"
 
 export const divisiColumns = ({
-  setDivisiForm,
-  setShow,
-  openConfirmDelete,
+  onEdit,
   onDelete,
 }: {
-  setDivisiForm: Dispatch<SetStateAction<DivisionForm>>,
-  setShow: Dispatch<SetStateAction<boolean>>,
-  openConfirmDelete: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void,
-  onDelete: (id: string) => void,
-
+  onEdit: (data: DivisionForm, id: BaseDivision["id"]) => void,
+  onDelete: (id: BaseDivision["id"], nama: string) => void,
 }): ColumnDef<DivisionTable>[] => [
-    { accessorKey: "no", header: "No", sortingFn: "alphanumeric" },
-    { accessorKey: "nama", header: "Nama Divisi" },
+    { accessorKey: "no", header: "No", sortingFn: "alphanumeric", size: 80 },
+    { accessorKey: "nama", header: "Nama Divisi", size: 300 },
     {
-      accessorKey: "is_active", header: "Status", cell: ({ getValue }) => {
+      accessorKey: "is_active", header: "Status", size: 300, cell: ({ getValue }) => {
         return getValue() as boolean ? "Aktif" : "Non Aktif"
       },
       meta: {
@@ -27,19 +20,21 @@ export const divisiColumns = ({
       }
     },
     {
-      id: "aksi", header: "Aksi", cell: ({ row }) => {
-        const kode = row.original.id
+      id: "aksi", header: "Aksi", size: 200, cell: ({ row }) => {
+        const id = row.original.id
         return (
           <Stack direction='horizontal' gap={2}>
             <Button type="button" variant='success' onClick={() => {
-              setDivisiForm({ nama: row.original.nama, is_active: row.original.is_active, id: kode });
-              setShow(true);
+              onEdit(
+                {
+                  nama: row.original.nama,
+                  is_active: row.original.is_active,
+                },
+                id
+              )
             }}><i className="bi bi-pencil-fill"></i></Button>
             <Button type="button" variant='danger' onClick={() => {
-              openConfirmDelete(
-                { nama: row.original.nama, id: kode },
-                (id: string) => { onDelete(id) }
-              )
+              onDelete(id, row.original.nama)
             }}><i className="bi bi-trash-fill"></i></Button>
           </Stack>
         )

@@ -7,10 +7,9 @@ import ContractAddForm from './ContractAddForm';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { useExecuteAction } from '@/hooks/useExecuteAction';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
-import { useShallow } from 'zustand/shallow';
 import { createKaryawanContractAction, deleteKaryawanContractAction, updateKaryawanContractAction } from '../ContractAction';
+import { useActionHandler } from '@/hooks/useActionHandler';
 
 const contractDefaultSort = [{ id: "no", desc: true }]
 const contractFormDefault: EmployeeContractForm = {
@@ -24,22 +23,14 @@ const contractFormDefault: EmployeeContractForm = {
 const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) => {
   const params = useParams();
 
-  const {
-    setOpen: openConfirmDelete,
-    isPosting,
-  } = useConfirmDelete(
-    useShallow((state) => ({
-      setOpen: state.setOpen,
-      isPosting: state.isPosting,
-    }))
-  )
+  const { openConfirmDelete } = useConfirmDelete();
+  const { run, isPending } = useActionHandler();
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [contractOnEdit, setContractOnEdit] = useState<string>("");
   const [contractForm, setContractForm] = useState<EmployeeContractForm>(contractFormDefault)
-  const { executeAction, isSuspense } = useExecuteAction();
 
-  const onCloseModal = () => {
+  const onModalClosed = () => {
     setShowModal(false);
     setContractOnEdit("");
     setContractForm(contractFormDefault);
@@ -51,51 +42,52 @@ const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) =
     setShowModal(true);
   }
 
-  const postContract = async (data: EmployeeContractForm) => {
-    await toast.promise(
-      executeAction(createKaryawanContractAction, { ...data, karyawan_id: params.id as string }), {
-      pending: "Membuat kontrak...",
-      success: "Berhasil buat kontrak",
-      error: {
-        render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+  const createContract = async () => {
+    await run(createKaryawanContractAction, [{ ...contractForm, karyawan_id: params.id as string }], {
+      toast: {
+        pending: "Membuat kontrak...",
+        success: "Berhasil buat kontrak",
+        error: {
+          render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+        },
       },
+      refresh: true,
     })
   }
 
-  const patchContract = async (id: BaseEmployeeContract["id"], data: EmployeeContractForm) => {
-    data.karyawan_id = id;
-    await toast.promise(
-      executeAction(updateKaryawanContractAction, id, data), {
-      pending: "Update kontrak...",
-      success: "Berhasil update kontrak",
-      error: {
-        render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+  const updateContract = async () => {
+    await run(updateKaryawanContractAction, [contractOnEdit, contractForm], {
+      toast: {
+        pending: "Update kontrak...",
+        success: "Berhasil update kontrak",
+        error: {
+          render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+        }
       },
+      refresh: true
     })
   }
 
-  const onSubmit = async (payload: EmployeeContractForm) => {
-    if (!payload) return toast.error("data tidak boleh kosong");
-
-    if (contractOnEdit === "") {
-      await postContract(payload);
-    } else {
-      await patchContract(contractOnEdit, payload);
+  const onSubmit = async () => {
+    try {
+      if (contractOnEdit === "") await createContract();
+      else await updateContract();
+    } finally {
+      onModalClosed();
     }
-
-    onCloseModal();
   }
 
   const onDelete = async (id: BaseEmployeeContract["id"]) => {
     if (!id) return toast.error("id tidak boleh kosong");
 
-    await toast.promise(
-      executeAction(deleteKaryawanContractAction, id), {
-      pending: "Menghapus kontrak...",
-      success: "Berhasil menghapus kontrak",
-      error: "Ooops... ada yang salah",
-    }
-    )
+    await run(deleteKaryawanContractAction, [id], {
+      toast: {
+        pending: "Menghapus kontrak...",
+        success: "Berhasil menghapus kontrak",
+        error: "Ooops... ada yang salah",
+      },
+      refresh: true,
+    })
   }
 
   return (
@@ -104,7 +96,7 @@ const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) =
         <h3>Table Kontrak</h3>
         <Button type='button' variant='primary' onClick={() => setShowModal(true)}>
           <i className='bi bi-plus-lg'></i>
-          <span style={{marginLeft: "4px"}}>Tambah</span>
+          <span style={{ marginLeft: "4px" }}>Tambah</span>
         </Button>
       </div>
 
@@ -112,21 +104,21 @@ const ContractsTable = ({ contracts }: { contracts: EmployeeContractTable[] }) =
         data={contracts ?? []}
         columns={karyawanContractColumns({
           onEditContract,
-          openConfirmDelete,
-          onDelete,
+          onDelete: (id, nama) => openConfirmDelete({ id, nama }, (id) => onDelete(id)),
         })}
         defaultSort={contractDefaultSort}
-        loading={isSuspense}
+        loading={isPending}
       />
 
       <ContractAddForm
-        showModal={showModal}
-        onCloseModal={onCloseModal}
-        contractOnEdit={contractOnEdit}
-        contractForm={contractForm}
-        setContractForm={setContractForm}
-        isPosting={isPosting}
-        onSubmit={onSubmit}
+        modal={{ show: showModal, onClose: onModalClosed }}
+        contract={{
+          onEdit: contractOnEdit,
+          form: contractForm,
+          setForm: setContractForm,
+          onSubmit: onSubmit,
+        }}
+        isPending
       />
     </>
   )

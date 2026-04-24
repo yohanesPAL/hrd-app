@@ -6,12 +6,12 @@ import InputGroupText from 'react-bootstrap/esm/InputGroupText';
 import { toast } from 'react-toastify';
 import { KaryawanFormOptions } from '../types/KaryawanTypes';
 import { BaseEmployee, EmployeeForm } from '@/modules/employee/employee.schema';
-import { useExecuteAction } from '@/hooks/useExecuteAction';
-import { createKaryawan } from '../KaryawanAction';
+import { createKaryawanAction } from '../KaryawanAction';
 import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
 import { EmployeeContractForm } from '@/modules/employee/contract/employee.contract.schema';
 import { formatDateYYYYMMDD } from '@/utils/dateFormatting';
+import { useActionHandler } from '@/hooks/useActionHandler';
 
 const contractFormDefault: EmployeeContractForm = {
   tgl_kontrak: new Date(),
@@ -38,38 +38,39 @@ const defaulKaryawanForm: EmployeeForm = {
 
 const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => {
   const router = useRouter();
-  const [karyawanForm, setKaryawanForm] = useState<EmployeeForm>(defaulKaryawanForm)
+  const { run } = useActionHandler();
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [employeeForm, setEmployeeForm] = useState<EmployeeForm>(defaulKaryawanForm)
   const [contractForm, setContractForm] = useState<EmployeeContractForm>(contractFormDefault)
-  const { executeAction } = useExecuteAction()
   const profile = useProfile((state) => state.profile);
-  const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const onSubmit = async (employee: EmployeeForm, contract: EmployeeContractForm) => {
-    if (!employee || !contract) return toast.error("data tidak boleh kosong");
-    if (employee.nik.length !== 16) return toast.error("NIK tidak sesuai")
+  const onSubmit = async () => {
+    if (employeeForm.nik.length !== 16) return toast.error("NIK tidak sesuai")
 
-    setSubmitted(true);
+    setSubmitting(true);
 
-    await toast.promise(
-      executeAction(createKaryawan, employee, contract).catch((err) => {
-        setSubmitted(false);
-        throw err;
-      }), {
-      pending: "Membuat karyawan...",
-      success: "Berhasil buat karywan",
-      error: {
-        render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
-      },
-    })
+    try {
+      await run(createKaryawanAction, [employeeForm, contractForm], {
+        toast: {
+          pending: "Membuat karyawan...",
+          success: "Berhasil buat karywan",
+          error: {
+            render: ({ data: err }: { data: any }) => err?.message || "Ooops... ada yang salah",
+          },
+        }
+      })
 
-    router.push(`/${profile?.role}/karyawan`)
+      router.push(`/${profile?.role}/karyawan`)
+    } finally {
+      setSubmitting(false);
+    }
   }
   return (
     <>
       <h2 className='mb-4'>Form Karyawan</h2>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(karyawanForm, contractForm);
+        onSubmit();
       }}>
         <Stack gap={4}>
           <Row>
@@ -80,8 +81,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                 placeholder='Ex: 1812345678902049'
                 maxLength={16}
                 required
-                value={karyawanForm.nik}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, nik: e.currentTarget.value })}
+                value={employeeForm.nik}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, nik: e.target.value }))}
               />
             </Form.Group>
 
@@ -91,8 +92,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                 type='text'
                 placeholder='Ex: Jhon Doe'
                 required
-                value={karyawanForm.nama}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, nama: e.currentTarget.value })}
+                value={employeeForm.nama}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, nama: e.target.value }))}
               />
             </Form.Group>
           </Row>
@@ -102,8 +103,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               type='text'
               placeholder='Ex: Jl. Soekarno Hatta No 100'
               required
-              value={karyawanForm.alamat}
-              onChange={(e) => setKaryawanForm({ ...karyawanForm, alamat: e.currentTarget.value })}
+              value={employeeForm.alamat}
+              onChange={(e) => setEmployeeForm(prev => ({ ...prev, alamat: e.target.value }))}
             />
           </Form.Group>
           <Row>
@@ -111,8 +112,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               <Form.Label>Jenis Kelamin</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.jk}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, jk: e.currentTarget.value as BaseEmployee["jk"] })}
+                value={employeeForm.jk}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, jk: e.target.value as BaseEmployee["jk"] }))}
               >
                 <option value={"Pria"}>Pria</option>
                 <option value={"Wanita"}>Wanita</option>
@@ -124,8 +125,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               <Form.Control
                 type='text'
                 placeholder='Ex: 081234567890/+6281234567890'
-                value={karyawanForm.hp}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, hp: e.currentTarget.value })}
+                value={employeeForm.hp}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, hp: e.target.value }))}
               />
             </Form.Group>
           </Row>
@@ -134,8 +135,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               <Form.Label>Divisi</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.divisi}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, divisi: e.currentTarget.value })}
+                value={employeeForm.divisi}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, divisi: e.target.value }))}
               >
                 <option value={""}>--Pilih Divisi--</option>
                 {formOptions?.activeDivision.map((item) => (
@@ -148,11 +149,11 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               <Form.Label>Jabatan</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.jabatan}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, jabatan: e.currentTarget.value })}
+                value={employeeForm.jabatan}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, jabatan: e.target.value }))}
               >
                 <option value={""}>--Pilih Jabatan--</option>
-                {formOptions?.activePosition.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
+                {formOptions?.activePosition.filter((item) => item.id_divisi === employeeForm.divisi).map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
                 ))
                 }
@@ -164,8 +165,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               <Form.Label>Status Aktif</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.is_active ? 1 : 0}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, is_active: Number(e.currentTarget.value) as EmployeeForm["is_active"] })}
+                value={employeeForm.is_active ? 1 : 0}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, is_active: Number(e.target.value) as EmployeeForm["is_active"] }))}
               >
                 <option value={1}>Aktif</option>
                 <option value={0}>Non Aktif</option>
@@ -177,8 +178,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               <Form.Control
                 type='text'
                 placeholder='Ex: 541'
-                value={karyawanForm.kode_absensi ?? ""}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, kode_absensi: e.currentTarget.value === "" ? null : e.currentTarget.value })}
+                value={employeeForm.kode_absensi ?? ""}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, kode_absensi: e.target.value === "" ? null : e.target.value }))}
               />
             </Form.Group>
           </Row>
@@ -191,8 +192,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                   type='number'
                   placeholder='Ex: 2'
                   required
-                  value={karyawanForm.cuti_terakhir}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_terakhir: Number(e.currentTarget.value) })}
+                  value={employeeForm.cuti_terakhir}
+                  onChange={(e) => setEmployeeForm(prev => ({ ...prev, cuti_terakhir: Number(e.target.value) }))}
                 />
                 <InputGroupText>Hari</InputGroupText>
               </InputGroup>
@@ -205,8 +206,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                   type='number'
                   placeholder='Ex: 2'
                   required
-                  value={karyawanForm.cuti_sekarang}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_sekarang: Number(e.currentTarget.value) })}
+                  value={employeeForm.cuti_sekarang}
+                  onChange={(e) => setEmployeeForm(prev => ({ ...prev, cuti_sekarang: Number(e.target.value) }))}
                 />
                 <InputGroupText>Hari</InputGroupText>
               </InputGroup>
@@ -217,8 +218,8 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
             <Form.Control
               type='date'
               required
-              value={karyawanForm.tgl_masuk}
-              onChange={(e) => setKaryawanForm({ ...karyawanForm, tgl_masuk: e.currentTarget.value })}
+              value={employeeForm.tgl_masuk}
+              onChange={(e) => setEmployeeForm(prev => ({ ...prev, tgl_masuk: e.target.value }))}
             />
           </Form.Group>
 
@@ -229,12 +230,12 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
               required
               value={contractForm.jenis}
               onChange={(e) => {
-                if (e.currentTarget.value === "tetap") {
-                  setContractForm({ ...contractForm, tgl_berakhir: null })
+                if (e.target.value === "tetap") {
+                  setContractForm(prev => ({ ...prev, tgl_berakhir: null }))
                 } else {
-                  setContractForm({ ...contractForm, tgl_berakhir: new Date() })
+                  setContractForm(prev => ({ ...prev, tgl_berakhir: new Date() }))
                 }
-                setContractForm({ ...contractForm, jenis: e.currentTarget.value as EmployeeContractForm["jenis"] })
+                setContractForm(prev => ({ ...prev, jenis: e.target.value as EmployeeContractForm["jenis"] }))
               }}
             >
               <option value={"tetap"}>Tetap</option>
@@ -248,7 +249,7 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                 type='date'
                 required
                 value={formatDateYYYYMMDD(contractForm.tgl_kontrak)}
-                onChange={(e) => setContractForm({ ...contractForm, tgl_kontrak: new Date(e.currentTarget.value) })}
+                onChange={(e) => setContractForm(prev => ({ ...prev, tgl_kontrak: new Date(e.target.value) }))}
               />
             </Form.Group>
             {
@@ -259,13 +260,13 @@ const KaryawanForm = ({ formOptions }: { formOptions: KaryawanFormOptions }) => 
                     type='date'
                     required
                     value={contractForm.tgl_berakhir ? formatDateYYYYMMDD(contractForm.tgl_berakhir) : ""}
-                    onChange={(e) => setContractForm({ ...contractForm, tgl_berakhir: new Date(e.currentTarget.value) })}
+                    onChange={(e) => setContractForm(prev => ({ ...prev, tgl_berakhir: new Date(e.target.value) }))}
                   />
                 </Form.Group>
               )
             }
           </Row>
-          <Button type="submit" style={{ width: '100px' }} disabled={submitted}>Submit</Button>
+          <Button type="submit" style={{ width: '100px' }} disabled={submitting}>Submit</Button>
         </Stack>
       </Form>
     </>

@@ -1,18 +1,16 @@
 import { CarMaintenanceForm, CarMaintenanceTable } from "@/modules/car/maintenance/car.maintenance.schema";
-import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type";
 import { formatDateDDMMYYYY, formatDateYYYYMMDD } from "@/utils/dateFormatting";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button, Stack } from "react-bootstrap";
 
 export const kendaraanMaintenanceColumns = ({
-  deleteMaintenance,
-  onUpdateMaintenance,
+  onDelete,
+  onEdit,
+  isPending,
 }: {
-  deleteMaintenance: {
-    openConfirmDelete: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void;
-    onDelete: (id: string) => void;
-  },
-  onUpdateMaintenance: (id: string, data: CarMaintenanceForm) => void;
+  onDelete: (id: string, nama: string) => void;
+  onEdit: (id: string, data: CarMaintenanceForm) => void;
+  isPending: boolean;
 }): ColumnDef<CarMaintenanceTable>[] => [
     { accessorKey: "no", header: "No" },
     { accessorKey: "ket", header: "Keterangan" },
@@ -23,12 +21,25 @@ export const kendaraanMaintenanceColumns = ({
     },
     {
       id: "aksi", header: "Aksi", cell: ({ row }) => {
-        const kode = row.original.id;
-        const nama = row.original.ket;
+        const rowData = row.original;
+        const id = rowData.id;
+        const ket = rowData.ket;
         return (
           <Stack direction="horizontal" gap={2}>
-            <Button type="button" variant="warning" className="text-white" onClick={() => onUpdateMaintenance(kode, { ket: row.original.ket, tanggal: formatDateYYYYMMDD(row.original.tanggal), id_kendaraan: row.original.id_kendaraan })}><i className="bi bi-pencil-fill"></i></Button>
-            <Button type="button" variant="danger" className="text-white" onClick={() => deleteMaintenance.openConfirmDelete({ nama: nama, id: kode }, (id: string) => deleteMaintenance.onDelete(id))}><i className="bi bi-trash-fill"></i></Button>
+            <Button type="button" variant="warning" className="text-white" onClick={() =>
+              onEdit(id,
+                {
+                  ket: ket,
+                  tanggal: formatDateYYYYMMDD(rowData.tanggal),
+                  id_kendaraan: rowData.id_kendaraan
+                })}>
+              <i className="bi bi-pencil-fill"></i>
+            </Button>
+
+            <Button type="button" variant="danger" className="text-white" onClick={() =>
+              onDelete(id, ket)}>
+              <i className="bi bi-trash-fill"></i>
+            </Button>
           </Stack>
         )
       }

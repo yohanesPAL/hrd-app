@@ -9,14 +9,13 @@ import { useRouter } from 'next/navigation';
 import { Button, Stack, } from 'react-bootstrap';
 import useProfile from '@/stores/profile/profile.store';
 import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store';
-import { useShallow } from 'zustand/shallow';
-import { useExecuteAction } from '@/hooks/useExecuteAction';
 import { karyawanColumns } from '../columns/KaryawanColumns';
-import { EmployeeKodeAbsenForm, EmployeeSpForm, EmployeeTable } from '@/modules/employee/employee.schema';
+import { BaseEmployee, EmployeeKodeAbsenForm, EmployeeSpForm, EmployeeTable } from '@/modules/employee/employee.schema';
 import KaryawanSpModal from './KaryawanSpModal';
 import KaryawanKodeAbsenModal from './KaryawanKodeAbsenModal';
-import { deleteKaryawan, updateKaryawanKodeAbsen, updateKaryawanSP } from '../KaryawanAction';
+import { deleteKaryawanAction, updateKaryawanKodeAbsenAction, updateKaryawanSpAction } from '../KaryawanAction';
 import { KaryawanOnEdit } from '../types/KaryawanTypes';
+import { useActionHandler } from '@/hooks/useActionHandler';
 
 const defaultSort: SortingState = [{ id: 'no', desc: false }]
 const kodeAbsenFormDefault: EmployeeKodeAbsenForm = { kode_absensi: null }
@@ -27,73 +26,71 @@ const KaryawanPage = ({ data }: { data: EmployeeTable[] }) => {
   const router = useRouter()
   const role = useProfile((state) => state.profile?.role)
 
-  const {
-    setOpen: openConfirmDelete,
-    isPosting,
-  } = useConfirmDelete(
-    useShallow((state) => ({
-      setOpen: state.setOpen,
-      isPosting: state.isPosting,
-    }))
-  )
+  const { openConfirmDelete } = useConfirmDelete();
+  const { run, isPending } = useActionHandler();
 
   const [table, setTable] = useState<Table<EmployeeTable> | null>(null)
   const [showModalAbsen, setShowModalAbsen] = useState<boolean>(false)
-  const [kodeAbsenForm, setKodeAbsenForm] = useState<EmployeeKodeAbsenForm>(kodeAbsenFormDefault)
   const [showModalSp, setShowModalSp] = useState<boolean>(false)
+  const [absentCodeForm, setAbsenCodeForm] = useState<EmployeeKodeAbsenForm>(kodeAbsenFormDefault)
   const [spForm, setSpForm] = useState<EmployeeSpForm>(spFormDefault)
-  const [karyawanOnEdit, setKaryawanOnEdit] = useState<KaryawanOnEdit>(karyawanOnEditDefault);
-  const { executeAction, isSuspense } = useExecuteAction()
+  const [employeeOnEdit, setKaryawanOnEdit] = useState<KaryawanOnEdit>(karyawanOnEditDefault);
 
-  const onCloseModalAbsen = () => {
+  const onAbsentModalClosed = () => {
     setShowModalAbsen(false)
     setKaryawanOnEdit(karyawanOnEditDefault)
-    setKodeAbsenForm(kodeAbsenFormDefault)
+    setAbsenCodeForm(kodeAbsenFormDefault)
   }
 
-  const onCloseModalSp = () => {
+  const onSpModalClosed = () => {
     setShowModalSp(false)
     setKaryawanOnEdit(karyawanOnEditDefault)
     setSpForm(spFormDefault)
   }
 
-  const onUpdateKodeAbsen = async (payload: EmployeeKodeAbsenForm) => {
-    if (!payload) return toast.error("data tidak boleh kosong");
+  const updateEmployeeAbsentCode = async () => {
+    try {
+      await run(updateKaryawanKodeAbsenAction, [employeeOnEdit.id, absentCodeForm], {
+        toast: {
+          pending: "Update kode absen...",
+          success: "Berhasil update kode absen",
+          error: "Ooops... ada yang salah"
+        },
+        refresh: true
+      })
+    } finally {
+      onAbsentModalClosed();
 
-    await toast.promise(
-      executeAction(updateKaryawanKodeAbsen, karyawanOnEdit.id, payload), {
-      pending: "Update kode absen...",
-      success: "Berhasil update kode absen",
-      error: "Ooops... ada yang salah"
-    })
-
-    onCloseModalAbsen();
-  }
-
-  const onUpdateSp = async (payload: EmployeeSpForm) => {
-    if (!payload) return toast.error("data tidak boleh kosong");
-    if (payload.sp > 3) return toast.error("sp tidak boleh > 3");
-
-    await toast.promise(
-      executeAction(updateKaryawanSP, karyawanOnEdit.id, payload), {
-      pending: "Update SP...",
-      success: "Berhasil update SP",
-      error: "Ooops... ada yang salah"
-    })
-
-    onCloseModalSp();
-  }
-
-  const onDelete = async (kode: string) => {
-    if (!kode) return toast.error("id tidak boleh kosong!")
-
-    await toast.promise(
-      executeAction(deleteKaryawan, kode), {
-      pending: "Menghapus karyawan...",
-      success: "Berhasil hapus karyawan",
-      error: "Ooops... ada yang salah"
     }
-    )
+  }
+
+  const updateEmployeeSp = async () => {
+    if (spForm.sp > 3) return toast.error("sp tidak boleh > 3");
+
+    try {
+      await run(updateKaryawanSpAction, [employeeOnEdit.id, spForm], {
+        toast: {
+          pending: "Update SP...",
+          success: "Berhasil update SP",
+          error: "Ooops... ada yang salah"
+        }, refresh: true
+      })
+    } finally {
+      onSpModalClosed();
+    }
+
+  }
+
+  const deleteEmployee = async (id: BaseEmployee["id"]) => {
+    if (!id) return toast.error("id karyawan tidak boleh kosong");
+
+    await run(deleteKaryawanAction, [id], {
+      toast: {
+        pending: "Menghapus karyawan...",
+        success: "Berhasil hapus karyawan",
+        error: "Ooops... ada yang salah"
+      }, refresh: true,
+    })
   }
 
   const onExport = () => {
@@ -106,7 +103,7 @@ const KaryawanPage = ({ data }: { data: EmployeeTable[] }) => {
       <Stack direction='horizontal' gap={2}>
         <Button type='button' variant='primary' onClick={() => router.push(`/${role}/karyawan/tambah`)}>
           <i className='bi bi-person-fill'></i>
-          <span style={{marginLeft: "4px"}}>Tambah</span>
+          <span style={{ marginLeft: "4px" }}>Tambah</span>
         </Button>
         <ExportToExcel onExport={onExport} />
       </Stack>
@@ -115,38 +112,39 @@ const KaryawanPage = ({ data }: { data: EmployeeTable[] }) => {
         columns={karyawanColumns({
           role,
           router,
-          setKaryawanOnEdit,
-          setKodeAbsenForm,
-          setShowModalAbsen,
-          setShowModalSp,
-          setSpForm,
-          openConfirmDelete,
-          onDelete,
+          employee: {
+            setOnEdit: setKaryawanOnEdit,
+            setAbsentCodeForm: setAbsenCodeForm,
+            setSpForm,
+            onDelete: (id, nama) => openConfirmDelete({ id, nama }, (id) => deleteEmployee(id)),
+          },
+          modal: {
+            setShowAbsen: setShowModalAbsen,
+            setShowSp: setShowModalSp,
+          }
         })}
         defaultSort={defaultSort}
-        loading={isSuspense}
+        loading={isPending}
         tableWidth='115%'
         SetTableComponent={setTable}
       />
 
       <KaryawanKodeAbsenModal
-        showModalAbsen={showModalAbsen}
-        onCloseModalAbsen={onCloseModalAbsen}
-        onUpdateKodeAbsen={onUpdateKodeAbsen}
-        karyawanOnEdit={karyawanOnEdit}
-        kodeAbsenForm={kodeAbsenForm}
-        setKodeAbsenForm={setKodeAbsenForm}
-        isPosting={isPosting}
+        modal={{ show: showModalAbsen, onClosed: onAbsentModalClosed }}
+        absentCode={{
+          onUpdate: updateEmployeeAbsentCode,
+          form: absentCodeForm,
+          setForm: setAbsenCodeForm
+        }}
+        employeeOnEdit={employeeOnEdit}
+        isPending
       />
 
       <KaryawanSpModal
-        showModalSp={showModalSp}
-        onCloseModalSp={onCloseModalSp}
-        onUpdateSp={onUpdateSp}
-        karyawanOnEdit={karyawanOnEdit}
-        spForm={spForm}
-        setSpForm={setSpForm}
-        isPosting={isPosting}
+        modal={{ show: showModalSp, onClosed: onSpModalClosed }}
+        sp={{ onUpdate: updateEmployeeSp, form: spForm, setForm: setSpForm }}
+        employeeOnEdit={employeeOnEdit}
+        isPending
       />
     </>
   )

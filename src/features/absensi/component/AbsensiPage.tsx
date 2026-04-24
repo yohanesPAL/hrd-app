@@ -1,5 +1,4 @@
 'use client';
-
 import DefaultTable from "@/components/Table/DefaulteTable";
 import { AbsensiTable } from "@/modules/absensi/absensi.schema";
 import { SortingState } from "@tanstack/react-table";
@@ -10,7 +9,7 @@ import useProfile from "@/stores/profile/profile.store";
 
 const defaultSort: SortingState = [{ id: "no", desc: false }];
 
-const AbsensiPage = ({ absensi }: { absensi: AbsensiTable[] }) => {
+const AbsensiPage = ({ absensiTable }: { absensiTable: AbsensiTable[] }) => {
   const router = useRouter();
   const role = useProfile(state => state.profile?.role);
 
@@ -24,7 +23,7 @@ const AbsensiPage = ({ absensi }: { absensi: AbsensiTable[] }) => {
       </Button>
 
       <DefaultTable<AbsensiTable>
-        data={absensi}
+        data={absensiTable}
         defaultSort={defaultSort}
         columns={absensiColumn(role)}
       />

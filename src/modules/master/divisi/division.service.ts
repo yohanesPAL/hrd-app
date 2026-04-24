@@ -6,6 +6,7 @@ import {
   BaseDivisionSchema,
   DivisionForm,
   DivisionFormSchema,
+  DivisionIdSchema,
   DivisionTable,
 } from "./division.schema";
 import { ZodError } from "zod";
@@ -18,7 +19,7 @@ export class DivisionService implements IDivisionService {
     try {
       const res = await this.divisionRepository.getAll();
 
-      return {success: true, status: 200, data: res};
+      return { success: true, status: 200, data: res };
     } catch (error) {
       console.error("DivisionService.getAllDivisions error:", error);
 
@@ -32,7 +33,7 @@ export class DivisionService implements IDivisionService {
     try {
       const res = await this.divisionRepository.getActive();
 
-      return {success: true, status: 200, data: res};
+      return { success: true, status: 200, data: res };
     } catch (error: unknown) {
       console.error("DivisionService.getActiveDivision error:", error);
 
@@ -52,43 +53,47 @@ export class DivisionService implements IDivisionService {
     } catch (error) {
       console.error("DivisionService.createDivision error:", error);
 
-      if (error instanceof ZodError) throw new Err(`invalid request data`, 400)
-      if (error instanceof Err) throw error
+      if (error instanceof ZodError) throw new Err(`invalid request data`, 400);
+      if (error instanceof Err) throw error;
 
       throw new Err("DivisionService unavailable", 500);
     }
   }
 
-  async updateDivision(data: BaseDivision): Promise<ServiceRes> {
+  async updateDivision(
+    data: DivisionForm,
+    id: BaseDivision["id"],
+  ): Promise<ServiceRes> {
     try {
-      const validated = BaseDivisionSchema.parse(data);
+      const validatedForm = DivisionFormSchema.parse(data);
+      const validatedId = DivisionIdSchema.parse(id);
 
-      await this.divisionRepository.update(validated);
+      await this.divisionRepository.update(validatedForm, validatedId);
 
       return { success: true, status: 200 };
     } catch (error: unknown) {
       console.error("DivisionService.updateDivision error:", error);
 
-      if (error instanceof ZodError) throw new Err(`invalid request data`, 400)
-      if (error instanceof Err) throw error
+      if (error instanceof ZodError) throw new Err(`invalid request data`, 400);
+      if (error instanceof Err) throw error;
 
       throw new Err("DivisionService unavailable", 500);
     }
   }
 
-  async deleteDivision(id: string): Promise<ServiceRes> {
-    if (!id || typeof id !== "string") throw new Err("invalid request data", 400);
-
+  async deleteDivision(id: BaseDivision["id"]): Promise<ServiceRes> {
     try {
-      await this.divisionRepository.delete(id);
+      const validatedId = DivisionIdSchema.parse(id);
 
-      return {success: true, status: 200}
+      await this.divisionRepository.delete(validatedId);
+
+      return { success: true, status: 200 };
     } catch (error: unknown) {
       console.error("DivisionService.deleteDivision error:", error);
 
-      if(error instanceof Err) throw error
+      if (error instanceof Err) throw error;
 
-      throw new Err("DivisionService unavailable", 500)
+      throw new Err("DivisionService unavailable", 500);
     }
   }
 }

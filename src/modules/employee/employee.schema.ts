@@ -2,14 +2,19 @@ import { z } from "zod";
 
 export const BaseEmployeeSchema = z
   .object({
-    id: z.union([z.string().trim().min(1), z.number()]).transform(val => val.toString()),
+    id: z
+      .union([z.string().trim().min(1), z.number()])
+      .transform((val) => val.toString()),
     nik: z.string().min(1).trim().regex(/^\d+$/, "nik tidak valid").max(16),
     nama: z.string().min(1).trim(),
     jk: z.enum(["Pria", "Wanita"]),
     alamat: z.string().min(1).trim(),
-    hp: z.string().trim().refine((val) => val === "" || /^\+?\d+$/.test(val), {
-      message: "hp tidak valid",
-    }),
+    hp: z
+      .string()
+      .trim()
+      .refine((val) => val === "" || /^\+?\d+$/.test(val), {
+        message: "hp tidak valid",
+      }),
     divisi: z.coerce.string().min(1),
     jabatan: z.coerce.string().min(1),
     sp: z.number().nonnegative().max(3),
@@ -83,3 +88,4 @@ export type EmployeeUpdate = Partial<z.infer<typeof EmployeeUpdateSchema>> &
   Partial<EmployeeKodeAbsenForm>;
 export type EmployeeAbsentDiv = z.infer<typeof EmployeeAbsentDivSchema>;
 export type OpenEmployee = z.infer<typeof OpenEmployeeSchema>;
+export type SelectOptions = { value: string; label: string };

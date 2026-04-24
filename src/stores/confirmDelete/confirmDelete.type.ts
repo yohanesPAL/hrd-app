@@ -6,10 +6,10 @@ export interface ConfirmDeleteProps {
 
 export interface ConfirmDelete {
   props: ConfirmDeleteProps;
-  setOpen: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void;
-  setClose: () => void;
-  isPosting: boolean;
-  setIsPosting: (state: boolean) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (state: boolean) => void,
+  openConfirmDelete: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void;
+  closeConfirmDelete: () => void;
   onConfirm?: (id: string) => void;
   resetStore: () => void;
 }

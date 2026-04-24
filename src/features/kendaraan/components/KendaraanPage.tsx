@@ -6,36 +6,30 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button, Stack } from 'react-bootstrap'
 import { kendaraanColumns } from '../columns/KendaraanColumns'
-import { CarTable } from '@/modules/car/car.schema'
+import { BaseCar, CarTable } from '@/modules/car/car.schema'
 import useConfirmDelete from '@/stores/confirmDelete/confirmDelete.store'
-import { useShallow } from 'zustand/shallow'
-import { useExecuteAction } from '@/hooks/useExecuteAction'
-import { toast } from 'react-toastify'
 import { deleteCarAndMaintenanceAction } from '../mobilAction'
+import { useActionHandler } from '@/hooks/useActionHandler'
 
+const defaultSort = [{ id: "no", desc: false }];
 
-const defaultSort = [{ id: "no", desc: false }]
-
-const KendaraanPage = ({ data }: { data: CarTable[] }) => {
-  const { setOpen: openConfirmDelete, isPosting } = useConfirmDelete(useShallow((state) => ({
-    setOpen: state.setOpen,
-    isPosting: state.isPosting,
-  })));
-
+const KendaraanPage = ({ carTable }: { carTable: CarTable[] }) => {
   const router = useRouter();
   const role = useProfile((state) => state.profile?.role);
+  const { openConfirmDelete } = useConfirmDelete();
+  const { run, isPending } = useActionHandler();
 
   const [table, setTable] = useState<Table<CarTable> | null>(null);
-  const {executeAction, isSuspense} = useExecuteAction()
 
-  const onDelete = async (id: string) => {
-    await toast.promise(
-      executeAction(deleteCarAndMaintenanceAction, id), {
+  const deleteCar = async (carId: BaseCar["id"]) => {
+    await run(deleteCarAndMaintenanceAction, [carId], {
+      toast: {
         pending: "Menghapus kendaraan...",
         success: "Berhasil hapus kendaraan",
         error: "Ooops... ada yang salah"
-      }
-    )
+      },
+      refresh: true
+    })
   }
 
   return (
@@ -49,17 +43,14 @@ const KendaraanPage = ({ data }: { data: CarTable[] }) => {
       </Stack>
 
       <DefaultTable<CarTable>
-        data={data ?? []}
+        data={carTable ?? []}
         columns={kendaraanColumns({
           role,
           router,
-          deleteKendaraan: {
-            openConFirmDelete: openConfirmDelete,
-            onDelete: onDelete,
-          },
-          isPosting: isPosting,
+          onDelete: (id, nama) => openConfirmDelete({ id, nama }, (id) => deleteCar(id)),
+          isPending,
         })}
-        loading={isSuspense}
+        loading={isPending}
         defaultSort={defaultSort}
         SetTableComponent={setTable}
       />

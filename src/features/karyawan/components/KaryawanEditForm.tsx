@@ -7,32 +7,33 @@ import { useRouter } from 'next/navigation';
 import useProfile from '@/stores/profile/profile.store';
 import { BaseEmployee, EmployeeForm, EmployeeUpdate } from '@/modules/employee/employee.schema';
 import { KaryawanFormOptions } from '../types/KaryawanTypes';
-import { updateKaryawan } from '../KaryawanAction';
-import { useExecuteAction } from '@/hooks/useExecuteAction';
+import { updateKaryawanAction } from '../KaryawanAction';
+import { useActionHandler } from '@/hooks/useActionHandler';
 
 const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee["id"], karyawanData: EmployeeUpdate, formOptions: KaryawanFormOptions }) => {
   const router = useRouter()
   const role = useProfile((state) => state.profile?.role)
-  const [karyawanForm, setKaryawanForm] = useState<EmployeeUpdate>(karyawanData)
-  const { executeAction } = useExecuteAction();
-  const [submitted, setSubmitted] = useState<boolean>(false);
+  const { run } = useActionHandler();
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [employeeForm, setEmployeeForm] = useState<EmployeeUpdate>(karyawanData)
 
-  const onSubmit = async (payload: EmployeeUpdate) => {
-    if (!payload) return toast.error("data tidak ditemukan");
+  const onSubmit = async () => {
     if (!id) return toast.error("id tidak ditemukan");
-    setSubmitted(true);
 
-    await toast.promise(
-      executeAction(updateKaryawan, id, payload).catch((err) => {
-        setSubmitted(false);
-        throw err;
-      }), {
-      pending: "Update karyawan...",
-      success: "Berhasil update karyawan...",
-      error: "Ooops... ada yang salah",
-    })
+    setSubmitting(true);
+    try {
+      await run(updateKaryawanAction, [id, employeeForm], {
+        toast: {
+          pending: "Update karyawan...",
+          success: "Berhasil update karyawan...",
+          error: "Ooops... ada yang salah",
+        }
+      })
 
-    router.push(`/${role}/karyawan`);
+      router.push(`/${role}/karyawan`);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -40,7 +41,7 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
       <h2 className='mb-4'>Form Karyawan</h2>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(karyawanForm);
+        onSubmit();
       }}>
         <Stack gap={4}>
           <Row>
@@ -51,8 +52,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
                 placeholder='Ex: 1812345678902049'
                 maxLength={16}
                 required
-                value={karyawanForm.nik}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, nik: e.currentTarget.value })}
+                value={employeeForm.nik}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, nik: e.target.value }))}
               />
             </Form.Group>
 
@@ -62,8 +63,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
                 type='text'
                 placeholder='Ex: Jhon Doe'
                 required
-                value={karyawanForm.nama}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, nama: e.currentTarget.value })}
+                value={employeeForm.nama}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, nama: e.target.value }))}
               />
             </Form.Group>
           </Row>
@@ -73,8 +74,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               type='text'
               placeholder='Ex: Jl. Soekarno Hatta No 100'
               required
-              value={karyawanForm.alamat}
-              onChange={(e) => setKaryawanForm({ ...karyawanForm, alamat: e.currentTarget.value })}
+              value={employeeForm.alamat}
+              onChange={(e) => setEmployeeForm(prev => ({ ...prev, alamat: e.target.value }))}
             />
           </Form.Group>
           <Row>
@@ -82,8 +83,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Label>Jenis Kelamin</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.jk}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, jk: e.currentTarget.value as EmployeeUpdate["jk"] })}
+                value={employeeForm.jk}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, jk: e.target.value as EmployeeUpdate["jk"] }))}
               >
                 <option value={"Pria"}>Pria</option>
                 <option value={"Wanita"}>Wanita</option>
@@ -95,8 +96,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Control
                 type='text'
                 placeholder='Ex: 081234567890/+6281234567890'
-                value={karyawanForm.hp}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, hp: e.currentTarget.value })}
+                value={employeeForm.hp}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, hp: e.target.value }))}
               />
             </Form.Group>
           </Row>
@@ -105,8 +106,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Label>Divisi</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.divisi}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, divisi: e.currentTarget.value, jabatan: "" })}
+                value={employeeForm.divisi}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, divisi: e.target.value }))}
               >
                 {formOptions.activeDivision.map((item) => (
                   <option key={item.id} value={item.id}>{item.nama}</option>
@@ -118,11 +119,11 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Label>Jabatan</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.jabatan || ""}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, jabatan: e.currentTarget.value })}
+                value={employeeForm.jabatan || ""}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, jabatan: e.target.value }))}
               >
                 <option value={""}>-- Pilih Jabatan --</option>
-                {formOptions.activePosition.filter((item) => item.id_divisi === karyawanForm.divisi).map((item) => (
+                {formOptions.activePosition.filter((item) => item.id_divisi === employeeForm.divisi).map((item) => (
                   <option key={item.id} value={String(item.id)}>{item.nama}</option>
                 ))}
               </Form.Select>
@@ -133,8 +134,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Label>Status Aktif</Form.Label>
               <Form.Select
                 required
-                value={karyawanForm.is_active ? 1 : 0}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, is_active: Number(e.currentTarget.value) as EmployeeForm["is_active"] })}
+                value={employeeForm.is_active ? 1 : 0}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, is_active: Number(e.target.value) as EmployeeForm["is_active"] }))}
               >
                 <option value={1}>Aktif</option>
                 <option value={0}>Non Aktif</option>
@@ -149,8 +150,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
                   type='number'
                   placeholder='Ex: 2'
                   required
-                  value={karyawanForm.cuti_terakhir}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_terakhir: Number(e.currentTarget.value) })}
+                  value={employeeForm.cuti_terakhir}
+                  onChange={(e) => setEmployeeForm(prev => ({ ...prev, cuti_terakhir: Number(e.target.value) }))}
                 />
                 <InputGroupText>Hari</InputGroupText>
               </InputGroup>
@@ -163,8 +164,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
                   type='number'
                   placeholder='Ex: 2'
                   required
-                  value={karyawanForm.cuti_sekarang}
-                  onChange={(e) => setKaryawanForm({ ...karyawanForm, cuti_sekarang: Number(e.currentTarget.value) })}
+                  value={employeeForm.cuti_sekarang}
+                  onChange={(e) => setEmployeeForm(prev => ({ ...prev, cuti_sekarang: Number(e.target.value) }))}
                 />
                 <InputGroupText>Hari</InputGroupText>
               </InputGroup>
@@ -176,8 +177,8 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Control
                 type='date'
                 required
-                value={karyawanForm.tgl_masuk?.slice(0, 10)}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, tgl_masuk: e.currentTarget.value })}
+                value={employeeForm.tgl_masuk?.slice(0, 10)}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, tgl_masuk: e.target.value }))}
               />
             </Form.Group>
 
@@ -185,12 +186,12 @@ const KaryawanEditForm = ({ id, karyawanData, formOptions }: { id: BaseEmployee[
               <Form.Label>Tanggal Keluar</Form.Label>
               <Form.Control
                 type='date'
-                value={karyawanForm.tgl_keluar?.slice(0, 10)}
-                onChange={(e) => setKaryawanForm({ ...karyawanForm, tgl_keluar: e.currentTarget.value })}
+                value={employeeForm.tgl_keluar?.slice(0, 10)}
+                onChange={(e) => setEmployeeForm(prev => ({ ...prev, tgl_keluar: e.target.value }))}
               />
             </Form.Group>
           </Row>
-          <Button type="submit" style={{ width: '100px' }} disabled={submitted}>Submit</Button>
+          <Button type="submit" style={{ width: '100px' }} disabled={submitting}>Submit</Button>
         </Stack>
       </Form>
     </>

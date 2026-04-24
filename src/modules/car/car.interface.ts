@@ -4,7 +4,7 @@ import { Connection } from "mysql2/promise";
 
 export interface ICarRepository {
   getAll(): Promise<CarTable[]>;
-  getById(carId: BaseCar["id"]): Promise<BaseCar>;
+  getById(carId: BaseCar["id"]): Promise<CarForm>;
   create(carForm: CarForm): Promise<boolean>;
   update(carForm: CarForm, carId: BaseCar["id"]): Promise<boolean>;
   delete(carId: BaseCar["id"], conn: Connection): Promise<boolean>;
@@ -12,7 +12,7 @@ export interface ICarRepository {
 
 export interface ICarService {
   getAllCars(): Promise<ServiceRes<CarTable[]>>;
-  getCarById(carId: BaseCar["id"]): Promise<ServiceRes<BaseCar>>;
+  getCarById(carId: BaseCar["id"]): Promise<ServiceRes<CarForm>>;
   createCar(carForm: CarForm): Promise<ServiceRes>;
   updateCar(carForm: CarForm, carId: BaseCar["id"]): Promise<ServiceRes>;
   deleteCar(carId: BaseCar["id"], conn: Connection): Promise<ServiceRes>;

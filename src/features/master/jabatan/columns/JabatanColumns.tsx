@@ -1,25 +1,19 @@
-import { PositionForm, PositionTable } from "@/modules/master/jabatan/jabatan.schema"
-import { ConfirmDeleteProps } from "@/stores/confirmDelete/confirmDelete.type"
+import { BasePosition, PositionForm, PositionTable } from "@/modules/master/jabatan/jabatan.schema"
 import { ColumnDef } from "@tanstack/react-table"
-import { Dispatch, SetStateAction } from "react"
 import { Button, Stack } from "react-bootstrap"
 
 export const jabatanColumns = ({
-  setJabatanForm,
-  setShow,
-  openConfirmDelete,
+  onEdit,
   onDelete,
 }: {
-  setJabatanForm: Dispatch<SetStateAction<PositionForm>>,
-  setShow: Dispatch<SetStateAction<boolean>>,
-  openConfirmDelete: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void,
-  onDelete: (id: string) => void,
+  onEdit: (data: PositionForm, id: BasePosition["id"]) => void,
+  onDelete: (id: BasePosition["id"], nama: string) => void,
 }): ColumnDef<PositionTable>[] => [
-    { accessorKey: "no", header: "No", sortingFn: 'alphanumeric' },
-    { accessorKey: "nama", header: "Jabatan" },
-    { accessorKey: "nama_divisi", header: "Divisi" },
+    { accessorKey: "no", header: "No", sortingFn: 'alphanumeric', size: 80 },
+    { accessorKey: "nama", header: "Jabatan", size: 300 },
+    { accessorKey: "nama_divisi", header: "Divisi", size: 300 },
     {
-      accessorKey: "is_active", header: "Status", cell: ({ getValue }) => {
+      accessorKey: "is_active", header: "Status", size: 300, cell: ({ getValue }) => {
         return getValue() as boolean ? "Aktif" : "Non Aktif"
       },
       meta: {
@@ -27,20 +21,21 @@ export const jabatanColumns = ({
       }
     },
     {
-      id: "aksi", header: "Aksi", cell: ({ row }) => {
+      id: "aksi", header: "Aksi", size: 200, cell: ({ row }) => {
         const kode = row.original.id
         return (
           <Stack direction='horizontal' gap={2}>
             <Button type="button" variant='success' onClick={() => {
-              setJabatanForm({
-                id_divisi: row.original.id_divisi,
-                nama: row.original.nama,
-                is_active: row.original.is_active,
-                id: kode,
-              });
-              setShow(true);
+              onEdit(
+                {
+                  id_divisi: row.original.id_divisi,
+                  nama: row.original.nama,
+                  is_active: row.original.is_active,
+                },
+                kode
+              );
             }}><i className="bi bi-pencil-fill"></i></Button>
-            <Button type="button" variant='danger' onClick={() => openConfirmDelete({ nama: row.original.nama, id: kode }, (id) => { onDelete(id) })}><i className="bi bi-trash-fill"></i></Button>
+            <Button type="button" variant='danger' onClick={() => onDelete(kode, row.original.nama)}><i className="bi bi-trash-fill"></i></Button>
           </Stack>
         )
       }

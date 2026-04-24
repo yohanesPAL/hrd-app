@@ -10,6 +10,7 @@ import {
   EmployeeUpdate,
   OpenEmployee,
   OpenEmployeeSchema,
+  SelectOptions,
 } from "./employee.schema";
 import { Err } from "@/lib/err";
 import { ZodError } from "zod";

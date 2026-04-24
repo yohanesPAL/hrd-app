@@ -4,6 +4,7 @@ import {
   EmployeeTableSchema,
   EmployeeUpdate,
   EmployeeUpdateSchema,
+  OpenEmployee,
 } from "./employee.schema";
 
 export class EmployeeMapper {
@@ -22,5 +23,12 @@ export class EmployeeMapper {
       tgl_masuk: data.tgl_masuk ? formatDateYYYYMMDD(data.tgl_masuk) : "",
       tgl_keluar: data.tgl_keluar ? formatDateYYYYMMDD(data.tgl_keluar) : "",
     });
+  }
+
+  static toSelectOptions(data: OpenEmployee[]) {
+    return data.map((item) => ({
+      value: item.id,
+      label: `${item.nik} | ${item.nama} | ${item.jabatan}`,
+    }));
   }
 }

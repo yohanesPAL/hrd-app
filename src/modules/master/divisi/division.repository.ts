@@ -10,7 +10,6 @@ import { RowDataPacket } from "mysql2";
 import { IDivisionRepository } from "./division.interface";
 import { ZodError } from "zod";
 import { Err } from "@/lib/err";
-import { Connection } from "mysql2/promise";
 import { DivisionMapper } from "./division.mapper";
 
 export class DivisionRepository implements IDivisionRepository {
@@ -59,21 +58,22 @@ export class DivisionRepository implements IDivisionRepository {
     }
   }
 
-  async update(data: BaseDivision): Promise<boolean> {
+  async update(data: DivisionForm, id: BaseDivision["id"]): Promise<boolean> {
     try {
       await pool.query(
         `UPDATE divisi SET nama = ?, is_active = ? WHERE id = ?`,
-        [data.nama, data.is_active, data.id],
+        [data.nama, data.is_active, id],
       );
 
       return true;
     } catch (error: unknown) {
       console.error("DivisionRepository.update error:", error);
+      
       throw new Err("failed to update division", 500);
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: BaseDivision["id"]): Promise<boolean> {
     try {
       await pool.query(`DELETE FROM divisi WHERE id = ?`, [id]);
 

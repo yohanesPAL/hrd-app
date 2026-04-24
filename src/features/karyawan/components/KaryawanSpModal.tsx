@@ -4,30 +4,31 @@ import { Button, Form, Modal, Stack } from 'react-bootstrap';
 import { KaryawanOnEdit } from '../types/KaryawanTypes';
 
 const KaryawanSpModal = ({
-  showModalSp,
-  onCloseModalSp,
-  onUpdateSp,
-  karyawanOnEdit,
-  spForm,
-  setSpForm,
-  isPosting,
+  modal,
+  sp,
+  employeeOnEdit,
+  isPending,
 }: {
-  showModalSp: boolean,
-  onCloseModalSp: () => void,
-  onUpdateSp: (data: EmployeeSpForm) => void,
-  karyawanOnEdit: KaryawanOnEdit,
-  spForm: EmployeeSpForm,
-  setSpForm: Dispatch<SetStateAction<EmployeeSpForm>>,
-  isPosting: boolean,
+  modal: {
+    show: boolean,
+    onClosed: () => void
+  }
+  sp: {
+    onUpdate:(data: EmployeeSpForm) => void,
+    form: EmployeeSpForm,
+    setForm:Dispatch<SetStateAction<EmployeeSpForm>>,
+  }
+  employeeOnEdit: KaryawanOnEdit,
+  isPending: boolean,
 }) => {
   return (
-    <Modal show={showModalSp} onHide={onCloseModalSp}>
+    <Modal show={modal.show} onHide={modal.onClosed}>
       <Modal.Header>
         <Modal.Title>Ubah SP Karyawan</Modal.Title>
       </Modal.Header>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        onUpdateSp(spForm);
+        sp.onUpdate(sp.form);
       }}>
         <Modal.Body>
           <Stack gap={2}>
@@ -37,7 +38,7 @@ const KaryawanSpModal = ({
                 type='text'
                 required
                 disabled
-                value={karyawanOnEdit.nama}
+                value={employeeOnEdit.nama}
               />
             </Form.Group>
             <Form.Group>
@@ -45,15 +46,15 @@ const KaryawanSpModal = ({
               <Form.Control
                 type='text'
                 required
-                value={spForm.sp}
-                onChange={(e) => setSpForm({ sp: Number(e.currentTarget.value) })}
+                value={sp.form.sp}
+                onChange={(e) => sp.setForm((prev) => ({ ...prev, sp: Number(e.target.value) }))}
               />
             </Form.Group>
           </Stack>
         </Modal.Body>
         <Modal.Footer>
-          <Button type='button' variant='danger' disabled={isPosting} onClick={onCloseModalSp}>Batal</Button>
-          <Button type='submit' variant='primary' disabled={isPosting}>Update</Button>
+          <Button type='button' variant='danger' disabled={isPending} onClick={modal.onClosed}>Batal</Button>
+          <Button type='submit' variant='primary' disabled={isPending}>Update</Button>
         </Modal.Footer>
       </Form>
     </Modal>

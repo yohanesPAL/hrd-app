@@ -7,22 +7,17 @@ import { revalidatePath } from "next/cache";
 
 const PATH = "user";
 
-export const getAllUsers = withAuth(async () => {
+export const getAllUsersAction = withAuth(async () => {
   return await userService.getAllUsers();
 });
 
-export const getUnaccountedEmployees = withAuth(
+export const getUnaccountedEmployeesAction = withAuth(
   async (session, selectedId: UserId) => {
-    const res = await employeeService.getUnaccountedEmployees(selectedId);
-    const selectsOption = res.data?.map(item => ({
-      value: item.id,
-      label: `${item.nik} | ${item.nama} | ${item.jabatan}`,
-    }));
-    return selectsOption;
+    return await employeeService.getUnaccountedEmployees(selectedId);
   },
 );
 
-export const createUser = withAuth(
+export const createUserAction = withAuth(
   async (session, data: UserForm) => {
     await userService.createUser(data);
     revalidatePath(`/${session.user.role}/${PATH}`);
@@ -30,7 +25,7 @@ export const createUser = withAuth(
   ["hrd"],
 );
 
-export const updateUser = withAuth(
+export const updateUserAction = withAuth(
   async (session, id: UserId, data: UserForm) => {
     await userService.updateUser(id, data);
     revalidatePath(`${session.user.role}/${PATH}`);
@@ -38,7 +33,7 @@ export const updateUser = withAuth(
   ["hrd"],
 );
 
-export const deleteUser = withAuth(
+export const deleteUserAction = withAuth(
   async (session, id: UserId) => {
     await userService.deleteUser(id);
     revalidatePath(`/${session.user.role}/${PATH}`);

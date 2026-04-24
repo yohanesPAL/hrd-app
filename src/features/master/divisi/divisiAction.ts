@@ -19,15 +19,15 @@ export const createDivisionAction = withAuth(
 );
 
 export const updateDivisionAction = withAuth(
-  async (session, data: BaseDivision) => {
-    await divisionService.updateDivision(data);
+  async (session, data: DivisionForm, id: BaseDivision["id"]) => {
+    await divisionService.updateDivision(data, id);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },
   ["hrd"],
 );
 
 export const deleteDivisionAction = withAuth(
-  async (session, id: string) => {
+  async (session, id: BaseDivision["id"]) => {
     await divisionService.deleteDivision(id);
     revalidatePath(`/${session.user.role}/${PATH}`);
   },

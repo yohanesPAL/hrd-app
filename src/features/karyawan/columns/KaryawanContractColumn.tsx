@@ -6,12 +6,10 @@ import { Button, Stack } from "react-bootstrap";
 
 export const karyawanContractColumns = ({
   onEditContract,
-  openConfirmDelete,
   onDelete,
 }: {
   onEditContract: (id: string, data: EmployeeContractForm) => void
-  openConfirmDelete: (props: ConfirmDeleteProps, onConfirm: (id: string) => void) => void,
-  onDelete: (id: string) => void,
+  onDelete: (id: string, nama: string) => void,
 }): ColumnDef<EmployeeContractTable>[] => [
     { accessorKey: "no", header: "No", sortingFn: "alphanumeric" },
     {
@@ -47,7 +45,7 @@ export const karyawanContractColumns = ({
               total_kontrak: 0,
               karyawan_id: "",
             })}><i className="bi bi-pencil-fill"></i></Button>
-            <Button type="button" variant="danger" onClick={() => openConfirmDelete({ nama: "kontrak", id: id }, (id: string) => onDelete(id))}><i className="bi bi-trash-fill"></i></Button>
+            <Button type="button" variant="danger" onClick={() => onDelete(id, "kontrak")}><i className="bi bi-trash-fill"></i></Button>
           </Stack>
         )
       }
